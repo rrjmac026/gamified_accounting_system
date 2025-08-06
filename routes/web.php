@@ -17,4 +17,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+
+//backup button para sa admin
+Route::post('/admin/backup-now', [DataBackupController::class, 'backupNow'])
+    ->name('admin.backup.now')
+    ->middleware(['auth', 'is_admin']);
+
 require __DIR__.'/auth.php';

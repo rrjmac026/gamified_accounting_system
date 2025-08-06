@@ -81,4 +81,9 @@ class User extends Authenticatable
         return $this->hasMany(SystemNotification::class);
     }
 
+    public function dataBackups()
+    {
+        return $this->hasMany(DataBackup::class, 'created_by');
+    }
+
 }

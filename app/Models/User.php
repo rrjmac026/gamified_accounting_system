@@ -24,6 +24,8 @@ class User extends Authenticatable
         'password',
         'role', // student, instructor, admin
         'is_active',
+        'admin_level',
+        'permissions',
         'last_login_at',
         'email_verified_at'
     ];
@@ -42,7 +44,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'last_login_at' => 'datetime',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
+        'permissions' => 'array',
     ];
 
     /**
@@ -66,11 +69,6 @@ class User extends Authenticatable
     public function instructor()
     {
         return $this->hasOne(Instructor::class);
-    }
-
-    public function admin()
-    {
-        return $this->hasOne(Admin::class);
     }
 
     public function activityLogs()

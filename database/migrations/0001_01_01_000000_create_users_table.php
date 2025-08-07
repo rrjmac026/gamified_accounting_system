@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('full_name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->enum('role', ['student', 'instructor', 'admin']);
+            $table->enum('role', ['admin', 'instructor', 'student'])->default('student');
             $table->enum('admin_level', ['super_admin', 'admin', 'moderator'])->nullable();
             $table->json('permissions')->nullable();
             $table->boolean('is_active')->default(true);

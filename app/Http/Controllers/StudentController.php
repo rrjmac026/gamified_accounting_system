@@ -2,96 +2,51 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use App\Models\Student;
-use App\Models\User;
-use App\Models\Subject;
-use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
-    public function index()
+    // ✅ Only declare this once!
+    protected function getAuthenticatedStudent()
     {
-        $students = Student::with(['user', 'subjects'])->paginate(10);
-        return view('students.index', compact('students'));
-    }
+        $user = Auth::user();
 
-    public function create()
-    {
-        $subjects = Subject::all();
-        return view('students.create', compact('subjects'));
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'course' => 'required|string|max:100',
-            'year_level' => 'required|integer|min:1|max:5',
-            'section' => 'required|string|max:50',
-            'subjects' => 'array|exists:subjects,id'
-        ]);
-
-        $student = Student::create($validated);
-
-        if(isset($validated['subjects'])) {
-            $student->subjects()->attach($validated['subjects']);
+        if (!$user || $user->role !== 'student') {
+            abort(403, 'Unauthorized.');
         }
 
-        return redirect()->route('students.index')
-            ->with('success', 'Student created successfully');
-    }
+        $student = Student::where('user_id', $user->id)->first();
 
-    public function show(Student $student)
-    {
-        $student->load(['user', 'subjects', 'badges', 'assignedTasks']);
-        return view('students.show', compact('student'));
-    }
-
-    public function edit(Student $student)
-    {
-        $subjects = Subject::all();
-        return view('students.edit', compact('student', 'subjects'));
-    }
-
-    public function update(Request $request, Student $student)
-    {
-        $validated = $request->validate([
-            'course' => 'required|string|max:100',
-            'year_level' => 'required|integer|min:1|max:5',
-            'section' => 'required|string|max:50',
-            'subjects' => 'array|exists:subjects,id'
-        ]);
-
-        $student->update($validated);
-
-        if(isset($validated['subjects'])) {
-            $student->subjects()->sync($validated['subjects']);
+        if (!$student) {
+            abort(404, 'Student profile not found.');
         }
 
-        return redirect()->route('students.show', $student)
-            ->with('success', 'Student updated successfully');
+        return $student;
     }
 
-    public function destroy(Student $student)
+    public function dashboard()
     {
-        $student->delete();
-        return redirect()->route('students.index')
-            ->with('success', 'Student deleted successfully');
+        $student = $this->getAuthenticatedStudent();
+        return view('students.dashboard', compact('student'));
     }
 
-    public function viewProgress(Student $student)
+    public function viewProgress()
     {
-        $student->load(['performanceLogs', 'quizScores', 'badges']);
+        $student = $this->getAuthenticatedStudent()->load(['performanceLogs', 'quizScores', 'badges']);
         return view('students.progress', compact('student'));
     }
 
-    public function viewAssignments(Student $student)
+    public function viewAssignments()
     {
-        $assignments = $student->assignedTasks()
-            ->with(['subject'])
-            ->orderBy('due_date', 'desc')
-            ->paginate(10);
-            
+        $student = $this->getAuthenticatedStudent();
+        $assignments = $student->assignedTasks()->with('subject')->orderByDesc('due_date')->paginate(10);
         return view('students.assignments', compact('student', 'assignments'));
+    }
+
+    public function viewXp()
+    {
+        $student = $this->getAuthenticatedStudent()->load('xpTransactions');
+        return view('students.xp', compact('student'));
     }
 }

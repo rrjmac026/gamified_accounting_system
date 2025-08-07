@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PerformanceLog extends Model
 {
-    use HasFactory;
+    
 
     protected $fillable = [
         'student_id',

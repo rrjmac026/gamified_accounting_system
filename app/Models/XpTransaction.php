@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class XpTransaction extends Model
 {
-    use HasFactory;
+    
 
     protected $fillable = [
         'student_id',

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Leaderboard extends Model
 {
-    use HasFactory;
+    
 
     protected $fillable = [
         'student_id',

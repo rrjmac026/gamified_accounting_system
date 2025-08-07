@@ -1,3 +1,35 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* Custom styles for auth pages */
+.auth-input {
+    @apply mt-1 block w-full px-3 py-2 border border-[#FFC8FB] rounded-md shadow-sm;
+}
+
+.auth-input:focus {
+    @apply outline-none ring-2 ring-[#FF92C2] border-[#FF92C2];
+}
+
+.auth-button {
+    @apply w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-[#FF92C2] hover:bg-[#FFC8FB] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF92C2];
+}
+
+/* Add new color variables */
+@layer base {
+    :root {
+        --color-primary: #FF92C2;
+        --color-primary-light: #FFC8FB;
+        --color-primary-lighter: #FFE4F3;
+        --color-primary-lightest: #FFEEF2;
+        --color-text: #595758;
+    }
+}

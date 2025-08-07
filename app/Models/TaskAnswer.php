@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TaskAnswer extends Model
 {
-    use HasFactory;
+    
 
     protected $fillable = [
         'task_submission_id',

@@ -11,13 +11,13 @@ class SubjectController extends Controller
     public function index()
     {
         $subjects = Subject::with('instructor')->get();
-        return view('subjects.index', compact('subjects'));
+        return view('admin.subjects.index', compact('subjects'));
     }
 
     public function create()
     {
         $instructors = Instructor::all();
-        return view('subjects.create', compact('instructors'));
+        return view('admin.subjects.create', compact('instructors'));
     }
 
     public function store(Request $request)
@@ -40,13 +40,13 @@ class SubjectController extends Controller
     public function show(Subject $subject)
     {
         $subject->load(['instructor', 'students', 'tasks']);
-        return view('subjects.show', compact('subject'));
+        return view('admin.subjects.show', compact('subject'));
     }
 
     public function edit(Subject $subject)
     {
         $instructors = Instructor::all();
-        return view('subjects.edit', compact('subject', 'instructors'));
+        return view('admin.subjects.edit', compact('subject', 'instructors'));
     }
 
     public function update(Request $request, Subject $subject)

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class DataBackup extends Model
 {
-    use HasFactory;
+    
 
     protected $fillable = [
         'backup_name',

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class StudentBadge extends Model
 {
-    use HasFactory;
+    
 
     protected $table = 'student_badges';
     

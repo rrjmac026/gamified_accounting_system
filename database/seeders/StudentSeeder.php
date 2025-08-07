@@ -27,5 +27,20 @@ class StudentSeeder extends Seeder
                 'performance_rating' => 0.00,
             ]);
         }
+
+
+        $user = User::where('email', 'jam@jam.com')->first();
+
+        if ($user && $user->role === 'student') {
+            Student::create([
+                'user_id' => $user->id,
+                'course' => 'BS Information Technology',
+                'year_level' => '4th Year',
+                'section' => 'A',
+                'total_xp' => 0,
+                'current_level' => 1,
+                'performance_rating' => 0.00,
+            ]);
+        }
     }
 }

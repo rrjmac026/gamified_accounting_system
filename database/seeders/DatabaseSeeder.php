@@ -29,6 +29,13 @@ class DatabaseSeeder extends Seeder
             'role' => 'student',
         ]);
 
+        User::factory()->create([
+            'name' => 'Nica',
+            'email' => 'nica@gmail.com',
+            'password' => bcrypt('password'),
+            'role' => 'student',
+        ]);
+
         $this->call(StudentSeeder::class);
 
         

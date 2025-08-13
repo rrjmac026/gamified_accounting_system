@@ -23,9 +23,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // student, instructor, admin
+        'role',
         'is_active',
-        'admin_level',
         'permissions',
         'last_login_at',
         'email_verified_at'

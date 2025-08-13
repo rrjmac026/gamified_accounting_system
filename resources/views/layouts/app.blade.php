@@ -30,7 +30,7 @@
         </style>
     </head>
     <body class="font-sans antialiased" 
-          :class="{ 'dark bg-gray-900': $store.darkMode.on, 'bg-gray-50': !$store.darkMode.on }">
+          :class="{ 'dark bg-[#595758]': $store.darkMode.on, 'bg-gray-50': !$store.darkMode.on }">
         <div class="min-h-screen flex flex-col">
             <!-- Navigation -->
             @include('layouts.navigation')

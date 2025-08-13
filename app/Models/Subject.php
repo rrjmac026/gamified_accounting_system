@@ -38,4 +38,9 @@ class Subject extends Model
     {
         return $this->hasMany(Task::class);
     }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
 }

@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller; 
 
 use App\Models\User;
 use App\Models\Student;
@@ -35,7 +37,7 @@ class UserController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function (Builder $q) use ($search) {
-                $q->where('full_name', 'LIKE', "%{$search}%")
+                $q->where('name', 'LIKE', "%{$search}%")
                   ->orWhere('email', 'LIKE', "%{$search}%")
                   ->orWhere('id_number', 'LIKE', "%{$search}%");
             });
@@ -65,23 +67,22 @@ class UserController extends Controller
     public function create()
     {
         $roles = ['student', 'instructor', 'admin'];
-        $adminLevels = ['super_admin', 'admin', 'moderator'];
         
-        return view('admin.users.create', compact('roles', 'adminLevels'));
+        return view('admin.users.create', compact('roles'));
     }
 
     /**
      * Store a newly created user in storage
      */
+    
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'id_number' => 'required|string|max:20|unique:users',
-            'full_name' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|in:student,instructor,admin',
-            'admin_level' => 'nullable|required_if:role,admin|in:super_admin,admin,moderator',
             'permissions' => 'nullable|array',
             'is_active' => 'boolean',
             
@@ -111,14 +112,13 @@ class UserController extends Controller
             // Create the user
             $user = User::create([
                 'id_number' => $request->id_number,
-                'full_name' => $request->full_name,
+                'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => $request->role,
-                'admin_level' => $request->admin_level,
                 'permissions' => $request->permissions ?? [],
-                'is_active' => $request->boolean('is_active', true),
-                'email_verified_at' => now(), // Auto-verify for admin created accounts
+                'is_active' => true, // Set default to true
+                'email_verified_at' => now(),
             ]);
 
             // Create role-specific records
@@ -143,7 +143,7 @@ class UserController extends Controller
 
             // Log the activity
             $this->logActivity('user_created', $user->id, [
-                'created_user' => $user->only(['id', 'full_name', 'email', 'role']),
+                'created_user' => $user->only(['id', 'name', 'email', 'role']),
                 'created_by' => Auth::id(),
             ]);
 
@@ -205,7 +205,6 @@ class UserController extends Controller
     {
         $user = User::with(['student', 'instructor'])->findOrFail($id);
         $roles = ['student', 'instructor', 'admin'];
-        $adminLevels = ['super_admin', 'admin', 'moderator'];
         
         return view('admin.users.edit', compact('user', 'roles', 'adminLevels'));
     }
@@ -219,11 +218,10 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'id_number' => ['required', 'string', 'max:20', Rule::unique('users')->ignore($user->id)],
-            'full_name' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|in:student,instructor,admin',
-            'admin_level' => 'nullable|required_if:role,admin|in:super_admin,admin,moderator',
             'permissions' => 'nullable|array',
             'is_active' => 'boolean',
             
@@ -261,10 +259,9 @@ class UserController extends Controller
             // Update user data
             $userData = [
                 'id_number' => $request->id_number,
-                'full_name' => $request->full_name,
+                'name' => $request->name,
                 'email' => $request->email,
                 'role' => $request->role,
-                'admin_level' => $request->admin_level,
                 'permissions' => $request->permissions ?? [],
                 'is_active' => $request->boolean('is_active', true),
             ];
@@ -498,7 +495,6 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'role' => 'required|in:student,instructor,admin',
-            'admin_level' => 'nullable|required_if:role,admin|in:super_admin,admin,moderator',
             'permissions' => 'nullable|array',
         ]);
 
@@ -517,14 +513,12 @@ class UserController extends Controller
 
         $user->update([
             'role' => $request->role,
-            'admin_level' => $request->admin_level,
             'permissions' => $request->permissions ?? [],
         ]);
 
         $this->logActivity('role_assigned', $user->id, [
             'previous_role' => $originalRole,
             'new_role' => $request->role,
-            'admin_level' => $request->admin_level,
             'assigned_by' => Auth::id(),
         ]);
 
@@ -677,7 +671,7 @@ class UserController extends Controller
         $query = User::query()
             ->where(function (Builder $q) use ($request) {
                 $search = $request->query;
-                $q->where('full_name', 'LIKE', "%{$search}%")
+                $q->where('name', 'LIKE', "%{$search}%")
                   ->orWhere('email', 'LIKE', "%{$search}%")
                   ->orWhere('id_number', 'LIKE', "%{$search}%");
             });
@@ -707,7 +701,6 @@ class UserController extends Controller
             'user_ids' => 'required|array|min:1',
             'user_ids.*' => 'integer|exists:users,id',
             'role' => 'nullable|required_if:operation,assign_role|in:student,instructor,admin',
-            'admin_level' => 'nullable|required_if:role,admin|in:super_admin,admin,moderator',
         ]);
 
         if ($validator->fails()) {
@@ -746,13 +739,6 @@ class UserController extends Controller
                 case 'delete':
                     $affectedCount = User::whereIn('id', $userIds)->delete();
                     break;
-
-                case 'assign_role':
-                    $affectedCount = User::whereIn('id', $userIds)->update([
-                        'role' => $request->role,
-                        'admin_level' => $request->admin_level,
-                    ]);
-                    break;
             }
 
             // Log bulk operation
@@ -761,7 +747,6 @@ class UserController extends Controller
                 'user_ids' => $userIds,
                 'affected_count' => $affectedCount,
                 'performed_by' => $currentUserId,
-                'additional_data' => $request->only(['role', 'admin_level']),
             ]);
 
             return response()->json([

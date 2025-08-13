@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller; 
 
 use App\Models\XpTransaction;
 use App\Models\Student;
@@ -11,7 +13,7 @@ class XpTransactionController extends Controller
     public function index()
     {
         $transactions = XpTransaction::with('student')->latest('processed_at')->get();
-        return view('xp-transactions.index', compact('transactions'));
+        return view('admin.xp-transactions.index', compact('transactions'));
     }
 
     public function create()
@@ -19,7 +21,7 @@ class XpTransactionController extends Controller
         $students = Student::all();
         $types = ['earned', 'bonus', 'penalty', 'adjustment'];
         $sources = ['task_completion', 'quiz_score', 'bonus_activity', 'manual'];
-        return view('xp-transactions.create', compact('students', 'types', 'sources'));
+        return view('admin.xp-transactions.create', compact('students', 'types', 'sources'));
     }
 
     public function store(Request $request)
@@ -35,13 +37,13 @@ class XpTransactionController extends Controller
         ]);
 
         XpTransaction::create($validated);
-        return redirect()->route('xp-transactions.index')
+        return redirect()->route('admin.xp-transactions.index')
             ->with('success', 'XP Transaction created successfully');
     }
 
     public function show(XpTransaction $xpTransaction)
     {
-        return view('xp-transactions.show', compact('xpTransaction'));
+        return view('admin.xp-transactions.show', compact('xpTransaction'));
     }
 
     public function edit(XpTransaction $xpTransaction)
@@ -49,7 +51,7 @@ class XpTransactionController extends Controller
         $students = Student::all();
         $types = ['earned', 'bonus', 'penalty', 'adjustment'];
         $sources = ['task_completion', 'quiz_score', 'bonus_activity', 'manual'];
-        return view('xp-transactions.edit', compact('xpTransaction', 'students', 'types', 'sources'));
+        return view('admin.xp-transactions.edit', compact('xpTransaction', 'students', 'types', 'sources'));
     }
 
     public function update(Request $request, XpTransaction $xpTransaction)
@@ -65,14 +67,14 @@ class XpTransactionController extends Controller
         ]);
 
         $xpTransaction->update($validated);
-        return redirect()->route('xp-transactions.index')
+        return redirect()->route('admin.xp-transactions.index')
             ->with('success', 'XP Transaction updated successfully');
     }
 
     public function destroy(XpTransaction $xpTransaction)
     {
         $xpTransaction->delete();
-        return redirect()->route('xp-transactions.index')
+        return redirect()->route('admin.xp-transactions.index')
             ->with('success', 'XP Transaction deleted successfully');
     }
 }

@@ -12,14 +12,14 @@ class TaskController extends Controller
     public function index()
     {
         $tasks = Task::with(['subject', 'instructor'])->get();
-        return view('tasks.index', compact('tasks'));
+        return view('instructors.tasks.index', compact('tasks'));
     }
 
     public function create()
     {
         $subjects = Subject::all();
         $instructors = Instructor::all();
-        return view('tasks.create', compact('subjects', 'instructors'));
+        return view('instructors.tasks.create', compact('subjects', 'instructors'));
     }
 
     public function store(Request $request)
@@ -31,6 +31,8 @@ class TaskController extends Controller
             'subject_id' => 'required|exists:subjects,id',
             'instructor_id' => 'required|exists:instructors,id',
             'difficulty_level' => 'required|integer|between:1,5',
+            'retry_limit' => 'required|integer|min:1',
+            'late_penalty' => 'nullable|integer|min:0',
             'max_score' => 'required|integer|min:0',
             'xp_reward' => 'required|integer|min:0',
             'due_date' => 'required|date',
@@ -47,14 +49,14 @@ class TaskController extends Controller
     public function show(Task $task)
     {
         $task->load(['subject', 'instructor', 'submissions', 'questions']);
-        return view('tasks.show', compact('task'));
+        return view('instructors.tasks.show', compact('task'));
     }
 
     public function edit(Task $task)
     {
         $subjects = Subject::all();
         $instructors = Instructor::all();
-        return view('tasks.edit', compact('task', 'subjects', 'instructors'));
+        return view('instructors.tasks.edit', compact('task', 'subjects', 'instructors'));
     }
 
     public function update(Request $request, Task $task)
@@ -66,6 +68,8 @@ class TaskController extends Controller
             'subject_id' => 'required|exists:subjects,id',
             'instructor_id' => 'required|exists:instructors,id',
             'difficulty_level' => 'required|integer|between:1,5',
+            'retry_limit' => 'required|integer|min:1',
+            'late_penalty' => 'nullable|integer|min:0',
             'max_score' => 'required|integer|min:0',
             'xp_reward' => 'required|integer|min:0',
             'due_date' => 'required|date',
@@ -75,14 +79,14 @@ class TaskController extends Controller
         ]);
 
         $task->update($validated);
-        return redirect()->route('tasks.index')
+        return redirect()->route('instructors.tasks.index')
             ->with('success', 'Task updated successfully');
     }
 
     public function destroy(Task $task)
     {
         $task->delete();
-        return redirect()->route('tasks.index')
+        return redirect()->route('instructors.tasks.index')
             ->with('success', 'Task deleted successfully');
     }
 }

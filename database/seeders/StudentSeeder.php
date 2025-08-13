@@ -29,7 +29,7 @@ class StudentSeeder extends Seeder
         }
 
 
-        $user = User::where('email', 'jam@jam.com')->first();
+        $user = User::where('email', 'nica@gmail.com')->first();
 
         if ($user && $user->role === 'student') {
             Student::create([

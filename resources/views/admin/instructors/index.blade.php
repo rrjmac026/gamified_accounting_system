@@ -1,54 +1,61 @@
 <x-app-layout>
+
+    <div class="flex justify-end px-8 mt-4">
+            <a href="{{ route('admin.instructors.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#FF92C2] hover:bg-[#ff6fb5] rounded-lg shadow-sm hover:shadow transition-all duration-200">
+                <i class="fas fa-plus mr-2"></i>Add Instructor
+            </a>
+        </div>
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 sm:rounded-lg">
-                <div class="p-6 text-gray-700 dark:text-gray-100">
+            <div class="bg-[#FFF0FA] overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 sm:rounded-lg">
+                <div class="p-6 text-gray-700">
 
                     @if (session('success'))
-                        <div class="mb-4 px-4 py-2 bg-green-100 border border-green-200 text-green-700 rounded-md dark:bg-green-900 dark:border-green-800 dark:text-green-300">
+                        <div class="mb-4 px-4 py-2 bg-green-100 border border-green-200 text-green-700 rounded-md">
                             {{ session('success') }}
                         </div>
                     @endif
 
                     <div class="overflow-x-auto">
                         <table class="min-w-full table-auto">
-                            <thead class="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700">
+                            <thead class="bg-[#FFC8FB]">
                                 <tr>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-amber-900 dark:text-amber-100">Name</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-amber-900 dark:text-amber-100">Email</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-amber-900 dark:text-amber-100">Employee ID</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-amber-900 dark:text-amber-100">Department</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-amber-900 dark:text-amber-100">Specialization</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-amber-900 dark:text-amber-100">Subjects</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-amber-900 dark:text-amber-100">Tasks</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-amber-900 dark:text-amber-100">Students</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-amber-900 dark:text-amber-100">Actions</th>
+                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Name</th>
+                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Email</th>
+                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Employee ID</th>
+                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Department</th>
+                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Specialization</th>
+                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Subjects</th>
+                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Tasks</th>
+                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Students</th>
+                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <tbody class="bg-[#FFF6FD] divide-y divide-[#FFC8FB]">
                                 @forelse ($instructors as $instructor)
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-amber-800/50 transition-colors duration-150">
+                                    <tr class="hover:bg-[#FFD9FF] transition-colors duration-150">
                                         <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
-                                            {{ $instructor->user->full_name ?? 'N/A' }}
+                                            {{ $instructor->name }}
                                         </td>
                                         <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
-                                            {{ $instructor->user->email ?? 'N/A' }}
+                                            {{ $instructor->email }}
                                         </td>
                                         <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
-                                            {{ $instructor->employee_id }}
+                                            {{ $instructor->employee_id ?? 'N/A' }}
                                         </td>
                                         <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
-                                            {{ $instructor->department ?? '-' }}
+                                            {{ $instructor->department ?? 'N/A' }}
                                         </td>
                                         <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
-                                            {{ $instructor->specialization ?? '-' }}
+                                            {{ $instructor->specialization ?? 'N/A' }}
                                         </td>
                                         <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
                                             {{ $instructor->stats['total_subjects'] ?? 0 }}
                                         </td>
                                         <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
                                             {{ $instructor->stats['total_tasks'] ?? 0 }}
-                                            @if ($instructor->stats['active_tasks'] > 0)
+                                            @if (($instructor->stats['active_tasks'] ?? 0) > 0)
                                                 <span class="ml-1 inline-block bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full dark:bg-green-900 dark:text-green-200">
                                                     {{ $instructor->stats['active_tasks'] }} active
                                                 </span>
@@ -69,7 +76,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="9" class="py-4 px-6 text-sm text-center text-gray-600 dark:text-gray-400">
+                                        <td colspan="9" class="py-4 px-6 text-sm text-center text-gray-600">
                                             No instructors found.
                                         </td>
                                     </tr>

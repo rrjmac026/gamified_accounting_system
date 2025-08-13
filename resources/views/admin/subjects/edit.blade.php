@@ -2,14 +2,14 @@
 
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-md sm:rounded-lg p-6">
+            <div class="bg-[#FFEEF2] dark:bg-[#595758] overflow-hidden shadow-md sm:rounded-lg p-6">
                 <form action="{{ route('subjects.update', $subject) }}" method="POST" class="space-y-6">
                     @csrf
                     @method('PUT')
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Subject Code</label>
-                        <input type="text" name="subject_code" value="{{ old('subject_code', $subject->subject_code) }}" class="mt-1 block w-full rounded-md shadow-sm" required>
+                        <input type="text" name="subject_code" value="{{ old('subject_code', $subject->subject_code) }}" class="mt-1 block w-full rounded-md shadow-sm bg-[#FF92C2] dark:bg-[#595758] border-[#FFC8FB] dark:border-[#FF92C2] text-gray-700 dark:text-gray-200" required>
                     </div>
 
                     <div>
@@ -19,12 +19,12 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Description</label>
-                        <textarea name="description" class="mt-1 block w-full rounded-md shadow-sm" rows="3" required>{{ old('description', $subject->description) }}</textarea>
+                        <textarea name="description" class="mt-1 block w-full rounded-md shadow-sm bg-[#FF92C2] dark:bg-[#595758] border-[#FFC8FB] dark:border-[#FF92C2] text-gray-700 dark:text-gray-200" rows="3" required>{{ old('description', $subject->description) }}</textarea>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Instructor</label>
-                        <select name="instructor_id" class="mt-1 block w-full rounded-md shadow-sm" required>
+                        <select name="instructor_id" class="mt-1 block w-full rounded-md shadow-sm bg-[#FF92C2] dark:bg-[#595758] border-[#FFC8FB] dark:border-[#FF92C2] text-gray-700 dark:text-gray-200" required>
                             @foreach($instructors as $instructor)
                                 <option value="{{ $instructor->id }}" {{ $instructor->id == $subject->instructor_id ? 'selected' : '' }}>
                                     {{ $instructor->user->name ?? 'Unnamed' }}
@@ -54,7 +54,7 @@
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded shadow">
+                        <button type="submit" class="px-4 py-2 bg-[#FF92C2] hover:bg-[#FFC8FB] text-white rounded shadow">
                             Update Subject
                         </button>
                     </div>

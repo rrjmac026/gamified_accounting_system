@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller; 
 use App\Models\ActivityLog;
 use App\Http\Requests\ActivityLog\ActivityLogFilterRequest;
 use Illuminate\Http\Request;

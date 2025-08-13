@@ -6,19 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Task extends Model
 {
-    
-
     protected $fillable = [
         'title',
         'description',
-        'type', // assignment, exercise, quiz, project
+        'type',
         'subject_id',
         'instructor_id',
         'difficulty_level',
         'max_score',
         'xp_reward',
+        'retry_limit',
+        'late_penalty',
         'due_date',
         'instructions',
+        'status',
         'is_active',
         'auto_grade'
     ];
@@ -29,6 +30,8 @@ class Task extends Model
         'auto_grade' => 'boolean',
         'max_score' => 'integer',
         'xp_reward' => 'integer',
+        'retry_limit' => 'integer',
+        'late_penalty' => 'integer',
         'difficulty_level' => 'integer'
     ];
 
@@ -46,7 +49,7 @@ class Task extends Model
     public function students()
     {
         return $this->belongsToMany(Student::class, 'student_tasks')
-                    ->withPivot('status', 'score', 'xp_earned', 'submitted_at', 'graded_at')
+                    ->withPivot('status', 'score', 'xp_earned', 'submitted_at', 'graded_at', 'retry_count') // maybe add retry count here
                     ->withTimestamps();
     }
 

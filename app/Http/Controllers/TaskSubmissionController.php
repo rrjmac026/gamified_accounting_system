@@ -6,6 +6,7 @@ use App\Models\TaskSubmission;
 use App\Models\Task;
 use App\Models\Student;
 use Illuminate\Http\Request;
+use App\Services\XpEngine;
 
 class TaskSubmissionController extends Controller
 {
@@ -78,7 +79,7 @@ class TaskSubmissionController extends Controller
             ->with('success', 'Task submission deleted successfully');
     }
 
-    public function grade(Request $request, TaskSubmission $taskSubmission)
+    public function grade(Request $request, TaskSubmission $taskSubmission, XpEngine $xpEngine)
     {
         $validated = $request->validate([
             'score' => 'required|numeric|min:0',
@@ -86,6 +87,7 @@ class TaskSubmissionController extends Controller
             'feedback' => 'required|string'
         ]);
 
+        // Update submission
         $taskSubmission->update([
             'score' => $validated['score'],
             'xp_earned' => $validated['xp_earned'],
@@ -94,7 +96,18 @@ class TaskSubmissionController extends Controller
             'graded_at' => now()
         ]);
 
+        // Award XP automatically
+        $xpEngine->award(
+            studentId: $taskSubmission->student_id,
+            amount: $validated['xp_earned'],
+            type: 'earned',
+            source: 'task_completion',
+            sourceId: $taskSubmission->task_id,
+            description: "Earned {$validated['xp_earned']} XP for completing '{$taskSubmission->task->title}'"
+        );
+
         return redirect()->route('task-submissions.show', $taskSubmission)
-            ->with('success', 'Task submission graded successfully');
+            ->with('success', 'Task submission graded and XP awarded successfully');
     }
+    
 }

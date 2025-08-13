@@ -24,11 +24,10 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'id_number' => 'required|string|max:20|unique:users,id_number',
-            'full_name' => 'required|string|max:255|regex:/^[a-zA-Z\s\.\-\']+$/',
+            'name' => 'required|string|max:255|regex:/^[a-zA-Z\s\.\-\']+$/',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
             'role' => 'required|in:student,instructor,admin',
-            'admin_level' => 'nullable|required_if:role,admin|in:super_admin,admin,moderator',
             'permissions' => 'nullable|array',
             'permissions.*' => 'string|max:100',
             'is_active' => 'boolean',
@@ -52,10 +51,9 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'id_number' => 'ID number',
-            'full_name' => 'full name',
+            'name' => 'full name',
             'year_level' => 'year level',
             'employee_id' => 'employee ID',
-            'admin_level' => 'admin level',
         ];
     }
 
@@ -65,13 +63,12 @@ class StoreUserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'full_name.regex' => 'The full name may only contain letters, spaces, dots, hyphens, and apostrophes.',
+            'name.regex' => 'The full name may only contain letters, spaces, dots, hyphens, and apostrophes.',
             'password.regex' => 'The password must contain at least one uppercase letter, one lowercase letter, and one number.',
             'section.regex' => 'The section may only contain letters, numbers, and hyphens.',
             'course.required_if' => 'The course field is required when role is student.',
             'year_level.required_if' => 'The year level field is required when role is student.',
             'employee_id.required_if' => 'The employee ID field is required when role is instructor.',
-            'admin_level.required_if' => 'The admin level field is required when role is admin.',
         ];
     }
 
@@ -117,18 +114,6 @@ class UpdateUserRequest extends FormRequest
             return true;
         }
         
-        // Users can only update their own non-critical information
-        if ($user->id === $targetUser) {
-            // Check if they're trying to update restricted fields
-            $restrictedFields = ['role', 'admin_level', 'permissions', 'is_active'];
-            foreach ($restrictedFields as $field) {
-                if ($this->has($field)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        
         return false;
     }
 
@@ -141,11 +126,10 @@ class UpdateUserRequest extends FormRequest
         
         return [
             'id_number' => ['required', 'string', 'max:20', Rule::unique('users', 'id_number')->ignore($user)],
-            'full_name' => 'required|string|max:255|regex:/^[a-zA-Z\s\.\-\']+$/',
+            'name' => 'required|string|max:255|regex:/^[a-zA-Z\s\.\-\']+$/',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user)],
             'password' => 'nullable|string|min:8|confirmed|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
             'role' => 'required|in:student,instructor,admin',
-            'admin_level' => 'nullable|required_if:role,admin|in:super_admin,admin,moderator',
             'permissions' => 'nullable|array',
             'permissions.*' => 'string|max:100',
             'is_active' => 'boolean',
@@ -175,10 +159,9 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             'id_number' => 'ID number',
-            'full_name' => 'full name',
+            'name' => 'full name',
             'year_level' => 'year level',
             'employee_id' => 'employee ID',
-            'admin_level' => 'admin level',
         ];
     }
 
@@ -188,13 +171,12 @@ class UpdateUserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'full_name.regex' => 'The full name may only contain letters, spaces, dots, hyphens, and apostrophes.',
+            'name.regex' => 'The full name may only contain letters, spaces, dots, hyphens, and apostrophes.',
             'password.regex' => 'The password must contain at least one uppercase letter, one lowercase letter, and one number.',
             'section.regex' => 'The section may only contain letters, numbers, and hyphens.',
             'course.required_if' => 'The course field is required when role is student.',
             'year_level.required_if' => 'The year level field is required when role is student.',
             'employee_id.required_if' => 'The employee ID field is required when role is instructor.',
-            'admin_level.required_if' => 'The admin level field is required when role is admin.',
         ];
     }
 
@@ -204,9 +186,9 @@ class UpdateUserRequest extends FormRequest
     protected function prepareForValidation()
     {
         // Clean up the data before validation
-        if ($this->has('full_name')) {
+        if ($this->has('name')) {
             $this->merge([
-                'full_name' => trim($this->full_name)
+                'name' => trim($this->name)
             ]);
         }
         
@@ -313,15 +295,6 @@ class AssignRoleRequest extends FormRequest
             return false;
         }
         
-        // Super admin can assign any role
-        if ($user->admin_level === 'super_admin') {
-            return true;
-        }
-        
-        // Regular admin cannot assign super_admin role
-        if ($this->admin_level === 'super_admin') {
-            return false;
-        }
         
         return true;
     }
@@ -333,7 +306,6 @@ class AssignRoleRequest extends FormRequest
     {
         return [
             'role' => 'required|in:student,instructor,admin',
-            'admin_level' => 'nullable|required_if:role,admin|in:super_admin,admin,moderator',
             'permissions' => 'nullable|array',
             'permissions.*' => 'string|max:100',
         ];
@@ -342,14 +314,6 @@ class AssignRoleRequest extends FormRequest
     /**
      * Get the error messages for the defined validation rules.
      */
-    public function messages(): array
-    {
-        return [
-            'admin_level.required_if' => 'The admin level is required when assigning admin role.',
-            'role.in' => 'Invalid role selected.',
-            'admin_level.in' => 'Invalid admin level selected.',
-        ];
-    }
 
     /**
      * Handle a failed validation attempt.
@@ -391,15 +355,7 @@ class BulkOperationRequest extends FormRequest
             return false;
         }
         
-        // Super admin can perform any bulk operation
-        if ($user->admin_level === 'super_admin') {
-            return true;
-        }
-        
-        // Regular admin has some restrictions
-        if ($this->operation === 'assign_role' && $this->role === 'admin' && $this->admin_level === 'super_admin') {
-            return false; // Cannot bulk assign super_admin role
-        }
+    
         
         return true;
     }
@@ -414,7 +370,6 @@ class BulkOperationRequest extends FormRequest
             'user_ids' => 'required|array|min:1|max:100',
             'user_ids.*' => 'integer|exists:users,id',
             'role' => 'nullable|required_if:operation,assign_role|in:student,instructor,admin',
-            'admin_level' => 'nullable|required_if:role,admin|in:super_admin,admin,moderator',
             'permissions' => 'nullable|array',
             'permissions.*' => 'string|max:100',
         ];
@@ -433,7 +388,7 @@ class BulkOperationRequest extends FormRequest
             'user_ids.max' => 'You can select a maximum of 100 users at once.',
             'user_ids.*.exists' => 'One or more selected users do not exist.',
             'role.required_if' => 'Role is required when operation is assign_role.',
-            'admin_level.required_if' => 'Admin level is required when assigning admin role.',
+            
         ];
     }
 
@@ -572,10 +527,9 @@ class UserFilterRequest extends FormRequest
             'role' => 'nullable|in:student,instructor,admin',
             'status' => 'nullable|in:active,inactive',
             'search' => 'nullable|string|max:100',
-            'sort_by' => 'nullable|in:full_name,email,created_at,last_login_at,id_number',
+            'sort_by' => 'nullable|in:name,email,created_at,last_login_at,id_number',
             'sort_order' => 'nullable|in:asc,desc',
             'per_page' => 'nullable|integer|min:5|max:100',
-            'admin_level' => 'nullable|in:super_admin,admin,moderator',
         ];
     }
 

@@ -14,8 +14,10 @@ Alpine.store('darkMode', {
     updateDOM() {
         if (this.on) {
             document.documentElement.classList.add('dark');
+            document.body.style.backgroundColor = '#595758'; // Set custom dark background
         } else {
             document.documentElement.classList.remove('dark');
+            document.body.style.backgroundColor = ''; // Reset to default
         }
     },
     init() {

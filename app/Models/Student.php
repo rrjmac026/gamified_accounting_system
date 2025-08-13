@@ -66,6 +66,12 @@ class Student extends Model
     public function subjects()
     {
         return $this->belongsToMany(Subject::class, 'student_subjects')
+                    ->withPivot('enrollment_date', 'status')
                     ->withTimestamps();
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
     }
 }

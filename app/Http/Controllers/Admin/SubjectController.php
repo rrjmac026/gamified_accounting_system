@@ -34,7 +34,7 @@ class SubjectController extends Controller
         ]);
 
         Subject::create($validated);
-        return redirect()->route('subjects.index')
+        return redirect()->route('admin.subjects.index')
             ->with('success', 'Subject created successfully');
     }
 
@@ -63,14 +63,14 @@ class SubjectController extends Controller
         ]);
 
         $subject->update($validated);
-        return redirect()->route('subjects.index')
+        return redirect()->route('admin.subjects.index')
             ->with('success', 'Subject updated successfully');
     }
 
     public function destroy(Subject $subject)
     {
         $subject->delete();
-        return redirect()->route('subjects.index')
+        return redirect()->route('admin.subjects.index')
             ->with('success', 'Subject deleted successfully');
     }
 }

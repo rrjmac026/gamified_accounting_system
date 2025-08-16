@@ -32,10 +32,12 @@ class InstructorManagementController extends Controller
     {
         //  dd($request->all());
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
-            'email'      => 'required|email|unique:users,email',
-            'password'   => 'required|string|min:8|confirmed',
+            'name'        => 'required|string|max:255',
+            'email'       => 'required|email|unique:users,email',
+            'employee_id' => 'required|string|max:50',
+            'department'  => 'required|string|max:255',
+            'specialization' => 'required|string|max:255',
+            'password'    => 'required|string|min:8',
         ]);
 
         if ($validator->fails()) {
@@ -43,19 +45,21 @@ class InstructorManagementController extends Controller
         }
 
         $user = User::create([
-            'first_name' => $request->first_name,
-            'last_name'  => $request->last_name,
+            'name' => $request->name,
             'email'      => $request->email,
             'password'   => Hash::make($request->password),
             'role'       => 'instructor'
         ]);
 
         Instructor::create([
-            'user_id' => $user->id
+            'user_id'        => $user->id,
+            'employee_id'    => $request->employee_id,
+            'department'     => $request->department,
+            'specialization' => $request->specialization,
         ]);
 
         $this->logActivity($user->id, 'Instructor account created');
-        return redirect()->route('instructors.index')->with('success', 'Instructor created successfully.');
+        return redirect()->route('admin.instructors.index')->with('success', 'Instructor created successfully.');
     }
 
     /**
@@ -64,8 +68,7 @@ class InstructorManagementController extends Controller
     public function update(Request $request, Instructor $instructor)
     {
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'email'      => [
                 'required', 'email',
                 Rule::unique('users', 'email')->ignore($instructor->user_id)
@@ -76,10 +79,10 @@ class InstructorManagementController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        $instructor->user->update($request->only(['first_name', 'last_name', 'email']));
+        $instructor->user->update($request->only(['name','email']));
         $this->logActivity($instructor->user_id, 'Instructor updated');
 
-        return redirect()->route('instructors.show', $instructor)->with('success', 'Instructor updated successfully.');
+        return redirect()->route('admin.instructors.show', $instructor)->with('success', 'Instructor updated successfully.');
     }
 
     /**
@@ -91,7 +94,7 @@ class InstructorManagementController extends Controller
         $instructor->delete();
 
         $this->logActivity(auth()->id(), 'Instructor deleted');
-        return redirect()->route('instructors.index')->with('success', 'Instructor deleted successfully.');
+        return redirect()->route('admin.instructors.index')->with('success', 'Instructor deleted successfully.');
     }
 
     /**

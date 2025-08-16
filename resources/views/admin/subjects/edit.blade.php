@@ -3,7 +3,7 @@
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-[#FFEEF2] dark:bg-[#595758] overflow-hidden shadow-md sm:rounded-lg p-6">
-                <form action="{{ route('subjects.update', $subject) }}" method="POST" class="space-y-6">
+                <form action="{{ route('admin.subjects.update', $subject) }}" method="POST" class="space-y-6">
                     @csrf
                     @method('PUT')
 

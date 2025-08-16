@@ -35,25 +35,25 @@
                             <tbody class="bg-[#FFF6FD] divide-y divide-[#FFC8FB]">
                                 @forelse ($instructors as $instructor)
                                     <tr class="hover:bg-[#FFD9FF] transition-colors duration-150">
-                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
+                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-black-200">
                                             {{ $instructor->name }}
                                         </td>
-                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
+                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-black-200">
                                             {{ $instructor->email }}
                                         </td>
-                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
+                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-black-200">
                                             {{ $instructor->employee_id ?? 'N/A' }}
                                         </td>
-                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
+                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-black-200">
                                             {{ $instructor->department ?? 'N/A' }}
                                         </td>
-                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
+                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-black-200">
                                             {{ $instructor->specialization ?? 'N/A' }}
                                         </td>
-                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
+                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-black-200">
                                             {{ $instructor->stats['total_subjects'] ?? 0 }}
                                         </td>
-                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
+                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-black-200">
                                             {{ $instructor->stats['total_tasks'] ?? 0 }}
                                             @if (($instructor->stats['active_tasks'] ?? 0) > 0)
                                                 <span class="ml-1 inline-block bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full dark:bg-green-900 dark:text-green-200">
@@ -61,10 +61,10 @@
                                                 </span>
                                             @endif
                                         </td>
-                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200">
+                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-black-200">
                                             {{ $instructor->stats['total_students'] ?? 0 }}
                                         </td>
-                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-gray-200 space-x-2">
+                                        <td class="py-4 px-6 text-sm text-gray-700 dark:text-black-200 space-x-2">
                                             <a href="{{ route('admin.instructors.show', $instructor->id) }}" class="text-indigo-600 hover:underline">View</a>
                                             <a href="{{ route('admin.instructors.edit', $instructor->id) }}" class="text-yellow-600 hover:underline">Edit</a>
                                             <form action="{{ route('admin.instructors.destroy', $instructor->id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure?');">

@@ -3,24 +3,27 @@ import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;
 
-// Initialize Dark Mode store
+// Initialize Dark Mode store with better persistence
 Alpine.store('darkMode', {
-    on: localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+    on: localStorage.getItem('theme') === 'dark',
     toggle() {
         this.on = !this.on;
-        localStorage.theme = this.on ? 'dark' : 'light';
+        localStorage.setItem('theme', this.on ? 'dark' : 'light');
         this.updateDOM();
     },
     updateDOM() {
         if (this.on) {
             document.documentElement.classList.add('dark');
-            document.body.style.backgroundColor = '#595758'; // Set custom dark background
         } else {
             document.documentElement.classList.remove('dark');
-            document.body.style.backgroundColor = ''; // Reset to default
         }
     },
     init() {
+        // Check system preference only if no theme is stored
+        if (!localStorage.getItem('theme')) {
+            this.on = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            localStorage.setItem('theme', this.on ? 'dark' : 'light');
+        }
         this.updateDOM();
     }
 });

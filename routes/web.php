@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\InstructorManagementController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\Admin\FeedbackRecordController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\StudentManagementController;
 
 
 Route::get('/', function () {
@@ -45,6 +46,7 @@ Route::middleware(['auth', 'role:admin,instructor'])->group(function () {
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::post('/students/import', [StudentManagementController::class, 'import'])->name('student.import');
     Route::get('/student', [AdminController::class, 'students'])->name('student.index');
     Route::resource('/activity-logs',ActivityLogController::class);
     Route::resource('feedback-records', FeedbackRecordController::class);

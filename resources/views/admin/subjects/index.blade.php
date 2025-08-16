@@ -46,7 +46,7 @@
                                             @endif
                                         </td>
                                         <td class="py-4 px-6 text-sm space-x-2">
-                                            <a href="{{ route('subjects.edit', $subject) }}" 
+                                            <a href="{{ route('admin.subjects.edit', $subject) }}" 
                                                class="text-[#FF6FB5] hover:text-[#e8559d]">
                                                 <i class="fas fa-edit"></i>
                                             </a>
@@ -55,7 +55,7 @@
                                                 class="text-red-500 hover:text-red-700 transition-colors duration-150">
                                                 <i class="fas fa-trash"></i>
                                             </button>
-                                            <form id="delete-subject-{{ $subject->id }}" action="{{ route('subjects.destroy', $subject) }}" method="POST" class="hidden">
+                                            <form id="delete-subject-{{ $subject->id }}" action="{{ route('admin.subjects.destroy', $subject) }}" method="POST" class="hidden">
                                                 @csrf
                                                 @method('DELETE')
                                             </form>

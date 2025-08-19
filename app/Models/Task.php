@@ -52,6 +52,11 @@ class Task extends Model
                     ->withPivot('status', 'score', 'xp_earned', 'submitted_at', 'graded_at', 'retry_count') // maybe add retry count here
                     ->withTimestamps();
     }
+    
+    public function studentTasks()
+    {
+        return $this->hasMany(StudentTask::class);
+    }
 
     public function submissions()
     {
@@ -62,4 +67,10 @@ class Task extends Model
     {
         return $this->hasMany(TaskQuestion::class);
     }
+
+    public function performanceLogs()
+    {
+        return $this->hasMany(PerformanceLog::class);
+    }
+
 }

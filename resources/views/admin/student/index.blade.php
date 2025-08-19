@@ -2,6 +2,18 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            {{-- Add Student & Import Section --}}
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-[#FF92C2]">Student Management</h2>
+                <div class="flex gap-4">
+                    <a href="{{ route('admin.student.create') }}" 
+                       class="px-6 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-colors duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Student
+                    </a>
+                </div>
+            </div>
+
             <div class="bg-[#FFF0FA] overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 sm:rounded-lg">
                 <div class="p-6 text-gray-700">
                     
@@ -59,7 +71,7 @@
                             <div class="flex items-center gap-4">
                                 <div class="flex-1">
                                     <label for="file" class="block text-sm font-medium text-gray-700 mb-1">
-                                        Select CSV or Excel File
+                                        Select CSV File
                                     </label>
                                     <input type="file" 
                                            name="file" 
@@ -93,6 +105,7 @@
                                     <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Year Level</th>
                                     <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Section</th>
                                     <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Status</th>
+                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-[#FFF6FD] divide-y divide-[#FFC8FB]">
@@ -108,7 +121,7 @@
                                             {{ $student->user->id_number ?? $student->id }}
                                         </td>
                                         <td class="py-4 px-6 text-sm text-gray-700">
-                                            {{ $student->course ?? '-' }}
+                                            {{ $student->course->course_name ?? '-' }}
                                         </td>
                                         <td class="py-4 px-6 text-sm text-gray-700">
                                             {{ $student->year_level ?? '-' }}
@@ -126,6 +139,23 @@
                                                     Inactive
                                                 </span>
                                             @endif
+                                        </td>
+                                        <td class="py-4 px-6 text-sm space-x-2">
+                                            <a href="{{ route('admin.student.show', $student->id) }}" class="text-[#FF92C2] hover:text-[#ff6fb5]">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('admin.student.edit', $student->id) }}" class="text-[#FF92C2] hover:text-[#ff6fb5]">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" 
+                                                onclick="return confirmAction('Are you sure you want to delete this student?', 'delete-student-{{ $student->id }}')"
+                                                class="text-red-500 hover:text-red-700 transition-colors duration-150">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            <form id="delete-student-{{ $student->id }}" action="{{ route('admin.student.destroy', $student->id) }}" method="POST" class="hidden">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
                                         </td>
                                     </tr>
                                 @empty

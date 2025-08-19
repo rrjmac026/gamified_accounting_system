@@ -36,10 +36,28 @@ class XpTransactionController extends Controller
             'processed_at' => 'required|date'
         ]);
 
-        XpTransaction::create($validated);
+        // Create the transaction
+        $transaction = XpTransaction::create($validated);
+
+        // Update student's total XP
+        $student = Student::find($validated['student_id']);
+        $student->increment('total_xp', $validated['amount']);
+
+        // 🔥 Check and award badges automatically
+        $badges = \App\Models\Badge::where('xp_threshold', '<=', $student->total_xp)
+            ->where('is_active', true)
+            ->get();
+
+        foreach ($badges as $badge) {
+            if (!$student->badges->contains($badge->id)) {
+                $student->badges()->attach($badge->id, ['earned_at' => now()]);
+            }
+        }
+
         return redirect()->route('admin.xp-transactions.index')
-            ->with('success', 'XP Transaction created successfully');
+            ->with('success', 'XP Transaction created successfully and badges updated!');
     }
+
 
     public function show(XpTransaction $xpTransaction)
     {
@@ -66,10 +84,29 @@ class XpTransactionController extends Controller
             'processed_at' => 'required|date'
         ]);
 
+        // Update transaction
         $xpTransaction->update($validated);
+
+        // 🔄 Recalculate total XP for the student
+        $student = Student::find($validated['student_id']);
+        $student->total_xp = XpTransaction::where('student_id', $student->id)->sum('amount');
+        $student->save();
+
+        // 🔥 Recheck and award badges
+        $badges = \App\Models\Badge::where('xp_threshold', '<=', $student->total_xp)
+            ->where('is_active', true)
+            ->get();
+
+        foreach ($badges as $badge) {
+            if (!$student->badges->contains($badge->id)) {
+                $student->badges()->attach($badge->id, ['earned_at' => now()]);
+            }
+        }
+
         return redirect()->route('admin.xp-transactions.index')
-            ->with('success', 'XP Transaction updated successfully');
+            ->with('success', 'XP Transaction updated successfully and badges updated!');
     }
+
 
     public function destroy(XpTransaction $xpTransaction)
     {

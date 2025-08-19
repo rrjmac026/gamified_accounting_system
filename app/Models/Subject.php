@@ -39,8 +39,9 @@ class Subject extends Model
         return $this->hasMany(Task::class);
     }
 
-    public function course()
+    public function performanceLogs()
     {
-        return $this->belongsTo(Course::class);
+        return $this->hasMany(PerformanceLog::class);
     }
+
 }

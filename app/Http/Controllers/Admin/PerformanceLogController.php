@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller; 
-
 use App\Models\PerformanceLog;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -33,11 +32,7 @@ class PerformanceLogController extends Controller
 
         $logs = $query->latest('recorded_at')->paginate(15);
 
-        return response()->json([
-            'success' => true,
-            'data' => $logs,
-            'message' => 'Performance logs retrieved successfully'
-        ]);
+        return view('admin.performance_logs.index', compact('logs'));
     }
 
     public function store(Request $request)
@@ -51,22 +46,16 @@ class PerformanceLogController extends Controller
             'recorded_at' => 'required|date'
         ]);
 
-        $log = PerformanceLog::create($validated);
+        PerformanceLog::create($validated);
 
-        return response()->json([
-            'success' => true,
-            'data' => $log,
-            'message' => 'Performance log created successfully'
-        ], 201);
+        return redirect()->route('admin.performance_logs.index')
+            ->with('success', 'Performance log created successfully');
     }
 
     public function show(PerformanceLog $performanceLog)
     {
-        return response()->json([
-            'success' => true,
-            'data' => $performanceLog->load(['student', 'subject', 'task']),
-            'message' => 'Performance log retrieved successfully'
-        ]);
+        $performanceLog->load(['student', 'subject', 'task']);
+        return view('admin.performance_logs.show', compact('performanceLog'));
     }
 
     public function update(Request $request, PerformanceLog $performanceLog)
@@ -79,21 +68,16 @@ class PerformanceLogController extends Controller
 
         $performanceLog->update($validated);
 
-        return response()->json([
-            'success' => true,
-            'data' => $performanceLog,
-            'message' => 'Performance log updated successfully'
-        ]);
+        return redirect()->route('admin.performance_logs.show', $performanceLog->id)
+            ->with('success', 'Performance log updated successfully');
     }
 
     public function destroy(PerformanceLog $performanceLog)
     {
         $performanceLog->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Performance log deleted successfully'
-        ]);
+        return redirect()->route('admin.performance_logs.index')
+            ->with('success', 'Performance log deleted successfully');
     }
 
     public function getStudentPerformance($studentId)
@@ -114,11 +98,7 @@ class PerformanceLogController extends Controller
             'recent_logs' => $logs->take(5)
         ];
 
-        return response()->json([
-            'success' => true,
-            'data' => $performance,
-            'message' => 'Student performance retrieved successfully'
-        ]);
+        return view('admin.performance_logs.student_performance', compact('performance', 'logs'));
     }
 
     public function getSubjectStatistics($subjectId)
@@ -139,10 +119,6 @@ class PerformanceLogController extends Controller
                 ])
         ];
 
-        return response()->json([
-            'success' => true,
-            'data' => $statistics,
-            'message' => 'Subject statistics retrieved successfully'
-        ]);
+        return view('admin.performance_logs.subject_statistics', compact('statistics', 'logs'));
     }
 }

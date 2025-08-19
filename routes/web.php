@@ -3,7 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\InstructorController;
+
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\XpTransactionController;
@@ -16,6 +16,10 @@ use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\Admin\FeedbackRecordController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\StudentManagementController;
+use App\Http\Controllers\Admin\CourseController;
+use App\Http\Controllers\Admin\PerformanceLogController;
+use App\Http\Controllers\Admin\LeaderboardController;
+use App\Http\Controllers\Admin\BadgeController;
 
 
 Route::get('/', function () {
@@ -47,7 +51,14 @@ Route::middleware(['auth', 'role:admin,instructor'])->group(function () {
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::post('/students/import', [StudentManagementController::class, 'import'])->name('student.import');
-    Route::get('/student', [AdminController::class, 'students'])->name('student.index');
+    // Route::get('/students', [AdminController::class, 'students'])->name('student.index');
+    Route::resource('/student', StudentManagementController::class);
+    // Route::post('/students', [StudentManagementController::class, 'store'])->name('student.store');
+
+    Route::resource('/courses', CourseController::class);
+    Route::resource('badges', BadgeController::class);
+
+    Route::get('/students/create', [StudentManagementController::class, 'create'])->name('student.create');
     Route::resource('/activity-logs',ActivityLogController::class);
     Route::resource('feedback-records', FeedbackRecordController::class);
     // Route::get('/instructors', [AdminController::class, 'instructors'])->name('instructors.index');
@@ -57,6 +68,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::resource('users', UserController::class);
     Route::resource('/xp-transactions', XpTransactionController::class);
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+    Route::resource('performance-logs', PerformanceLogController::class);
+    Route::get('performance-logs/student/{student}', [PerformanceLogController::class, 'getStudentPerformance'])
+        ->name('performance-logs.student');
+    Route::get('performance-logs/subject/{subject}', [PerformanceLogController::class, 'getSubjectStatistics'])
+        ->name('performance-logs.subject');
+
+    // Add these new routes
+    Route::get('/leaderboards', [LeaderboardController::class, 'index'])->name('leaderboards.index');
+    Route::get('/leaderboards/{leaderboard}', [LeaderboardController::class, 'show'])->name('leaderboards.show');
+
     // Reports routes
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/students', [ReportController::class, 'generateStudentReport'])->name('reports.students');

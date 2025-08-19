@@ -9,7 +9,7 @@ class Student extends Model
 
     protected $fillable = [
         'user_id',
-        'course',
+        'course_id',
         'year_level',
         'section',
         'total_xp',
@@ -28,12 +28,20 @@ class Student extends Model
     {
         return $this->belongsTo(User::class);
     }
+    
 
     public function assignedTasks()
     {
+        // Quick access: gives you Task models with pivot info
         return $this->belongsToMany(Task::class, 'student_tasks')
-                    ->withPivot('status', 'score', 'xp_earned', 'submitted_at', 'graded_at')
+                    ->withPivot('status', 'score', 'xp_earned', 'submitted_at', 'graded_at', 'retry_count')
                     ->withTimestamps();
+    }
+
+    public function studentTasks()
+    {
+        // Full access: gives you StudentTask models
+        return $this->hasMany(StudentTask::class);
     }
 
     public function submissions()
@@ -72,6 +80,6 @@ class Student extends Model
 
     public function course()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Course::class, 'course_id');
     }
 }

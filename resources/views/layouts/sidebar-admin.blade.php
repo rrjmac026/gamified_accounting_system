@@ -58,17 +58,35 @@
                 <i class="fas fa-book-open w-5 h-5"></i>
                 <span>Subjects</span>
             </a>
-            <a href="#" 
-               class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 
-               {{ request()->routeIs('admin.modules.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FFE3F5] text-[#FF92C2] shadow-sm' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFF0FA] dark:hover:bg-[#3D3D3D]' }}">
-                <i class="fas fa-cubes w-5 h-5"></i>
-                <span>Modules</span>
-            </a>
             <a href="{{ route('admin.xp-transactions.index') }}" 
                class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 
                {{ request()->routeIs('admin.xp-transactions.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FFE3F5] text-[#FF92C2] shadow-sm' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFF0FA] dark:hover:bg-[#3D3D3D]' }}">
-                <i class="fas fa-star w-5 h-5"></i>
+                <i class="fas fa-medal w-5 h-5"></i>
                 <span>XP Management</span>
+            </a>
+            <a href="{{ route('admin.courses.index') }}" 
+               class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 
+               {{ request()->routeIs('admin.courses.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FFE3F5] text-[#FF92C2] shadow-sm' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFF0FA] dark:hover:bg-[#3D3D3D]' }}">
+                <i class="fas fa-graduation-cap w-5 h-5"></i>
+                <span>Courses</span>
+            </a>
+            <a href="{{ route('admin.performance-logs.index') }}" 
+               class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 
+               {{ request()->routeIs('admin.performance-logs.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FFE3F5] text-[#FF92C2] shadow-sm' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFF0FA] dark:hover:bg-[#3D3D3D]' }}">
+                <i class="fas fa-chart-bar w-5 h-5"></i>
+                <span>Performance Logs</span>
+            </a>
+            <a href="{{ route('admin.badges.index') }}" 
+               class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 
+               {{ request()->routeIs('admin.badges.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FFE3F5] text-[#FF92C2] shadow-sm' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFF0FA] dark:hover:bg-[#3D3D3D]' }}">
+                <i class="fas fa-medal w-5 h-5"></i>
+                <span>Badges</span>
+            </a>
+            <a href="{{ route('admin.leaderboards.index') }}" 
+               class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 
+               {{ request()->routeIs('admin.leaderboards.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FFE3F5] text-[#FF92C2] shadow-sm' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFF0FA] dark:hover:bg-[#3D3D3D]' }}">
+                <i class="fas fa-trophy w-5 h-5"></i>
+                <span>Leaderboards</span>
             </a>
         </div>
     </div>

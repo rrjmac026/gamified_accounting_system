@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Subject;
+use App\Models\Course;
 use Illuminate\Http\Request;
-// use Maatwebsite\Excel\Facades\Excel; // Comment out if not using Excel package
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -19,6 +19,69 @@ class StudentManagementController extends Controller
         $students = Student::with(['user', 'subjects'])->paginate(10);
         return view('admin.student.index', compact('students'));
     }
+
+    public function create()
+    {
+        
+        $subjects = Subject::all();
+        $courses = Course::all();
+        return view('admin.student.create', compact('subjects', 'courses'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'id_number' => 'required|string|unique:users,id_number',
+            'course_id' => 'required|exists:courses,id',
+            'year_level' => 'required|integer|min:1|max:5',
+            'section' => 'required|string|max:50',
+            'password' => 'required|string|min:6',
+            'subjects'   => 'array',
+            'subjects.*' => 'exists:subjects,id'
+        ]);
+
+
+        try {
+            DB::beginTransaction();
+
+            // First, create the user
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'id_number' => $validated['id_number'],
+                'password' => Hash::make($validated['password']),
+                'role' => 'student',
+                'is_active' => true
+            ]);
+
+            // Then create the student record
+            $student = Student::create([
+                'user_id' => $user->id,
+                'course_id' => $validated['course_id'],
+                'year_level' => $validated['year_level'],
+                'section' => $validated['section']
+            ]);
+
+            // Attach subjects if provided
+            if (isset($validated['subjects'])) {
+                $student->subjects()->attach($validated['subjects']);
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.student.index')
+                ->with('success', 'Student created successfully');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('Error creating student: ' . $e->getMessage());
+            return back()->withInput()
+                ->with('error', 'Error creating student: ' . $e->getMessage());
+        }
+    }
+    
 
     /**
      * Read CSV file natively without Laravel Excel package
@@ -38,10 +101,46 @@ class StudentManagementController extends Controller
         return $data;
     }
 
+    /**
+     * Read Excel file using Laravel Excel package
+     */
+    private function readExcelFile($file)
+    {
+        try {
+            // Use the correct namespace - try different approaches
+            if (class_exists('Maatwebsite\Excel\Facades\Excel')) {
+                return \Maatwebsite\Excel\Facades\Excel::toArray([], $file)[0];
+            } elseif (class_exists('Excel')) {
+                return \Excel::toArray([], $file)[0];
+            } else {
+                throw new \Exception('Laravel Excel package not properly installed');
+            }
+        } catch (\Exception $e) {
+            Log::error('Excel reading error: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Check if Laravel Excel package is available
+     */
+    private function isExcelPackageAvailable()
+    {
+        return class_exists('Maatwebsite\Excel\Facades\Excel') || 
+               class_exists('Excel') || 
+               class_exists('\Maatwebsite\Excel\Excel');
+    }
+
     public function import(Request $request) 
     {
+        // Validate file based on available packages
+        $allowedMimes = ['csv'];
+        if ($this->isExcelPackageAvailable()) {
+            $allowedMimes = ['xlsx', 'xls', 'csv'];
+        }
+
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
+            'file' => 'required|mimes:' . implode(',', $allowedMimes) . '|max:2048'
         ]);
 
         try {
@@ -51,24 +150,40 @@ class StudentManagementController extends Controller
             $file = $request->file('file');
             $extension = $file->getClientOriginalExtension();
             
+            Log::info('File upload details:', [
+                'original_name' => $file->getClientOriginalName(),
+                'extension' => $extension,
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize()
+            ]);
+            
             // Handle different file types
             if (in_array(strtolower($extension), ['csv'])) {
                 // Handle CSV files natively
+                Log::info('Processing CSV file');
                 $data = $this->readCsvFile($file);
             } elseif (in_array(strtolower($extension), ['xlsx', 'xls'])) {
-                // Handle Excel files - requires Laravel Excel package
-                if (class_exists('\Maatwebsite\Excel\Facades\Excel')) {
-                    $sheets = \Maatwebsite\Excel\Facades\Excel::toArray([], $file);
-                    $data = $sheets[0];
+                // Handle Excel files using Laravel Excel package
+                Log::info('Processing Excel file');
+                if ($this->isExcelPackageAvailable()) {
+                    $data = $this->readExcelFile($file);
                 } else {
-                    throw new \Exception('Laravel Excel package is required for Excel files. Please install it with: composer require maatwebsite/excel');
+                    throw new \Exception('Laravel Excel package is required for Excel files. Please install it with: composer require maatwebsite/excel OR convert your Excel file to CSV format.');
                 }
             } else {
-                throw new \Exception('Unsupported file type. Please upload a CSV or Excel file.');
+                throw new \Exception('Unsupported file type. Please upload a CSV' . ($this->isExcelPackageAvailable() ? ' or Excel' : '') . ' file.');
             }
 
             // Debug: Log the raw data structure
-            Log::info('Import data structure:', ['data' => $data]);
+            Log::info('Import data structure:', [
+                'total_rows' => count($data),
+                'first_row' => isset($data[0]) ? $data[0] : 'No data',
+                'second_row' => isset($data[1]) ? $data[1] : 'No second row'
+            ]);
+            
+            if (empty($data)) {
+                throw new \Exception('No data found in the uploaded file.');
+            }
             
             $processedCount = 0;
             $skippedCount = 0;
@@ -77,6 +192,7 @@ class StudentManagementController extends Controller
             foreach ($data as $index => $row) {
                 // Skip header row (row 0)
                 if ($index === 0) {
+                    Log::info('Header row:', ['header' => $row]);
                     continue;
                 }
 
@@ -120,7 +236,7 @@ class StudentManagementController extends Controller
                 }
 
                 try {
-                    // Generate id_number if not provided
+                    // Use provided id_number or generate one if empty
                     if (empty($id_number)) {
                         $id_number = 'STU' . date('Y') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
                     }
@@ -201,19 +317,20 @@ class StudentManagementController extends Controller
     public function show(Student $student)
     {
         $student->load(['user', 'subjects', 'badges', 'assignedTasks']);
-        return view('instructors.student.show', compact('student'));
+        return view('admin.student.show', compact('student'));
     }
 
     public function edit(Student $student)
     {
         $subjects = Subject::all();
-        return view('admin.student.edit', compact('student', 'subjects'));
+        $courses = Course::all();
+        return view('admin.student.edit', compact('student', 'subjects', 'courses'));
     }
 
     public function update(Request $request, Student $student)
     {
         $validated = $request->validate([
-            'course' => 'required|string|max:100',
+            'course_id' => 'required|string|max:100',
             'year_level' => 'required|integer|min:1|max:5',
             'section' => 'required|string|max:50',
             'subjects' => 'array|exists:subjects,id'
@@ -227,6 +344,34 @@ class StudentManagementController extends Controller
 
         return redirect()->route('admin.student.show', $student)
             ->with('success', 'Student updated successfully');
+    }
+
+    public function destroy(Student $student)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Store user ID before deleting student
+            $userId = $student->user_id;
+
+            // Delete the student record first (this will cascade delete related records)
+            $student->delete();
+
+            // Delete the associated user record
+            User::where('id', $userId)->delete();
+
+            DB::commit();
+
+            return redirect()->route('admin.student.index')
+                ->with('success', 'Student deleted successfully');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error deleting student: ' . $e->getMessage());
+            
+            return redirect()->route('admin.student.index')
+                ->with('error', 'Error deleting student. Please try again.');
+        }
     }
 
     public function viewAssignments(Student $student)

@@ -39,11 +39,11 @@ class AdminController extends Controller
     /**
      * List all students with their user info.
      */
-    public function students()
-    {
-        $students = Student::with('user')->latest()->paginate(10);
-        return view('admin.student.index', compact('students'));
-    }
+    // public function students()
+    // {
+    //     $students = Student::with('user')->latest()->paginate(10);
+    //     return view('admin.student.index', compact('students'));
+    // }
 
     /**
      * List all instructors with their user info.

@@ -26,4 +26,15 @@ class StudentTask extends Model
         'submitted_at' => 'datetime',
         'graded_at' => 'datetime'
     ];
+
+    public function student()
+    {
+        return $this->belongsTo(Student::class);
+    }
+
+    public function task()
+    {
+        return $this->belongsTo(Task::class);
+    }
+
 }

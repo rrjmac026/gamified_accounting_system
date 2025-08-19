@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Course extends Model
 {
@@ -27,9 +28,5 @@ class Course extends Model
         return $this->hasMany(Student::class);
     }
 
-    public function subjects()
-    {
-        return $this->hasMany(Subject::class);
-    }
 }
 

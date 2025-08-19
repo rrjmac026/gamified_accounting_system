@@ -16,10 +16,10 @@ class BadgeRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'icon_path' => 'required|string',
-            'criteria' => 'required|array',
+            'icon' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
             'xp_threshold' => 'required|integer|min:0',
-            'is_active' => 'required|boolean'
+            'criteria' => 'required|in:achievement,skill,participation,milestone',
         ];
     }
 }
+

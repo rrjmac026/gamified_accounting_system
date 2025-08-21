@@ -39,16 +39,20 @@
                          x-transition:enter="transition ease-out duration-100"
                          x-transition:enter-start="opacity-0 scale-95"
                          x-transition:enter-end="opacity-100 scale-100"
-                         class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2 border border-gray-100 dark:border-gray-700">
+                         :class="$store.darkMode.on ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'"
+                         class="absolute right-0 mt-2 w-48 rounded-lg shadow-lg py-2 border">
+                        
                         <!-- Profile -->
                          <a href="{{ route('profile.edit') }}" 
-                           class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                           :class="$store.darkMode.on ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'"
+                           class="flex items-center px-4 py-2 text-sm transition-colors duration-200">
                             <i class="fas fa-user mr-2"></i> Profile
                         </a>
                         
                         <!-- Dark Mode Toggle -->
                         <button @click="$store.darkMode.toggle()"
-                                class="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                :class="$store.darkMode.on ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'"
+                                class="flex items-center w-full px-4 py-2 text-sm transition-colors duration-200">
                             <template x-if="$store.darkMode.on">
                                 <i class="fas fa-sun mr-2 text-amber-400"></i>
                             </template>
@@ -62,7 +66,8 @@
                         <form method="POST" action="{{ route('logout') }}" class="w-full">
                             @csrf
                             <button type="submit" 
-                                    class="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                    :class="$store.darkMode.on ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'"
+                                    class="flex items-center w-full px-4 py-2 text-sm transition-colors duration-200">
                                 <i class="fas fa-sign-out-alt mr-2"></i>
                                 <span>Logout</span>
                             </button>

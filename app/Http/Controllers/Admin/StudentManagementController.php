@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller; 
+use App\Http\Controllers\Controller;
+use App\Traits\Loggable;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Subject;
+use App\Models\ActivityLog;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -14,6 +16,8 @@ use Illuminate\Support\Facades\Log;
 
 class StudentManagementController extends Controller
 {
+    use Loggable;
+
     public function index()
     {
         $students = Student::with(['user', 'subjects'])->paginate(10);
@@ -70,6 +74,17 @@ class StudentManagementController extends Controller
             }
 
             DB::commit();
+            // Log activity
+            $this->logActivity(
+                "Created Student",
+                "Student",
+                $student->id,
+                [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'course' => $validated['course_id']
+                ]
+            );
 
             return redirect()->route('admin.student.index')
                 ->with('success', 'Student created successfully');
@@ -342,6 +357,16 @@ class StudentManagementController extends Controller
             $student->subjects()->sync($validated['subjects']);
         }
 
+        $this->logActivity(
+            "Updated Student",
+            "Student",
+            $student->id,
+            [
+                'student_id' => $student->id,
+                'changes' => $student->getChanges()
+            ]
+        );
+
         return redirect()->route('admin.student.show', $student)
             ->with('success', 'Student updated successfully');
     }
@@ -361,6 +386,8 @@ class StudentManagementController extends Controller
             User::where('id', $userId)->delete();
 
             DB::commit();
+
+            $this->logActivity($userId, "Deleted student with user_id {$userId}");
 
             return redirect()->route('admin.student.index')
                 ->with('success', 'Student deleted successfully');

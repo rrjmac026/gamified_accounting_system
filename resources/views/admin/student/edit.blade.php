@@ -74,7 +74,7 @@
 
                     {{-- Submit --}}
                     <div class="flex justify-end space-x-4">
-                        <a href="{{ route('admin.student.show', $student) }}" 
+                        <a href="{{ route('admin.student.index', $student) }}" 
                            class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancel</a>
                         <button type="submit" 
                                 class="px-6 py-2 bg-gradient-to-r from-[#FF92C2] to-[#FF5DA2] hover:from-[#FF5DA2] hover:to-[#FF92C2] 

@@ -1,3 +1,4 @@
+@section('title', 'Course Page')
 <x-app-layout>
     <div class="flex justify-end px-8 mt-4">
         <a href="{{ route('admin.courses.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#FF92C2] hover:bg-[#ff6fb5] rounded-lg shadow-sm hover:shadow transition-all duration-200">

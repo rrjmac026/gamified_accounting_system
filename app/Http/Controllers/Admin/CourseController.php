@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Traits\Loggable;
 
 class CourseController extends Controller
 {
+    use Loggable;
     /**
      * Display a listing of courses.
      */
@@ -41,7 +43,18 @@ class CourseController extends Controller
             'is_active' => 'boolean'
         ]);
 
-        Course::create($validated);
+        $course = Course::create($validated);
+
+        $this->logActivity(
+            "Created Course",  // More descriptive action
+            "Course",
+            $course->id,
+            [
+                'course_code' => $course->course_code,
+                'course_name' => $course->course_name,
+                'department' => $course->department
+            ]
+        );
 
         return redirect()->route('admin.courses.index')
                         ->with('success', 'Course created successfully');
@@ -82,12 +95,7 @@ class CourseController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $course = Course::find($id);
-
-        if (!$course) {
-            return redirect()->route('admin.courses.index')
-                            ->with('error', 'Course not found');
-        }
+        $course = Course::findOrFail($id);
 
         $validated = $request->validate([
             'course_code' => [
@@ -104,7 +112,18 @@ class CourseController extends Controller
             'is_active' => 'boolean'
         ]);
 
+        $originalData = $course->toArray();
         $course->update($validated);
+
+        $this->logActivity(
+            "Updated Course",  // More descriptive action
+            "Course",
+            $course->id,
+            [
+                'original' => $originalData,
+                'changes' => $course->getChanges()
+            ]
+        );
 
         return redirect()->route('admin.courses.show', $course->id)
                         ->with('success', 'Course updated successfully');
@@ -115,20 +134,25 @@ class CourseController extends Controller
      */
     public function destroy($id)
     {
-        $course = Course::find($id);
+        $course = Course::findOrFail($id);
 
-        if (!$course) {
-            return redirect()->route('admin.courses.index')
-                            ->with('error', 'Course not found');
-        }
-
-        // Check if course has associated students
         if ($course->students()->exists()) {
             return redirect()->route('admin.courses.show', $course->id)
                             ->with('error', 'Cannot delete course. It has associated students.');
         }
 
+        $courseData = $course->toArray();
         $course->delete();
+
+        $this->logActivity(
+            "Deleted Course",  // More descriptive action
+            "Course",
+            $id,
+            [
+                'course_code' => $courseData['course_code'],
+                'course_name' => $courseData['course_name']
+            ]
+        );
 
         return redirect()->route('admin.courses.index')
                         ->with('success', 'Course deleted successfully');
@@ -151,17 +175,22 @@ class CourseController extends Controller
      */
     public function toggleStatus($id)
     {
-        $course = Course::find($id);
-
-        if (!$course) {
-            return redirect()->route('admin.courses.index')
-                            ->with('error', 'Course not found');
-        }
-
+        $course = Course::findOrFail($id);
+        $originalStatus = $course->is_active;
+        
         $course->update(['is_active' => !$course->is_active]);
 
-        $status = $course->is_active ? 'activated' : 'deactivated';
+        $this->logActivity(
+            $course->is_active ? "Activated Course" : "Deactivated Course",  // More descriptive action
+            "Course",
+            $course->id,
+            [
+                'previous_status' => $originalStatus,
+                'new_status' => $course->is_active
+            ]
+        );
 
+        $status = $course->is_active ? 'activated' : 'deactivated';
         return redirect()->route('admin.courses.show', $course->id)
                         ->with('success', "Course {$status} successfully");
     }

@@ -1,3 +1,5 @@
+@section('title', 'Instructors List')
+
 <x-app-layout>
 
     <div class="flex justify-end px-8 mt-4">

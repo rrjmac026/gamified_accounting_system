@@ -12,8 +12,9 @@
                     <div>
                         <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Badge Name</label>
                         <input type="text" name="name" required
-                               class="w-full rounded-lg shadow-sm bg-white dark:bg-[#595758] border-[#FFC8FB] 
-                                      focus:border-pink-400 focus:ring focus:ring-pink-200">
+                               class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
+                                        border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                        text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200">
                     </div>
 
                     <div>
@@ -29,23 +30,26 @@
                     <div>
                         <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Description</label>
                         <textarea name="description" rows="3" required
-                                  class="w-full rounded-lg shadow-sm bg-white dark:bg-[#595758] border-[#FFC8FB] 
-                                         focus:border-pink-400 focus:ring focus:ring-pink-200"></textarea>
+                                  class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
+                                        border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                        text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"></textarea>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">XP Required</label>
                             <input type="number" name="xp_threshold" required min="0"
-                                   class="w-full rounded-lg shadow-sm bg-white dark:bg-[#595758] border-[#FFC8FB] 
-                                          focus:border-pink-400 focus:ring focus:ring-pink-200">
+                                   class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
+                                        border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                        text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200">
                         </div>
 
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Badge Type</label>
                             <select name="criteria" required
-                                    class="w-full rounded-lg shadow-sm bg-white dark:bg-[#595758] border-[#FFC8FB] 
-                                           focus:border-pink-400 focus:ring focus:ring-pink-200">
+                                    class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
+                                        border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                        text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200">
                                 <option value="achievement">Achievement</option>
                                 <option value="skill">Skill</option>
                                 <option value="participation">Participation</option>

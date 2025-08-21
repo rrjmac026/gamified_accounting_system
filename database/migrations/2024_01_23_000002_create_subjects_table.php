@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('subject_code')->unique();
             $table->string('subject_name');
+            $table->unsignedTinyInteger('units')->default(3);
             $table->text('description');
             $table->foreignId('instructor_id')->constrained()->onDelete('cascade');
             $table->string('semester');

@@ -1,3 +1,5 @@
+@section('title', 'XP Transactions')
+
 <x-app-layout>
     <div class="flex justify-end px-8 mt-4">
         <a href="{{ route('admin.xp-transactions.create') }}" 
@@ -8,8 +10,8 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-[#FFF0FA] dark:bg-[#595758] overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 sm:rounded-lg">
-                <div class="p-6 text-gray-700 dark:text-[#FFC8FB]">
+            <div class="bg-[#FFF0FA] dark:from-[#4B4B4B] dark:to-[#3B3B3B] overflow-hidden shadow-lg sm:rounded-2xl p-8 border border-[#FFC8FB]/50">
+                <div class="p-6 text-gray-700">
                     @if (session('success'))
                         <div class="mb-4 px-4 py-2 bg-green-100 border border-green-200 text-green-700 rounded-md">
                             {{ session('success') }}
@@ -28,7 +30,7 @@
                                     <th class="py-3 px-6 text-left text-sm font-medium text-[#595758]">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-[#FFF6FD] dark:bg-[#595758] divide-y divide-[#FFC8FB]">
+                            <tbody class="bg-[#FFF6FD] divide-y divide-[#FFC8FB]">
                                 @forelse ($transactions as $transaction)
                                     <tr class="hover:bg-[#FFD9FF] dark:hover:bg-[#6a6869] transition-colors duration-150">
                                         <td class="py-4 px-6 text-sm">{{ $transaction->student->user->name ?? 'N/A' }}</td>

@@ -1,3 +1,5 @@
+@section('title', 'Subjects Management')
+
 <x-app-layout>
     
     <div class="flex justify-end px-8 mt-4">
@@ -23,6 +25,7 @@
                                 <tr>
                                     <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Code</th>
                                     <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Name</th>
+                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Units</th>
                                     <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Instructor</th>
                                     <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Semester</th>
                                     <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Year</th>
@@ -35,6 +38,7 @@
                                     <tr class="hover:bg-[#FFD9FF] transition-colors duration-150">
                                         <td class="py-4 px-6 text-sm text-gray-700">{{ $subject->subject_code }}</td>
                                         <td class="py-4 px-6 text-sm text-gray-700">{{ $subject->subject_name }}</td>
+                                        <td class="py-4 px-6 text-sm text-gray-700">{{ $subject->units }}</td>
                                         <td class="py-4 px-6 text-sm text-gray-700">{{ $subject->instructor?->user->name ?? 'N/A' }}</td>
                                         <td class="py-4 px-6 text-sm text-gray-700">{{ $subject->semester }}</td>
                                         <td class="py-4 px-6 text-sm text-gray-700">{{ $subject->academic_year }}</td>

@@ -40,7 +40,7 @@
                     @if (Route::has('login'))
                         <div class="flex items-center gap-4">
                             <!-- Dark Mode Toggle -->
-                            <button @click="$store.darkMode.toggle()" 
+                            <!-- <button @click="$store.darkMode.toggle()" 
                                     class="p-2 rounded-lg hover:bg-[#FFF0FA] dark:hover:bg-[#3D3D3D] transition-colors duration-200">
                                 <template x-if="$store.darkMode.on">
                                     <i class="fas fa-sun text-[#FF92C2] text-xl"></i>
@@ -48,7 +48,7 @@
                                 <template x-if="!$store.darkMode.on">
                                     <i class="fas fa-moon text-[#FF92C2] text-xl"></i>
                                 </template>
-                            </button>
+                            </button> -->
 
                             @auth
                                 @php

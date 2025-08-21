@@ -1,8 +1,10 @@
 <x-app-layout>
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-[#FFF0FA] dark:bg-[#595758] overflow-hidden shadow-lg sm:rounded-2xl p-8 border border-[#FFC8FB]/50">
-                <h2 class="text-2xl font-bold text-[#FF92C2] mb-6">Edit XP Transaction</h2>
+            <div class="bg-[#FFF0FA] dark:from-[#4B4B4B] dark:to-[#3B3B3B] 
+                        backdrop-blur-sm overflow-hidden shadow-lg sm:rounded-2xl p-8 border border-[#FFC8FB]/50">
+                
+                <h2 class="text-2xl font-bold text-[#FF92C2] dark:text-[#FF92C2] mb-6">Edit XP Transaction</h2>
 
                 <form action="{{ route('admin.xp-transactions.update', $xpTransaction) }}" method="POST" class="space-y-6">
                     @csrf
@@ -61,10 +63,11 @@
                     </div>
 
                     <div class="flex justify-end space-x-4">
-                        <a href="{{ route('admin.xp-transactions.index') }}" class="px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 transition-all duration-200">
-                            Cancel
-                        </a>
-                        <button type="submit" class="px-6 py-2 bg-[#FF92C2] hover:bg-[#ff6fb5] text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
+                        <a href="{{ route('admin.xp-transactions.index') }}" 
+                           class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancel</a>
+                        <button type="submit" 
+                                class="px-6 py-2 bg-gradient-to-r from-[#FF92C2] to-[#FF5DA2] hover:from-[#FF5DA2] hover:to-[#FF92C2] 
+                                       text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
                             Update Transaction
                         </button>
                     </div>

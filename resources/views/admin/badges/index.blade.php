@@ -1,3 +1,4 @@
+@section('title', 'Badge Page')
 <x-app-layout>
     <div class="flex justify-end px-8 mt-4">
         <a href="{{ route('admin.badges.create') }}" 

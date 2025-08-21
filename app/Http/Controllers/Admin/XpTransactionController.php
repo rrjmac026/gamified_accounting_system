@@ -7,9 +7,13 @@ use App\Http\Controllers\Controller;
 use App\Models\XpTransaction;
 use App\Models\Student;
 use Illuminate\Http\Request;
+use App\Models\ActivityLog;
+use App\Traits\Loggable;
 
 class XpTransactionController extends Controller
 {
+    use Loggable;
+
     public function index()
     {
         $transactions = XpTransaction::with('student')->latest('processed_at')->get();
@@ -53,6 +57,19 @@ class XpTransactionController extends Controller
                 $student->badges()->attach($badge->id, ['earned_at' => now()]);
             }
         }
+
+        // ✅ Log activity
+        $this->logActivity(
+            "Created XP Transaction",
+            "XpTransaction",
+            $transaction->id,
+            [
+                'student_id' => $student->id,
+                'amount' => $transaction->amount,
+                'type' => $transaction->type,
+                'source' => $transaction->source,
+            ]
+        );
 
         return redirect()->route('admin.xp-transactions.index')
             ->with('success', 'XP Transaction created successfully and badges updated!');
@@ -102,6 +119,25 @@ class XpTransactionController extends Controller
                 $student->badges()->attach($badge->id, ['earned_at' => now()]);
             }
         }
+
+        $this->logActivity(
+            "Updated XP Transaction",
+            "XpTransaction",
+            $xpTransaction->id,
+            [
+                'student_id' => $student->id,
+                'amount' => $validated['amount'],
+                'type' => $validated['type'],
+                'source' => $validated['source'],
+            ]
+        );
+        $this->logActivity(
+            "Deleted XP Transaction",
+            "XpTransaction",
+            $xpTransaction->id,
+            ['description' => $xpTransaction->description]
+        );
+
 
         return redirect()->route('admin.xp-transactions.index')
             ->with('success', 'XP Transaction updated successfully and badges updated!');

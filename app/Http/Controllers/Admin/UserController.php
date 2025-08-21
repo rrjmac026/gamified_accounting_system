@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller; 
+use App\Http\Controllers\Controller;
+use App\Traits\Loggable;
 
 use App\Models\User;
 use App\Models\Student;
@@ -18,6 +19,8 @@ use Carbon\Carbon;
 
 class UserController extends Controller
 {
+    use Loggable;
+
     /**
      * Display a listing of users with filtering and pagination
      */
@@ -117,7 +120,7 @@ class UserController extends Controller
                 'password' => Hash::make($request->password),
                 'role' => $request->role,
                 'permissions' => $request->permissions ?? [],
-                'is_active' => true, // Set default to true
+                'is_active' => true,
                 'email_verified_at' => now(),
             ]);
 
@@ -141,11 +144,17 @@ class UserController extends Controller
                 ]);
             }
 
-            // Log the activity
-            $this->logActivity('user_created', $user->id, [
-                'created_user' => $user->only(['id', 'name', 'email', 'role']),
-                'created_by' => Auth::id(),
-            ]);
+            // Log the activity (updated to match SubjectController pattern)
+            $this->logActivity(
+                "Created User",
+                "User",
+                $user->id,
+                [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role
+                ]
+            );
 
             if ($request->expectsJson()) {
                 return response()->json([
@@ -206,7 +215,7 @@ class UserController extends Controller
         $user = User::with(['student', 'instructor'])->findOrFail($id);
         $roles = ['student', 'instructor', 'admin'];
         
-        return view('admin.users.edit', compact('user', 'roles', 'adminLevels'));
+        return view('admin.users.edit', compact('user', 'roles'));
     }
 
     /**
@@ -254,6 +263,7 @@ class UserController extends Controller
         }
 
         try {
+            $user = User::findOrFail($id);
             $originalData = $user->toArray();
 
             // Update user data
@@ -324,12 +334,16 @@ class UserController extends Controller
                 }
             }
 
-            // Log the activity
-            $this->logActivity('user_updated', $user->id, [
-                'original_data' => $originalData,
-                'updated_data' => $user->fresh()->toArray(),
-                'updated_by' => Auth::id(),
-            ]);
+            // Log the activity (updated to match SubjectController pattern)
+            $this->logActivity(
+                "Updated User",
+                "User",
+                $user->id,
+                [
+                    'original' => $originalData,
+                    'changes' => $user->getChanges()
+                ]
+            );
 
             if ($request->expectsJson()) {
                 return response()->json([
@@ -375,15 +389,15 @@ class UserController extends Controller
 
         try {
             $userData = $user->toArray();
-
-            // Delete related records (cascading will handle most)
             $user->delete();
 
-            // Log the activity
-            $this->logActivity('user_deleted', null, [
-                'deleted_user' => $userData,
-                'deleted_by' => Auth::id(),
-            ]);
+            // Log the activity (updated to match SubjectController pattern)
+            $this->logActivity(
+                "Deleted User",
+                "User",
+                $user->id,
+                ['user_data' => $userData]
+            );
 
             if ($request->expectsJson()) {
                 return response()->json([
@@ -426,7 +440,7 @@ class UserController extends Controller
 
         $user->update(['is_active' => true]);
 
-        $this->logActivity('user_activated', $user->id, [
+        $this->logActivity('user_activated', 'User', $user->id, [
             'activated_by' => Auth::id(),
         ]);
 
@@ -471,7 +485,7 @@ class UserController extends Controller
 
         $user->update(['is_active' => false]);
 
-        $this->logActivity('user_deactivated', $user->id, [
+        $this->logActivity('user_deactivated', 'User', $user->id, [
             'deactivated_by' => Auth::id(),
         ]);
 
@@ -516,7 +530,7 @@ class UserController extends Controller
             'permissions' => $request->permissions ?? [],
         ]);
 
-        $this->logActivity('role_assigned', $user->id, [
+        $this->logActivity('role_assigned', 'User', $user->id, [
             'previous_role' => $originalRole,
             'new_role' => $request->role,
             'assigned_by' => Auth::id(),
@@ -570,7 +584,7 @@ class UserController extends Controller
             $user->update(['last_login_at' => now()]);
 
             // Log the activity
-            $this->logActivity('login', $user->id, [
+            $this->logActivity('login', 'User', $user->id, [
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
@@ -742,7 +756,7 @@ class UserController extends Controller
             }
 
             // Log bulk operation
-            $this->logActivity('bulk_operation', null, [
+            $this->logActivity('bulk_operation', 'User', null, [
                 'operation' => $request->operation,
                 'user_ids' => $userIds,
                 'affected_count' => $affectedCount,
@@ -761,24 +775,5 @@ class UserController extends Controller
                 'message' => 'Bulk operation failed: ' . $e->getMessage()
             ], 500);
         }
-    }
-
-    /**
-     * Log user activity
-     */
-    private function logActivity($action, $userId = null, $details = [])
-    {
-        ActivityLog::create([
-            'user_id' => Auth::id(),
-            'action' => $action,
-            'model_type' => 'User',
-            'model_id' => $userId,
-            'details' => array_merge($details, [
-                'timestamp' => now()->toISOString(),
-            ]),
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'performed_at' => now(),
-        ]);
     }
 }

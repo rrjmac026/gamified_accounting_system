@@ -15,7 +15,8 @@ class Subject extends Model
         'instructor_id',
         'semester',
         'academic_year',
-        'is_active'
+        'is_active',
+        'units',
     ];
 
     protected $casts = [

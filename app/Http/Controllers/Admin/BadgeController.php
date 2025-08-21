@@ -7,9 +7,12 @@ use App\Models\Badge;
 use App\Http\Requests\BadgeRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\Loggable;
 
 class BadgeController extends Controller
 {
+    use Loggable;
+
     /**
      * Display a listing of the resource.
      */
@@ -40,7 +43,18 @@ class BadgeController extends Controller
             $validated['icon_path'] = $path;
         }
 
-        Badge::create($validated);
+        $badge = Badge::create($validated);
+
+        $this->logActivity(
+            "Created Badge",
+            "Badge",
+            $badge->id,
+            [
+                'name' => $badge->name,
+                'type' => $badge->criteria,
+                'xp_threshold' => $badge->xp_threshold
+            ]
+        );
 
         return redirect()
             ->route('admin.badges.index')
@@ -69,6 +83,7 @@ class BadgeController extends Controller
     public function update(BadgeRequest $request, Badge $badge)
     {
         $validated = $request->validated();
+        $originalData = $badge->toArray();
         
         if ($request->hasFile('icon')) {
             // Delete old icon if exists
@@ -82,6 +97,16 @@ class BadgeController extends Controller
 
         $badge->update($validated);
 
+        $this->logActivity(
+            "Updated Badge",
+            "Badge",
+            $badge->id,
+            [
+                'original' => $originalData,
+                'changes' => $badge->getChanges()
+            ]
+        );
+
         return redirect()
             ->route('admin.badges.index')
             ->with('success', 'Badge updated successfully!');
@@ -92,7 +117,19 @@ class BadgeController extends Controller
      */
     public function destroy(Badge $badge)
     {
+        $badgeData = $badge->toArray();
         $badge->delete();
+
+        $this->logActivity(
+            "Deleted Badge",
+            "Badge",
+            $badge->id,
+            [
+                'name' => $badgeData['name'],
+                'type' => $badgeData['criteria'],
+                'xp_threshold' => $badgeData['xp_threshold']
+            ]
+        );
 
         return redirect()
             ->route('admin.badges.index')

@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller; 
-
 use App\Models\Instructor;
 use App\Models\User;
 use App\Models\Subject;
-use App\Models\ActivityLog;
+use App\Traits\Loggable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -15,6 +14,8 @@ use Illuminate\Validation\Rule;
 
 class InstructorManagementController extends Controller
 {
+    use Loggable;
+
     /**
      * Store a new instructor.
      */
@@ -51,15 +52,30 @@ class InstructorManagementController extends Controller
             'role'       => 'instructor'
         ]);
 
-        Instructor::create([
+        $instructor = Instructor::create([
             'user_id'        => $user->id,
             'employee_id'    => $request->employee_id,
             'department'     => $request->department,
             'specialization' => $request->specialization,
         ]);
 
-        $this->logActivity($user->id, 'Instructor account created');
+        $this->logActivity(
+            "Created Instructor",
+            "Instructor",
+            $instructor->id,
+            [
+                'name' => $user->name,
+                'email' => $user->email,
+                'department' => $instructor->department
+            ]
+        );
+
         return redirect()->route('admin.instructors.index')->with('success', 'Instructor created successfully.');
+    }
+
+    public function edit(Instructor $instructor)
+    {
+        return view('admin.instructors.edit', compact('instructor'));
     }
 
     /**
@@ -68,21 +84,56 @@ class InstructorManagementController extends Controller
     public function update(Request $request, Instructor $instructor)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email'      => [
+            'name'           => 'required|string|max:255',
+            'email'          => [
                 'required', 'email',
                 Rule::unique('users', 'email')->ignore($instructor->user_id)
             ],
+            'employee_id'    => 'required|string|max:50',
+            'department'     => 'required|string|max:255',
+            'specialization' => 'required|string|max:255',
+            'password'       => 'nullable|string|min:8',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
+        $originalData = $instructor->toArray();
+        
+        // update User
+        $instructor->user->update([
+            'name'  => $request->name,
+            'email' => $request->email,
+            // update password only if provided
+            'password' => $request->filled('password') ? Hash::make($request->password) : $instructor->user->password,
+        ]);
 
-        $instructor->user->update($request->only(['name','email']));
-        $this->logActivity($instructor->user_id, 'Instructor updated');
+        // update Instructor
+        $instructor->update([
+            'employee_id'    => $request->employee_id,
+            'department'     => $request->department,
+            'specialization' => $request->specialization,
+        ]);
 
-        return redirect()->route('admin.instructors.show', $instructor)->with('success', 'Instructor updated successfully.');
+        $this->logActivity(
+            "Updated Instructor",
+            "Instructor",
+            $instructor->id,
+            [
+                'original' => $originalData,
+                'changes' => $instructor->getChanges()
+            ]
+        );
+
+        return redirect()->route('admin.instructors.show', $instructor)
+            ->with('success', 'Instructor updated successfully.');
+    }
+
+
+    public function show(Instructor $instructor)
+    {
+        $subjects = Subject::all();
+        return view('admin.instructors.show', compact('instructor', 'subjects'));
     }
 
     /**
@@ -90,11 +141,19 @@ class InstructorManagementController extends Controller
      */
     public function destroy(Instructor $instructor)
     {
+        $instructorData = $instructor->toArray();
         $instructor->user->delete();
         $instructor->delete();
 
-        $this->logActivity(auth()->id(), 'Instructor deleted');
-        return redirect()->route('admin.instructors.index')->with('success', 'Instructor deleted successfully.');
+        $this->logActivity(
+            "Deleted Instructor",
+            "Instructor",
+            $instructor->id,
+            ['instructor_data' => $instructorData]
+        );
+
+        return redirect()->route('admin.instructors.index')
+            ->with('success', 'Instructor deleted successfully.');
     }
 
     /**
@@ -123,15 +182,5 @@ class InstructorManagementController extends Controller
         return back()->with('success', 'Subject removed successfully.');
     }
 
-    /**
-     * Log instructor activity.
-     */
-    protected function logActivity($userId, $action)
-    {
-        ActivityLog::create([
-            'user_id'    => $userId,
-            'action'     => $action,
-            'ip_address' => request()->ip()
-        ]);
-    }
+    
 }

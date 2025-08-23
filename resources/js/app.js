@@ -28,12 +28,21 @@ Alpine.store('darkMode', {
     }
 });
 
-// Initialize Sidebar store
-Alpine.store('sidebar', {
-    isOpen: window.innerWidth >= 1024, // Default open on desktop, closed on mobile
-    toggle() {
-        this.isOpen = !this.isOpen;
-        localStorage.setItem('sidebar', this.isOpen);
+// Initialize sidebar store
+document.addEventListener('alpine:init', () => {
+    Alpine.store('sidebar', {
+        isOpen: window.innerWidth >= 1024, // Default open on desktop, closed on mobile
+        toggle() {
+            this.isOpen = !this.isOpen;
+            localStorage.setItem('sidebar', this.isOpen);
+        }
+    });
+});
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    if (window.innerWidth >= 1024) {
+        Alpine.store('sidebar').isOpen = true;
     }
 });
 

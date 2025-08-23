@@ -1,8 +1,8 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-[#FFF0FA] overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 sm:rounded-lg">
-                <div class="p-6 text-gray-700">
+    <div class="py-6 sm:py-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-[#FFF0FA] overflow-hidden shadow-lg rounded-lg sm:rounded-2xl">
+                <div class="p-4 sm:p-6 text-gray-700">
                     <h2 class="text-2xl font-bold text-[#FF92C2] mb-6">Performance Log Details</h2>
 
                     @if (session('success'))
@@ -11,8 +11,8 @@
                         </div>
                     @endif
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                        <div class="bg-white p-4 sm:p-6 rounded-lg shadow">
                             <h3 class="text-lg font-semibold text-[#FF92C2] mb-4">Basic Information</h3>
                             <dl class="space-y-2">
                                 <div class="flex justify-between">
@@ -30,7 +30,7 @@
                             </dl>
                         </div>
 
-                        <div class="bg-white p-6 rounded-lg shadow">
+                        <div class="bg-white p-4 sm:p-6 rounded-lg shadow">
                             <h3 class="text-lg font-semibold text-[#FF92C2] mb-4">Performance Details</h3>
                             <dl class="space-y-2">
                                 <div class="flex justify-between">
@@ -49,9 +49,11 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 flex justify-end space-x-4">
+                    <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3">
                         <a href="{{ route('admin.performance_logs.index') }}" 
-                           class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Back</a>
+                           class="w-full sm:w-auto px-4 sm:px-6 py-2 text-center bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                            Back
+                        </a>
                     </div>
                 </div>
             </div>

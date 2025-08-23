@@ -1,13 +1,11 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-[#FFF0FA] dark:from-[#4B4B4B] dark:to-[#3B3B3B] 
-                        backdrop-blur-sm overflow-hidden shadow-lg sm:rounded-2xl p-8 border border-[#FFC8FB]/50">
-                
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-[#FF92C2] dark:text-[#FF92C2]">Badge Details</h2>
+    <div class="py-6 sm:py-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-[#FFF0FA] backdrop-blur-sm overflow-hidden shadow-lg rounded-lg sm:rounded-2xl p-4 sm:p-8 border border-[#FFC8FB]/50">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
+                    <h2 class="text-xl sm:text-2xl font-bold text-[#FF92C2]">Badge Details</h2>
                     <a href="{{ route('admin.badges.index') }}" 
-                       class="px-4 py-2 bg-[#FF92C2] text-white rounded-lg hover:bg-[#ff6fb5]">
+                       class="w-full sm:w-auto px-4 py-2 text-center bg-[#FF92C2] text-white rounded-lg hover:bg-[#ff6fb5]">
                         <i class="fas fa-arrow-left mr-2"></i>Back to Badges
                     </a>
                 </div>
@@ -51,3 +49,4 @@
         </div>
     </div>
 </x-app-layout>
+

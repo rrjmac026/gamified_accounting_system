@@ -1,19 +1,17 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-[#FFF0FA] overflow-hidden shadow-lg sm:rounded-lg">
-                <div class="p-6 text-gray-700">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-[#FF92C2]">Student Details</h2>
-                        <div class="flex space-x-4">
-                            <a href="{{ route('admin.student.edit', $student) }}" 
-                               class="px-4 py-2 bg-[#FF92C2] text-white rounded-lg hover:bg-[#ff6fb5]">
-                                Edit Student
-                            </a>
-                        </div>
+    <div class="py-6 sm:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-[#FFF0FA] overflow-hidden shadow-lg rounded-xl sm:rounded-2xl">
+                <div class="p-4 sm:p-6 text-gray-700">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
+                        <h2 class="text-xl sm:text-2xl font-bold text-[#FF92C2]">Student Details</h2>
+                        <a href="{{ route('admin.student.edit', $student) }}" 
+                           class="w-full sm:w-auto px-4 py-2 bg-[#FF92C2] text-white rounded-lg hover:bg-[#ff6fb5] text-center">
+                            Edit Student
+                        </a>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         <div class="bg-white p-6 rounded-lg shadow">
                             <h3 class="text-lg font-semibold text-[#FF92C2] mb-4">Basic Information</h3>
                             <dl class="space-y-2">
@@ -120,11 +118,12 @@
                                 </div>
                             @else
                                 <p class="text-gray-500">No subjects enrolled.</p>
-                            @endif
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</x-app-layout>
     </div>
 </x-app-layout>

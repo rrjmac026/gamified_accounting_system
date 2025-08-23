@@ -1,9 +1,10 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+
+//Admin Controllers
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\AdminController;
-
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\XpTransactionController;
@@ -20,6 +21,9 @@ use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\PerformanceLogController;
 use App\Http\Controllers\Admin\LeaderboardController;
 use App\Http\Controllers\Admin\BadgeController;
+
+//Student Controllers
+use App\Http\Controllers\Students\StudentController;
 
 
 Route::get('/', function () {
@@ -81,6 +85,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Reports routes
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/students', [ReportController::class, 'generateStudentReport'])->name('reports.students');
+    Route::get('/reports/students/export', [ReportController::class, 'exportStudentReport'])->name('reports.students.export');
     Route::get('/reports/instructors', [ReportController::class, 'generateInstructorReport'])->name('reports.instructors');
     Route::get('/reports/tasks', [ReportController::class, 'generateTaskReport'])->name('reports.tasks');
     Route::get('/reports/activities', [ReportController::class, 'generateActivityReport'])->name('reports.activities');

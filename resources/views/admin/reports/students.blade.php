@@ -4,9 +4,19 @@
             <div class="bg-[#FFF0FA] dark:bg-[#595758] overflow-hidden shadow-lg sm:rounded-2xl p-8">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-[#FF92C2] dark:text-[#FFC8FB]">Student Performance Report</h2>
-                    <button onclick="window.print()" class="px-4 py-2 bg-[#FF92C2] text-white rounded-lg hover:bg-[#ff6fb5]">
-                        <i class="fas fa-print mr-2"></i>Print Report
-                    </button>
+                    <div class="flex space-x-3">
+                        <button onclick="window.print()" class="px-4 py-2 bg-[#FF92C2] text-white rounded-lg hover:bg-[#ff6fb5] flex items-center">
+                            <i class="fas fa-print mr-2"></i>Print
+                        </button>
+                        <a href="{{ route('admin.reports.students.export', ['format' => 'pdf'] + request()->all()) }}" 
+                           class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center">
+                            <i class="fas fa-file-pdf mr-2"></i>PDF
+                        </a>
+                        <a href="{{ route('admin.reports.students.export', ['format' => 'excel'] + request()->all()) }}" 
+                           class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center">
+                            <i class="fas fa-file-excel mr-2"></i>Excel
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Statistics Summary -->

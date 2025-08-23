@@ -23,12 +23,11 @@
         <!-- Navigation -->
         <nav class="fixed w-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border-b border-gray-200/20 dark:border-gray-700/20 z-50 shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-20">
+                <div class="flex justify-between h-16 sm:h-20">
                     <!-- Logo -->
                     <div class="flex items-center">
-                        <div class="flex items-center gap-4">
-                            <!-- Same GAS Logo as login page -->
-                            <div class="w-12 h-12 bg-gradient-to-br from-[#FF92C2] to-[#FFC8FB] rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300 relative">
+                        <div class="flex items-center gap-2 sm:gap-4">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#FF92C2] to-[#FFC8FB] rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300 relative">
                                 <div class="text-white font-bold text-lg tracking-wide">
                                     <span class="block text-xl leading-none">G</span>
                                     <div class="flex text-xs -mt-0.5">
@@ -41,14 +40,15 @@
                                 </div>
                             </div>
                             <div>
-                                <span class="text-2xl font-bold bg-gradient-to-r from-[#FF92C2] to-[#FFC8FB] bg-clip-text text-transparent">GAS</span>
-                                <div class="text-sm text-gray-600 dark:text-gray-300 -mt-1">Gamified Accounting</div>
+                                <span class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#FF92C2] to-[#FFC8FB] bg-clip-text text-transparent">GAS</span>
+                                <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 -mt-1">Gamified Accounting</div>
                             </div>
                         </div>
                     </div>                    
+
                     <!-- Auth Buttons -->
                     @if (Route::has('login'))
-                        <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2 sm:gap-4">
                             @auth
                                 @php
                                     $role = Auth::user()->role ?? null;
@@ -82,7 +82,7 @@
         </nav>
 
         <!-- Hero Section -->
-        <div class="relative pt-32 pb-20 overflow-hidden">
+        <div class="relative pt-24 sm:pt-32 pb-16 sm:pb-20 overflow-hidden">
             <!-- Animated Background Elements -->
             <div class="absolute inset-0 z-0">
                 <div class="absolute top-20 right-20 w-32 h-32 bg-[#FFC8FB]/30 rounded-full mix-blend-multiply filter blur-xl animate-float"></div>
@@ -99,7 +99,7 @@
                             <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Revolutionary Learning Experience</span>
                         </div>
                         
-                        <h1 class="text-5xl md:text-7xl font-bold mb-8 leading-tight">
+                        <h1 class="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 sm:mb-8 leading-tight">
                             <span class="bg-clip-text text-transparent bg-gradient-to-r from-[#FF92C2] to-[#FFC8FB] block">
                                 Master Accounting
                             </span>
@@ -108,7 +108,7 @@
                             </span>
                         </h1>
                         
-                        <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
+                        <p class="text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed">
                             Transform your learning journey with our gamified accounting system. Earn XP, unlock achievements, and master financial concepts through interactive challenges designed for the modern learner.
                         </p>
                     </div>
@@ -147,7 +147,7 @@
         </div>
 
         <!-- Features Section -->
-        <div id="features" class="py-20 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+        <div id="features" class="py-16 sm:py-20 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
                     <h2 class="text-4xl font-bold bg-gradient-to-r from-[#FF92C2] to-[#FFC8FB] bg-clip-text text-transparent mb-4">
@@ -158,7 +158,7 @@
                     </p>
                 </div>
 
-                <div class="grid md:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                     <!-- Feature 1 -->
                     <div class="group bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/50 hover:border-[#FFC8FB]/30">
                         <div class="w-16 h-16 bg-gradient-to-br from-[#FF92C2] to-[#FFC8FB] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
@@ -262,6 +262,22 @@
             .animate-float { animation: float 6s ease-in-out infinite; }
             .animate-float-delay { animation: float-delay 4s ease-in-out infinite 2s; }
             .animate-float-slow { animation: float-slow 8s ease-in-out infinite 1s; }
+
+            /* Additional responsive styles */
+            @media (max-width: 640px) {
+                .container {
+                    padding-left: 1rem;
+                    padding-right: 1rem;
+                }
+                
+                .hero-text {
+                    font-size: clamp(2rem, 5vw, 4rem);
+                }
+                
+                .feature-card {
+                    padding: 1.5rem;
+                }
+            }
         </style>
     </body>
 </html>

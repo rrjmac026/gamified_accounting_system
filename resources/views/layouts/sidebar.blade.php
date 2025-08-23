@@ -1,22 +1,27 @@
+<!-- sidebar.blade.php -->
 <div x-data class="h-full">
-    <!-- Backdrop -->
-    <div x-show="$store.sidebar.isOpen" x-cloak
-        class="fixed inset-0 z-40 backdrop-blur-sm lg:hidden"
+    <!-- Backdrop for mobile -->
+    <div x-show="$store.sidebar.isOpen && window.innerWidth < 1024" x-cloak
+        class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
         @click="$store.sidebar.toggle()">
     </div>
 
     <!-- Sidebar -->
     <aside x-show="$store.sidebar.isOpen" x-cloak
-        x-transition:enter="transform transition-transform duration-300"
+        x-transition:enter="transform transition-transform duration-300 ease-in-out"
         x-transition:enter-start="-translate-x-full"
         x-transition:enter-end="translate-x-0"
-        x-transition:leave="transform transition-transform duration-300"
+        x-transition:leave="transform transition-transform duration-300 ease-in-out"
         x-transition:leave-start="translate-x-0"
         x-transition:leave-end="-translate-x-full"
-        class="fixed top-16 left-0 h-[calc(100vh-4rem)] w-72 border-r shadow-xl z-40 flex flex-col">
+        :class="{
+            'fixed': window.innerWidth < 1024,
+            'absolute lg:fixed': window.innerWidth >= 1024
+        }"
+        class="top-16 left-0 h-[calc(100vh-4rem)] w-72 max-w-[85vw] sm:max-w-72 border-r shadow-xl z-40 flex flex-col">
         
         <!-- Main content wrapper with scrolling -->
-        <div class="flex-1 overflow-y-auto">
+        <div class="flex-1 overflow-y-auto overflow-x-hidden">
             @if(auth()->user()->role === 'student')
                 @include('layouts.sidebar-student')
             @elseif(auth()->user()->role === 'instructor')
@@ -27,11 +32,11 @@
         </div>
 
         <!-- Footer (not affected by scroll) -->
-        <div class="p-4 flex-shrink-0">
-            <div class="p-4 rounded-xl shadow-lg bg-[#FFEEF2]">
+        <div class="p-3 sm:p-4 flex-shrink-0">
+            <div class="p-3 sm:p-4 rounded-xl shadow-lg bg-[#FFEEF2]">
                 <div class="flex items-center justify-center gap-2 text-[#FF92C2]">
-                    <i class="fas fa-calculator"></i>
-                    <span class="text-sm font-medium">GAS v1.0</span>
+                    <i class="fas fa-calculator text-sm"></i>
+                    <span class="text-xs sm:text-sm font-medium">GAS v1.0</span>
                 </div>
             </div>
         </div>

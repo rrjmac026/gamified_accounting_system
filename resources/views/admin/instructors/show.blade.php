@@ -1,12 +1,14 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-[#FFF0FA] dark:from-[#4B4B4B] dark:to-[#3B3B3B] 
-                        backdrop-blur-sm overflow-hidden shadow-lg sm:rounded-2xl p-8 border border-[#FFC8FB]/50">
-                
-                <h2 class="text-2xl font-bold text-[#FF92C2] dark:text-[#FF92C2] mb-6">Instructor Details</h2>
+    <div class="py-6 sm:py-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-[#FFF0FA] backdrop-blur-sm overflow-hidden shadow-lg rounded-lg sm:rounded-2xl p-4 sm:p-8 border border-[#FFC8FB]/50">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6">
+                    <h2 class="text-xl sm:text-2xl font-bold text-[#FF92C2] mb-4 sm:mb-0">Instructor Details</h2>
+                    <div class="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
+                    </div>
+                </div>
 
-                <div class="space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                         <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Name</label>
                         <div class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
@@ -47,23 +49,23 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="flex justify-end gap-4">
-                        <a href="{{ route('admin.instructors.edit', $instructor) }}" 
-                           class="px-6 py-2 bg-gradient-to-r from-[#FF92C2] to-[#FF5DA2] hover:from-[#FF5DA2] hover:to-[#FF92C2] 
-                                  text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
-                            Edit
-                        </a>
-                        <form action="{{ route('admin.instructors.destroy', $instructor) }}" method="POST" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" 
-                                    class="px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-                                    onclick="return confirm('Are you sure?')">
-                                Delete
-                            </button>
-                        </form>
-                    </div>
+                <div class="flex flex-col sm:flex-row justify-end gap-3 mt-6">
+                    <a href="{{ route('admin.instructors.edit', $instructor) }}" 
+                       class="px-6 py-2 bg-gradient-to-r from-[#FF92C2] to-[#FF5DA2] hover:from-[#FF5DA2] hover:to-[#FF92C2] 
+                              text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
+                        Edit
+                    </a>
+                    <form action="{{ route('admin.instructors.destroy', $instructor) }}" method="POST" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" 
+                                class="px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                                onclick="return confirm('Are you sure?')">
+                            Delete
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

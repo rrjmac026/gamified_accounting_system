@@ -1,15 +1,16 @@
 @section('title', 'Course Page')
 <x-app-layout>
-    <div class="flex justify-end px-8 mt-4">
-        <a href="{{ route('admin.courses.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#FF92C2] hover:bg-[#ff6fb5] rounded-lg shadow-sm hover:shadow transition-all duration-200">
+    <div class="flex justify-end px-4 sm:px-8 mt-4">
+        <a href="{{ route('admin.courses.create') }}" 
+           class="w-full sm:w-auto inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#FF92C2] hover:bg-[#ff6fb5] rounded-lg shadow-sm hover:shadow transition-all duration-200">
             <i class="fas fa-plus mr-2"></i>Add Course
         </a>
     </div>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-[#FFF0FA] overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 sm:rounded-lg">
-                <div class="p-6 text-gray-700">
+    <div class="py-6 sm:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-[#FFF0FA] overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 rounded-lg sm:rounded-2xl">
+                <div class="p-4 sm:p-6 text-gray-700">
                     @if (session('success'))
                         <div class="mb-4 px-4 py-2 bg-green-100 border border-green-200 text-green-700 rounded-md">
                             {{ session('success') }}
@@ -20,31 +21,29 @@
                         <table class="min-w-full table-auto">
                             <thead class="bg-[#FFC8FB]">
                                 <tr>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Course Code</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Name</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Department</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Duration</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Students</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Status</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Actions</th>
+                                    <th class="py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Course Code</th>
+                                    <th class="py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Name</th>
+                                    <th class="hidden md:table-cell py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Department</th>
+                                    <th class="hidden lg:table-cell py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Duration</th>
+                                    <th class="py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Status</th>
+                                    <th class="py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-[#FFF6FD] divide-y divide-[#FFC8FB]">
                                 @forelse ($courses as $course)
                                     <tr class="hover:bg-[#FFD9FF] transition-colors duration-150">
-                                        <td class="py-4 px-6 text-sm text-gray-700">{{ $course->course_code }}</td>
-                                        <td class="py-4 px-6 text-sm text-gray-700">{{ $course->course_name }}</td>
-                                        <td class="py-4 px-6 text-sm text-gray-700">{{ $course->department }}</td>
-                                        <td class="py-4 px-6 text-sm text-gray-700">{{ $course->duration_years }} years</td>
-                                        <td class="py-4 px-6 text-sm text-gray-700">{{ $course->students_count ?? 0 }}</td>
-                                        <td class="py-4 px-6 text-sm">
+                                        <td class="py-4 px-3 sm:px-6 text-sm text-gray-700">{{ $course->course_code }}</td>
+                                        <td class="py-4 px-3 sm:px-6 text-sm text-gray-700">{{ $course->course_name }}</td>
+                                        <td class="hidden md:table-cell py-4 px-3 sm:px-6 text-sm text-gray-700">{{ $course->department }}</td>
+                                        <td class="hidden lg:table-cell py-4 px-3 sm:px-6 text-sm text-gray-700">{{ $course->duration_years }} years</td>
+                                        <td class="py-4 px-3 sm:px-6 text-sm">
                                             @if($course->is_active)
                                                 <span class="text-green-600 font-medium">Active</span>
                                             @else
                                                 <span class="text-red-600 font-medium">Inactive</span>
                                             @endif
                                         </td>
-                                        <td class="py-4 px-6 text-sm space-x-2">
+                                        <td class="py-4 px-3 sm:px-6 text-sm space-x-2">
                                             <a href="{{ route('admin.courses.show', $course) }}" class="text-[#FF6FB5] hover:text-[#e8559d]">
                                                 <i class="fas fa-eye"></i>
                                             </a>
@@ -64,7 +63,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="py-4 px-6 text-sm text-center text-gray-600">
+                                        <td colspan="6" class="py-4 px-3 sm:px-6 text-sm text-center text-gray-600">
                                             No courses found
                                         </td>
                                     </tr>
@@ -72,11 +71,6 @@
                             </tbody>
                         </table>
                     </div>
-                    @if($courses->hasPages())
-                        <div class="mt-4">
-                            {{ $courses->links() }}
-                        </div>
-                    @endif
                 </div>
             </div>
         </div>
@@ -91,3 +85,4 @@
         }
     </script>
 </x-app-layout>
+

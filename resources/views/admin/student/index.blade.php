@@ -1,14 +1,13 @@
-
 @section('title', 'Student Management')
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 sm:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {{-- Add Student & Import Section --}}
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-semibold text-[#FF92C2]">Student Management</h2>
-                <div class="flex gap-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-4">
+                <h2 class="text-lg sm:text-xl font-semibold text-[#FF92C2]">Student Management</h2>
+                <div class="w-full sm:w-auto">
                     <a href="{{ route('admin.student.create') }}" 
-                       class="px-6 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-colors duration-200">
+                       class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center">
                         <i class="fas fa-plus mr-2"></i>
                         Add Student
                     </a>
@@ -65,28 +64,23 @@
                     @endif
 
                     {{-- Import Form --}}
-                    <div class="mb-6 p-4 bg-white rounded-lg border border-pink-200">
-                        <h3 class="text-lg font-medium text-gray-900 mb-3">Import Students</h3>
+                    <div class="mb-4 sm:mb-6 p-4 bg-white rounded-lg border border-pink-200">
+                        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3">Import Students</h3>
                         <form action="{{ route('admin.student.import') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            <div class="flex items-center gap-4">
-                                <div class="flex-1">
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                <div class="w-full">
                                     <label for="file" class="block text-sm font-medium text-gray-700 mb-1">
                                         Select CSV File
                                     </label>
-                                    <input type="file" 
-                                           name="file" 
-                                           id="file"
-                                           accept=".csv,.xlsx,.xls"
+                                    <input type="file" name="file" id="file" accept=".csv,.xlsx,.xls"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                                            required>
                                 </div>
-                                <div class="mt-6">
-                                    <button type="submit" 
-                                            class="px-6 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-colors duration-200">
-                                        Import Students
-                                    </button>
-                                </div>
+                                <button type="submit" 
+                                        class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-colors duration-200">
+                                    Import Students
+                                </button>
                             </div>
                             <p class="mt-2 text-xs text-gray-500">
                                 Accepted formats: CSV, XLSX, XLS. Expected columns: name, email, course, year_level, section, password
@@ -95,85 +89,87 @@
                     </div>
 
                     {{-- Students Table --}}
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full table-auto">
-                            <thead class="bg-[#FFC8FB]">
-                                <tr>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Name</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Email</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Student ID</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Course</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Year Level</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Section</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Status</th>
-                                    <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-[#FFF6FD] divide-y divide-[#FFC8FB]">
-                                @forelse ($students as $student)
-                                    <tr class="hover:bg-[#FFD9FF] transition-colors duration-150">
-                                        <td class="py-4 px-6 text-sm text-gray-700">
-                                            {{ $student->user->name ?? 'N/A' }}
-                                        </td>
-                                        <td class="py-4 px-6 text-sm text-gray-700">
-                                            {{ $student->user->email ?? 'N/A' }}
-                                        </td>
-                                        <td class="py-4 px-6 text-sm text-gray-700">
-                                            {{ $student->user->id_number ?? $student->id }}
-                                        </td>
-                                        <td class="py-4 px-6 text-sm text-gray-700">
-                                            {{ $student->course->course_name ?? '-' }}
-                                        </td>
-                                        <td class="py-4 px-6 text-sm text-gray-700">
-                                            {{ $student->year_level ?? '-' }}
-                                        </td>
-                                        <td class="py-4 px-6 text-sm text-gray-700">
-                                            {{ $student->section ?? '-' }}
-                                        </td>
-                                        <td class="py-4 px-6 text-sm text-gray-700">
-                                            @if($student->user && $student->user->is_active)
-                                                <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                                    Active
-                                                </span>
-                                            @else
-                                                <span class="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
-                                                    Inactive
-                                                </span>
-                                            @endif
-                                        </td>
-                                        <td class="py-4 px-6 text-sm space-x-2">
-                                            <a href="{{ route('admin.student.show', $student->id) }}" class="text-[#FF92C2] hover:text-[#ff6fb5]">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('admin.student.edit', $student->id) }}" class="text-[#FF92C2] hover:text-[#ff6fb5]">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <button type="button" 
-                                                onclick="return confirmAction('Are you sure you want to delete this student?', 'delete-student-{{ $student->id }}')"
-                                                class="text-red-500 hover:text-red-700 transition-colors duration-150">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                            <form id="delete-student-{{ $student->id }}" action="{{ route('admin.student.destroy', $student->id) }}" method="POST" class="hidden">
-                                                @csrf
-                                                @method('DELETE')
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @empty
+                    <div class="overflow-x-auto bg-white rounded-lg shadow">
+                        <div class="inline-block min-w-full align-middle">
+                            <table class="min-w-full divide-y divide-[#FFC8FB]">
+                                <thead class="bg-[#FFC8FB]">
                                     <tr>
-                                        <td colspan="7" class="py-8 px-6 text-sm text-center text-gray-600">
-                                            <div class="flex flex-col items-center">
-                                                <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                                                </svg>
-                                                <p class="text-lg font-medium text-gray-900 mb-1">No students found</p>
-                                                <p class="text-gray-600">Import a CSV or Excel file to get started</p>
-                                            </div>
-                                        </td>
+                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Name</th>
+                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Email</th>
+                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Student ID</th>
+                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Course</th>
+                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Year Level</th>
+                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Section</th>
+                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Status</th>
+                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Actions</th>
                                     </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody class="bg-[#FFF6FD] divide-y divide-[#FFC8FB]">
+                                    @forelse ($students as $student)
+                                        <tr class="hover:bg-[#FFD9FF] transition-colors duration-150">
+                                            <td class="py-4 px-6 text-sm text-gray-700">
+                                                {{ $student->user->name ?? 'N/A' }}
+                                            </td>
+                                            <td class="py-4 px-6 text-sm text-gray-700">
+                                                {{ $student->user->email ?? 'N/A' }}
+                                            </td>
+                                            <td class="py-4 px-6 text-sm text-gray-700">
+                                                {{ $student->user->id_number ?? $student->id }}
+                                            </td>
+                                            <td class="py-4 px-6 text-sm text-gray-700">
+                                                {{ $student->course->course_name ?? '-' }}
+                                            </td>
+                                            <td class="py-4 px-6 text-sm text-gray-700">
+                                                {{ $student->year_level ?? '-' }}
+                                            </td>
+                                            <td class="py-4 px-6 text-sm text-gray-700">
+                                                {{ $student->section ?? '-' }}
+                                            </td>
+                                            <td class="py-4 px-6 text-sm text-gray-700">
+                                                @if($student->user && $student->user->is_active)
+                                                    <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                                                        Active
+                                                    </span>
+                                                @else
+                                                    <span class="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                                                        Inactive
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td class="py-4 px-6 text-sm space-x-2">
+                                                <a href="{{ route('admin.student.show', $student->id) }}" class="text-[#FF92C2] hover:text-[#ff6fb5]">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route('admin.student.edit', $student->id) }}" class="text-[#FF92C2] hover:text-[#ff6fb5]">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" 
+                                                    onclick="return confirmAction('Are you sure you want to delete this student?', 'delete-student-{{ $student->id }}')"
+                                                    class="text-red-500 hover:text-red-700 transition-colors duration-150">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                                <form id="delete-student-{{ $student->id }}" action="{{ route('admin.student.destroy', $student->id) }}" method="POST" class="hidden">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="py-8 px-6 text-sm text-center text-gray-600">
+                                                <div class="flex flex-col items-center">
+                                                    <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                                    </svg>
+                                                    <p class="text-lg font-medium text-gray-900 mb-1">No students found</p>
+                                                    <p class="text-gray-600">Import a CSV or Excel file to get started</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     {{-- Pagination --}}

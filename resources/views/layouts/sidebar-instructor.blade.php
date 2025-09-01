@@ -5,7 +5,7 @@
             Menu
         </span>
         <div class="mt-2 space-y-1">
-            <a href="{{ route('instructor.dashboard') }}" 
+            <a href="{{ route('instructors.dashboard') }}" 
                class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 
                {{ request()->routeIs('instructor.dashboard') ? 'bg-[#FFC8FB] text-[#595758]' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFEEF2]' }}">
                 <i class="fas fa-home w-5 h-5"></i>
@@ -20,9 +20,9 @@
             Classes
         </span>
         <div class="mt-2 space-y-1">
-            <a href="#" 
+            <a href="{{ route('instructors.tasks.index') }}" 
                class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 
-               {{ request()->routeIs('instructor.classes') ? 'bg-[#FFC8FB] text-[#595758]' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFEEF2]' }}">
+               {{ request()->routeIs('instructor.tasks.*') ? 'bg-[#FFC8FB] text-[#595758]' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFEEF2]' }}">
                 <i class="fas fa-chalkboard w-5 h-5"></i>
                 <span>My Classes</span>
             </a>
@@ -35,17 +35,11 @@
             Assessment
         </span>
         <div class="mt-2 space-y-1">
-            <a href="#" 
+            <a href="{{ route('instructors.tasks.index') }}" 
                class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 
-               {{ request()->routeIs('instructor.quizzes') ? 'bg-[#FFC8FB] text-[#595758]' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFEEF2]' }}">
+               {{ request()->routeIs('instructor.tasks.*') ? 'bg-[#FFC8FB] text-[#595758]' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFEEF2]' }}">
                 <i class="fas fa-tasks w-5 h-5"></i>
-                <span>Quizzes</span>
-            </a>
-            <a href="#" 
-               class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 
-               {{ request()->routeIs('instructor.exercises') ? 'bg-[#FFC8FB] text-[#595758]' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFEEF2]' }}">
-                <i class="fas fa-pencil-alt w-5 h-5"></i>
-                <span>Exercises</span>
+                <span>Task</span>
             </a>
         </div>
     </div>
@@ -56,9 +50,9 @@
             Reports
         </span>
         <div class="mt-2 space-y-1">
-            <a href="#" 
+            <a href="{{ route('instructors.task-submissions.index') }}" 
                class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 
-               {{ request()->routeIs('instructor.progress') ? 'bg-[#FFC8FB] text-[#595758]' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFEEF2]' }}">
+               {{ request()->routeIs('instructor.task-submissions.*') ? 'bg-[#FFC8FB] text-[#595758]' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFEEF2]' }}">
                 <i class="fas fa-chart-line w-5 h-5"></i>
                 <span>Student Progress</span>
             </a>

@@ -3,12 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Student extends Model
 {
 
+    use HasFactory;
+    
     protected $fillable = [
         'user_id',
+        'student_number',
         'course_id',
         'year_level',
         'section',
@@ -81,5 +85,10 @@ class Student extends Model
     public function course()
     {
         return $this->belongsTo(Course::class, 'course_id');
+    }
+
+    public function sections()
+    {
+        return $this->belongsToMany(Section::class, 'section_student');
     }
 }

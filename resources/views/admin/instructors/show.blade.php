@@ -50,6 +50,22 @@
                         </div>
                     </div>
                 </div>
+                <div class="mt-8">
+                    <h3 class="text-lg font-bold text-[#FF92C2] mb-4">Subjects</h3>
+                    
+                    @if($instructor->subjects->isEmpty())
+                        <p class="text-gray-600">No subjects assigned to this instructor.</p>
+                    @else
+                        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            @foreach($instructor->subjects as $subject)
+                                <li class="px-4 py-2 bg-white border border-[#FFC8FB] rounded-lg shadow-sm">
+                                    <span class="font-semibold">{{ $subject->subject_code }}</span> - 
+                                    {{ $subject->subject_name }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
 
                 <div class="flex flex-col sm:flex-row justify-end gap-3 mt-6">
                     <a href="{{ route('admin.instructors.edit', $instructor) }}" 

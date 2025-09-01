@@ -25,7 +25,6 @@
                                         <th class="py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Code</th>
                                         <th class="hidden sm:table-cell py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Name</th>
                                         <th class="hidden md:table-cell py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Units</th>
-                                        <th class="hidden lg:table-cell py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Instructor</th>
                                         <th class="py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Semester</th>
                                         <th class="py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Year</th>
                                         <th class="py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Status</th>
@@ -38,7 +37,6 @@
                                             <td class="py-4 px-3 sm:px-6 text-sm text-gray-700">{{ $subject->subject_code }}</td>
                                             <td class="hidden sm:table-cell py-4 px-3 sm:px-6 text-sm text-gray-700">{{ $subject->subject_name }}</td>
                                             <td class="hidden md:table-cell py-4 px-3 sm:px-6 text-sm text-gray-700">{{ $subject->units }}</td>
-                                            <td class="hidden lg:table-cell py-4 px-3 sm:px-6 text-sm text-gray-700">{{ $subject->instructor?->user->name ?? 'N/A' }}</td>
                                             <td class="py-4 px-3 sm:px-6 text-sm text-gray-700">{{ $subject->semester }}</td>
                                             <td class="py-4 px-3 sm:px-6 text-sm text-gray-700">{{ $subject->academic_year }}</td>
                                             <td class="py-4 px-3 sm:px-6 text-sm">
@@ -49,6 +47,9 @@
                                                 @endif
                                             </td>
                                             <td class="py-4 px-3 sm:px-6 text-sm space-x-2">
+                                                <a href="{{ route('admin.subjects.show', $subject->id) }}" class="text-[#FF92C2] hover:text-[#ff6fb5]">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
                                                 <a href="{{ route('admin.subjects.edit', $subject) }}" 
                                                    class="text-[#FF6FB5] hover:text-[#e8559d]">
                                                     <i class="fas fa-edit"></i>

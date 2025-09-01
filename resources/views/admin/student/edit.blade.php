@@ -8,23 +8,61 @@
                     @csrf
                     @method('PUT')
 
-                    {{-- Course Selection --}}
-                    <div>
-                        <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Course</label>
-                        <select name="course_id" required
-                                class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
-                                       border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                       text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200
-                                       @error('course_id') border-red-500 @enderror">
-                            @foreach($courses as $course)
-                                <option value="{{ $course->id }}" {{ $student->course_id == $course->id ? 'selected' : '' }}>
-                                    {{ $course->course_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('course_id')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                    {{-- Basic Info --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Full Name</label>
+                            <input type="text" name="name" value="{{ old('name', $student->user->name) }}"
+                                   class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
+                                          border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                          text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
+                                   required>
+                            @error('name')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Email</label>
+                            <input type="email" name="email" value="{{ old('email', $student->user->email) }}"
+                                   class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
+                                          border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                          text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
+                                   required>
+                            @error('email')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Student Number</label>
+                            <input type="text" name="student_number" value="{{ old('student_number', $student->student_number) }}"
+                                   class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
+                                          border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                          text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
+                                   required>
+                            @error('student_number')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Course Selection --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Course</label>
+                            <select name="course_id" required
+                                    class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
+                                          border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                          text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200">
+                                @foreach($courses as $course)
+                                    <option value="{{ $course->id }}" {{ old('course_id', $student->course_id) == $course->id ? 'selected' : '' }}>
+                                        {{ $course->course_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('course_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
                     {{-- Year Level & Section --}}
@@ -32,7 +70,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Year Level</label>
                             <select name="year_level" 
-                                   class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
+                                   class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
                                           border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
                                           text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
                                    required>
@@ -46,28 +84,31 @@
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Section</label>
                             <input type="text" name="section" value="{{ $student->section }}"
-                                   class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
+                                   class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
                                           border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
                                           text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
                                    required>
                         </div>
                     </div>
 
-                    {{-- Subjects - Updated with consistent styling and new hover color --}}
+                    {{-- Subjects Selection --}}
                     <div>
                         <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Assign Subjects</label>
-                        <div class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
-                                    border border-[#FFC8FB] focus-within:border-pink-400 focus-within:ring focus-within:ring-pink-200 dark:focus-within:ring-pink-500
-                                    px-4 py-2 transition-all duration-200 max-h-48 overflow-y-auto">
+                        <div class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
+                                          border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                          text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200">
                             @foreach($subjects as $subject)
-                                <label class="flex items-center space-x-3 py-2 hover:bg-[#FFC8FB]/20 dark:hover:bg-[#FFC8FB]/10 rounded cursor-pointer">
+                                <label class="flex items-center space-x-3 py-2 hover:bg-[#FFC8FB]/20 rounded cursor-pointer">
                                     <input type="checkbox" name="subjects[]" value="{{ $subject->id }}" 
-                                           {{ $student->subjects->contains($subject->id) ? 'checked' : '' }}
+                                           {{ (is_array(old('subjects', $student->subjects->pluck('id')->toArray())) && in_array($subject->id, old('subjects', $student->subjects->pluck('id')->toArray()))) ? 'checked' : '' }}
                                            class="text-[#FF92C2] border-[#FFC8FB] rounded focus:ring-[#FF92C2] focus:ring-2">
-                                    <span class="text-gray-800 dark:text-black-200">{{ $subject->subject_name }}</span>
+                                    <span class="text-gray-800">{{ $subject->subject_name }}</span>
                                 </label>
                             @endforeach
                         </div>
+                        @error('subjects')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     {{-- Submit Buttons --}}

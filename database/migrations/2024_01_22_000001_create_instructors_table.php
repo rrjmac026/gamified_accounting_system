@@ -20,6 +20,15 @@ return new class extends Migration
 
     public function down()
     {
+        Schema::disableForeignKeyConstraints();
+        
+        // Drop any pivot tables that reference instructors
+        Schema::dropIfExists('instructor_subject');
+        Schema::dropIfExists('instructor_section');
+        
+        // Now safe to drop instructors table
         Schema::dropIfExists('instructors');
+        
+        Schema::enableForeignKeyConstraints();
     }
 };

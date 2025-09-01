@@ -12,12 +12,17 @@ return new class extends Migration
             $table->id();
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
             $table->foreignId('task_id')->nullable()->constrained()->onDelete('set null');
-            $table->enum('feedback_type', ['automated', 'manual', 'ai_generated'])->default('manual');
-            $table->text('feedback_text')->nullable();
-            $table->json('recommendations')->nullable();
-            $table->timestamp('generated_at')->nullable();
-            $table->boolean('is_read')->default(false);
+            $table->text('feedback');
+            $table->integer('rating')->nullable();
+            $table->string('type')->default('task'); // task, general, etc.
+            $table->enum('sentiment', ['positive', 'neutral', 'negative'])->nullable();
+            $table->boolean('is_anonymous')->default(false);
+            $table->timestamp('feedback_date');
             $table->timestamps();
+            
+            // Indexes
+            $table->index(['student_id', 'task_id']);
+            $table->index('feedback_date');
         });
     }
 

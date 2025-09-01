@@ -48,6 +48,12 @@
                 <i class="fas fa-book-open w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"></i>
                 <span class="truncate">Subjects</span>
             </a>
+            <a href="{{ route('admin.sections.index') }}" 
+               class="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium rounded-xl transition-all duration-200 
+               {{ request()->routeIs('admin.sections.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FFE3F5] text-[#FF92C2] shadow-sm' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFF0FA] dark:hover:bg-[#3D3D3D]' }}">
+                <i class="fas fa-book-open w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"></i>
+                <span class="truncate">Sections</span>
+            </a>
             <a href="{{ route('admin.xp-transactions.index') }}" 
                class="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium rounded-xl transition-all duration-200 
                {{ request()->routeIs('admin.xp-transactions.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FFE3F5] text-[#FF92C2] shadow-sm' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFF0FA] dark:hover:bg-[#3D3D3D]' }}">

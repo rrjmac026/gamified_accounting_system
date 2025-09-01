@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Students;
 
+use App\Http\Controllers\Controller;
 use App\Models\Evaluation;
 use App\Http\Requests\EvaluationRequest;
 use Illuminate\Support\Facades\Auth;

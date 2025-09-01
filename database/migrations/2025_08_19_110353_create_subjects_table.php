@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('subject_name');
             $table->unsignedTinyInteger('units')->default(3);
             $table->text('description');
-            $table->foreignId('instructor_id')->constrained()->onDelete('cascade');
+            $table->foreignId('section_id')->nullable()->constrained()->onDelete('set null');
             $table->string('semester');
             $table->string('academic_year');
             $table->boolean('is_active')->default(true);

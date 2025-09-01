@@ -25,7 +25,7 @@
                                 </div>
                                 <div class="flex justify-between">
                                     <dt class="text-gray-500">ID Number:</dt>
-                                    <dd class="text-gray-900">{{ $student->user->id_number }}</dd>
+                                    <dd class="text-gray-900">{{ $student->student_number }}</dd>
                                 </div>
                                 <div class="flex justify-between">
                                     <dt class="text-gray-500">Course:</dt>
@@ -116,7 +116,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                            @else
+                            @endif
                                 <p class="text-gray-500">No subjects enrolled.</p>
                         </div>
                     </div>
@@ -125,5 +125,4 @@
         </div>
     </div>
 </x-app-layout>
-    </div>
-</x-app-layout>
+

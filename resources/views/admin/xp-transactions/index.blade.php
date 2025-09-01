@@ -50,6 +50,7 @@
                                     <tr>
                                         <td colspan="6" class="py-4 px-3 sm:px-6 text-sm text-center">No transactions found.</td>
                                     </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -57,5 +58,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
 </x-app-layout>

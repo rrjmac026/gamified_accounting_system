@@ -3,16 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Subject extends Model
 {
-   
+   use HasFactory;
 
     protected $fillable = [
         'subject_code',
         'subject_name',
         'description',
-        'instructor_id',
         'semester',
         'academic_year',
         'is_active',
@@ -24,9 +24,10 @@ class Subject extends Model
     ];
 
     // Relationships
-    public function instructor()
+    public function instructors()
     {
-        return $this->belongsTo(Instructor::class);
+        return $this->belongsToMany(Instructor::class, 'instructor_subject')
+                    ->withTimestamps();
     }
 
     public function students()
@@ -44,5 +45,11 @@ class Subject extends Model
     {
         return $this->hasMany(PerformanceLog::class);
     }
+    
+    public function section()
+    {
+        return $this->belongsTo(Section::class);
+    }
 
 }
+

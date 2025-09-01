@@ -45,14 +45,14 @@
                         {{-- Student ID --}}
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Student ID</label>
-                            <input type="text" name="id_number" 
-                                   value="{{ old('id_number') }}"
+                            <input type="text" name="student_number" 
+                                   value="{{ old('student_number') }}"
                                    class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
                                           border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
                                           text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200
-                                          @error('id_number') border-red-500 @enderror"
+                                          @error('student_number') border-red-500 @enderror"
                                    required>
-                            @error('id_number')
+                            @error('student_number')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>

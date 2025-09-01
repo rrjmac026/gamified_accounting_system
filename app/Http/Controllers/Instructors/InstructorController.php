@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Instructors;
 
+use App\Http\Controllers\Controller;
 use App\Models\Instructor;
 use App\Models\Subject;
 use App\Models\Task;
@@ -32,6 +33,14 @@ class InstructorController extends Controller
 
         $instructors = $query->paginate(10);
         return view('instructors.index', compact('instructors'));
+    }
+
+    public function mySections()
+    {
+        $instructor = Auth::user()->instructor;
+        $sections = $instructor->sections()->with('course', 'students')->get();
+
+        return view('instructors.sections.index', compact('sections'));
     }
 
     /**

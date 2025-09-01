@@ -39,19 +39,32 @@
                                   required></textarea>
                     </div>
 
-                    {{-- Instructor --}}
+
+                    {{-- Multiple Instructors Selection --}}
                     <div>
-                        <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Instructor</label>
-                        <select name="instructor_id"
-                                class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
-                                       border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                       text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
-                                required>
-                            <option value="">-- Select Instructor --</option>
+                        <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">
+                            Assign Instructors
+                        </label>
+                        <div class="max-h-48 overflow-y-auto p-4 border border-[#FFC8FB] rounded-lg">
+                            <div class="flex justify-between mb-2">
+                                <button type="button" id="select-all-instructors" 
+                                        class="text-sm text-[#FF92C2] hover:text-[#ff6fb5]">
+                                    Select All
+                                </button>
+                                <button type="button" id="deselect-all-instructors" 
+                                        class="text-sm text-[#FF92C2] hover:text-[#ff6fb5]">
+                                    Deselect All
+                                </button>
+                            </div>
                             @foreach($instructors as $instructor)
-                                <option value="{{ $instructor->id }}">{{ $instructor->user->name ?? 'Unnamed' }}</option>
+                                <label class="flex items-center space-x-2 py-1">
+                                    <input type="checkbox" name="instructor_ids[]" 
+                                           value="{{ $instructor->id }}"
+                                           class="instructor-checkbox rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-[#FF92C2]">
+                                    <span>{{ $instructor->user->name }}</span>
+                                </label>
                             @endforeach
-                        </select>
+                        </div>
                     </div>
 
                     {{-- Semester & Academic Year --}}
@@ -114,4 +127,14 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('select-all-instructors').addEventListener('click', function() {
+            document.querySelectorAll('.instructor-checkbox').forEach(cb => cb.checked = true);
+        });
+
+        document.getElementById('deselect-all-instructors').addEventListener('click', function() {
+            document.querySelectorAll('.instructor-checkbox').forEach(cb => cb.checked = false);
+        });
+    </script>
 </x-app-layout>

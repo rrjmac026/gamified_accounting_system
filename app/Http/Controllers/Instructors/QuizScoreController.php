@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Instructors;
 
+use App\Http\Controllers\Controller;
 use App\Models\QuizScore;
 use App\Http\Requests\QuizScoreRequest;
 use Illuminate\Http\Request;

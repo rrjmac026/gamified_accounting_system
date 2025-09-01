@@ -114,7 +114,7 @@
                                                 {{ $student->user->email ?? 'N/A' }}
                                             </td>
                                             <td class="py-4 px-6 text-sm text-gray-700">
-                                                {{ $student->user->id_number ?? $student->id }}
+                                                {{ $student->user->student_number ?? $student->student_number }}
                                             </td>
                                             <td class="py-4 px-6 text-sm text-gray-700">
                                                 {{ $student->course->course_name ?? '-' }}

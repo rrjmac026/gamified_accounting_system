@@ -28,7 +28,8 @@ class Instructor extends Model
 
     public function subjects()
     {
-        return $this->hasMany(Subject::class);
+        return $this->belongsToMany(Subject::class, 'instructor_subject')
+                    ->withTimestamps();
     }
 
     public function tasks()
@@ -38,14 +39,12 @@ class Instructor extends Model
 
     public function students()
     {
-        return $this->hasManyThrough(
-            Student::class,
-            Subject::class,
-            'instructor_id', // Foreign key on subjects table
-            'id', // Foreign key on students table
-            'id', // Local key on instructors table
-            'id'  // Local key on subjects table
-        )->distinct();
+        // Remove old hasManyThrough relationship and replace with this:
+        return Student::whereHas('subjects', function($query) {
+            $query->whereHas('instructors', function($q) {
+                $q->where('instructors.id', $this->id);
+            });
+        });
     }
 
     // Add accessor for full name
@@ -69,4 +68,19 @@ class Instructor extends Model
             'total_students' => $this->students()->count(),
         ];
     }
+
+    public function sections()
+    {
+        return $this->belongsToMany(Section::class, 'instructor_section', 'instructor_id', 'section_id');
+    }
+    
+    public function getSectionStudentsAttribute()
+    {
+        return Student::whereHas('sections', function($query) {
+            $query->whereHas('instructors', function($q) {
+                $q->where('instructors.id', $this->id);
+            });
+        })->get();
+    }
+
 }

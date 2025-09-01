@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Task extends Model
 {
     protected $fillable = [
+        // Core Task fields
         'title',
         'description',
         'type',
@@ -21,7 +22,15 @@ class Task extends Model
         'instructions',
         'status',
         'is_active',
-        'auto_grade'
+        'auto_grade',
+        'parent_task_id', // For linking questions to main tasks
+
+        // Question fields (when type = 'question')
+        'question_type', 
+        'correct_answer',
+        'points',
+        'order_index',
+        'options',
     ];
 
     protected $casts = [
@@ -32,7 +41,10 @@ class Task extends Model
         'xp_reward' => 'integer',
         'retry_limit' => 'integer',
         'late_penalty' => 'integer',
-        'difficulty_level' => 'integer'
+        'difficulty_level' => 'integer',
+        'options' => 'array',
+        'points' => 'integer',
+        'order_index' => 'integer',
     ];
 
     // Relationships
@@ -46,31 +58,70 @@ class Task extends Model
         return $this->belongsTo(Instructor::class);
     }
 
+    // Many-to-many relationship with students through pivot table
     public function students()
     {
         return $this->belongsToMany(Student::class, 'student_tasks')
-                    ->withPivot('status', 'score', 'xp_earned', 'submitted_at', 'graded_at', 'retry_count') // maybe add retry count here
+                    ->withPivot(['status', 'score', 'xp_earned', 'submitted_at', 'graded_at', 'retry_count'])
                     ->withTimestamps();
     }
-    
-    public function studentTasks()
+
+    // Self-referencing relationship for questions
+    public function parentTask()
     {
-        return $this->hasMany(StudentTask::class);
+        return $this->belongsTo(Task::class, 'parent_task_id');
     }
 
+    public function questions()
+    {
+        return $this->hasMany(Task::class, 'parent_task_id')
+                    ->where('type', 'question');
+    }
+
+    // Legacy relationship - you might want to keep this if you have other models referencing it
     public function submissions()
     {
         return $this->hasMany(TaskSubmission::class);
     }
 
-    public function questions()
+    // Scopes
+    public function scopeMainTasks($query)
     {
-        return $this->hasMany(TaskQuestion::class);
+        return $query->whereNull('parent_task_id');
     }
 
-    public function performanceLogs()
+    public function scopeQuestions($query)
     {
-        return $this->hasMany(PerformanceLog::class);
+        return $query->where('type', 'question');
     }
 
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    // Helper methods
+    public function isQuestion()
+    {
+        return $this->type === 'question';
+    }
+
+    public function isMainTask()
+    {
+        return is_null($this->parent_task_id);
+    }
+
+    public function getQuestionsCount()
+    {
+        return $this->questions()->count();
+    }
+
+    public function getTotalPoints()
+    {
+        if ($this->isQuestion()) {
+            return $this->points;
+        }
+        
+        return $this->questions()->sum('points') ?: $this->max_score;
+    }
 }

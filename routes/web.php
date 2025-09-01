@@ -11,7 +11,8 @@ use App\Http\Controllers\Admin\XpTransactionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\StudentContronController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\TaskController;
+use App\Http\Controllers\Admin\SectionController;
+
 use App\Http\Controllers\Admin\InstructorManagementController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\Admin\FeedbackRecordController;
@@ -21,6 +22,12 @@ use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\PerformanceLogController;
 use App\Http\Controllers\Admin\LeaderboardController;
 use App\Http\Controllers\Admin\BadgeController;
+use App\Http\Controllers\Students\FeedbackController;
+//instructor Controllers
+use App\Http\Controllers\Instructors\InstructorController;
+use App\Http\Controllers\Instructors\TaskQuestionController;
+use App\Http\Controllers\Instructors\TaskController;
+use App\Http\Controllers\Instructors\StudentTaskController;
 
 //Student Controllers
 use App\Http\Controllers\Students\StudentController;
@@ -64,7 +71,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 
     Route::get('/students/create', [StudentManagementController::class, 'create'])->name('student.create');
     Route::resource('/activity-logs',ActivityLogController::class);
-    Route::resource('feedback-records', FeedbackRecordController::class);
+    
     // Route::get('/instructors', [AdminController::class, 'instructors'])->name('instructors.index');
     // Route::get('/subjects', [AdminController::class, 'subjects'])->name('subjects.index');
     Route::resource('/subjects',SubjectController::class);
@@ -94,20 +101,67 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/evaluations', [EvaluationController::class, 'index'])->name('evaluations.index');
     Route::get('/evaluations/{evaluation}', [EvaluationController::class, 'show'])->name('evaluations.show');
     Route::delete('/evaluations/{evaluation}', [EvaluationController::class, 'destroy'])->name('evaluations.destroy');
-    
+    Route::resource('feedback-records', FeedbackRecordController::class);
+    Route::resource('sections', SectionController::class);
 });
 
-Route::middleware(['auth', 'role:instructor'])->prefix('instructors')->name('instructors.')->group(function () {
-    Route::get('/dashboard', [InstructorController::class, 'dashboard'])->name('dashboard');
-    Route::resource('tasks', TaskController::class);
-    // Route::resource('instructors', InstructorController::class);
-});
+Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('instructors.')->group(function () {
+        // Dashboard
+        Route::get('/dashboard', [InstructorController::class, 'dashboard'])
+            ->name('dashboard');
+
+        // Task submissions
+        Route::get('/task-submissions', [TaskSubmissionController::class, 'index'])
+            ->name('task-submissions.index');
+        Route::get('/task-submissions/{taskSubmission}/edit', [TaskSubmissionController::class, 'edit'])
+            ->name('task-submissions.edit');
+        Route::put('/task-submissions/{taskSubmission}', [TaskSubmissionController::class, 'update'])
+            ->name('task-submissions.update');
+        Route::post('/task-submissions/{taskSubmission}/grade', [TaskSubmissionController::class, 'grade'])
+            ->name('task-submissions.grade');
+        
+             // CSV Upload/Download routes
+        Route::post('tasks/csv-upload', [TaskController::class, 'csvUpload'])->name('tasks.csv-upload');
+        Route::get('tasks/download-csv-template', [TaskController::class, 'downloadCsvTemplate'])->name('tasks.download-csv-template');
+        
+        Route::post('/tasks/{task}/assign-students', [TaskController::class, 'assignToStudent'])
+        ->name('tasks.assign-students');
+        Route::get('/tasks/{task}/assign-students', [TaskController::class, 'showAssignStudentsForm'])
+        ->name('tasks.assign-students-form');
+       
+        Route::resource('tasks', TaskController::class);
+       
+        // Question management routes
+        Route::post('tasks/{task}/add-question', [TaskController::class, 'addQuestion'])->name('tasks.add-question');
+        Route::get('tasks/{task}/questions/{question}/edit', [TaskController::class, 'editQuestion'])->name('tasks.edit-question');
+        Route::put('tasks/{task}/questions/{question}', [TaskController::class, 'updateQuestion'])->name('tasks.update-question');
+        Route::delete('tasks/{task}/questions/{question}', [TaskController::class, 'deleteQuestion'])->name('tasks.delete-question');
+        
+        // Student assignment routes
+        Route::post('tasks/{task}/assign-student', [TaskController::class, 'assignToStudent'])->name('tasks.assign-student');
+        Route::post('tasks/bulk-assign', [TaskController::class, 'bulkAssign'])->name('tasks.bulk-assign');
+        Route::get('tasks/student-tasks', [TaskController::class, 'studentTasks'])->name('tasks.student-tasks');
+        Route::get('tasks/{task}/students/{student}', [TaskController::class, 'showStudentTask'])->name('tasks.show-student-task');
+        Route::get('tasks/{task}/students/{student}/grade', [TaskController::class, 'gradeStudentForm'])->name('tasks.grade-student-form');
+        Route::put('tasks/{task}/students/{student}/grade', [TaskController::class, 'gradeStudent'])->name('tasks.grade-student');
+    });
 
 Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.')->group(function () {
         Route::get('/dashboard', [StudentController::class, 'dashboard'])->name('dashboard');
         Route::get('/progress', [StudentController::class, 'viewProgress'])->name('progress');
         Route::get('/assignments', [StudentController::class, 'viewAssignments'])->name('assignments');
         // Route::get('/xp', [StudentController::class, 'viewXp'])->name('xp');
+        Route::get('/task-submissions', [TaskSubmissionController::class, 'index'])
+            ->name('task-submissions.index');
+        Route::get('/task-submissions/{taskSubmission}/edit', [TaskSubmissionController::class, 'edit'])
+            ->name('task-submissions.edit');
+        Route::put('/task-submissions/{taskSubmission}', [TaskSubmissionController::class, 'update'])
+            ->name('task-submissions.update');
+        Route::post('/task-submissions/{taskSubmission}/grade', [TaskSubmissionController::class, 'grade'])
+            ->name('task-submissions.grade');
+
+
+        Route::resource('feedback', FeedbackController::class)->only(['create', 'store', 'index', 'show']);
 });
 
 Route::middleware('guest')->group(function () {
@@ -117,14 +171,7 @@ Route::middleware('guest')->group(function () {
 
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::get('test-user-creation', function() {
-    dd(
-        auth()->check(),
-        auth()->user()?->role,
-        route('admin.users.store'),
-        app()->make(\App\Http\Requests\User\StoreUserRequest::class)->authorize()
-    );
-});
+
 // Route::post('/admin/backup-now', [DataBackupController::class, 'backupNow'])
 //     ->name('admin.backup.now')
 //     ->middleware(['auth', 'is_admin']);

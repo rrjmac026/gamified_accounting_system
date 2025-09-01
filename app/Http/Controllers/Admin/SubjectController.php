@@ -14,7 +14,7 @@ class SubjectController extends Controller
 
     public function index()
     {
-        $subjects = Subject::with('instructor')->get();
+        $subjects = Subject::with('instructors.user')->get();
         return view('admin.subjects.index', compact('subjects'));
     }
 
@@ -30,14 +30,25 @@ class SubjectController extends Controller
             'subject_code'   => 'required|string|unique:subjects,subject_code',
             'subject_name'   => 'required|string|max:255',
             'description'    => 'required|string',
-            'instructor_id'  => 'required|exists:instructors,id',
+            'instructor_ids' => 'required|array',
+            'instructor_ids.*' => 'exists:instructors,id',
             'semester'       => 'required|string',
             'academic_year'  => 'required|string',
             'units'          => 'required|integer|min:1|max:6',
             'is_active'      => 'required|boolean'
         ]);
 
-        $subject = Subject::create($validated);
+        $subject = Subject::create([
+            'subject_code' => $validated['subject_code'],
+            'subject_name' => $validated['subject_name'],
+            'description' => $validated['description'],
+            'semester' => $validated['semester'],
+            'academic_year' => $validated['academic_year'],
+            'units' => $validated['units'],
+            'is_active' => $validated['is_active']
+        ]);
+
+        $subject->instructors()->attach($validated['instructor_ids']);
 
         $this->logActivity(
             "Created Subject",
@@ -55,7 +66,8 @@ class SubjectController extends Controller
 
     public function show(Subject $subject)
     {
-        $subject->load(['instructor', 'students', 'tasks']);
+        $subject->load(['instructors.user']);
+        // $instructors = Instructor::with('user')->get(); // 👈 fetch all instructors
         return view('admin.subjects.show', compact('subject'));
     }
 
@@ -71,7 +83,8 @@ class SubjectController extends Controller
             'subject_code'   => 'required|string|unique:subjects,subject_code,' . $subject->id,
             'subject_name'   => 'required|string|max:255',
             'description'    => 'required|string',
-            'instructor_id'  => 'required|exists:instructors,id',
+            'instructor_ids' => 'required|array',
+            'instructor_ids.*' => 'exists:instructors,id',
             'semester'       => 'required|string',
             'academic_year'  => 'required|string',
             'units'          => 'required|integer|min:1|max:6',
@@ -79,7 +92,18 @@ class SubjectController extends Controller
         ]);
 
         $originalData = $subject->toArray();
-        $subject->update($validated);
+        
+        $subject->update([
+            'subject_code' => $validated['subject_code'],
+            'subject_name' => $validated['subject_name'],
+            'description' => $validated['description'],
+            'semester' => $validated['semester'],
+            'academic_year' => $validated['academic_year'],
+            'units' => $validated['units'],
+            'is_active' => $validated['is_active']
+        ]);
+
+        $subject->instructors()->sync($validated['instructor_ids']);
 
         $this->logActivity(
             "Updated Subject",

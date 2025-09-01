@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class StudentManagementController extends Controller
 {
@@ -37,35 +38,37 @@ class StudentManagementController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'id_number' => 'required|string|unique:users,id_number',
+            'student_number' => 'required|string|unique:students,student_number',
             'course_id' => 'required|exists:courses,id',
             'year_level' => 'required|integer|min:1|max:5',
             'section' => 'required|string|max:50',
             'password' => 'required|string|min:6',
-            'subjects'   => 'array',
+            'subjects' => 'array',
             'subjects.*' => 'exists:subjects,id'
         ]);
-
 
         try {
             DB::beginTransaction();
 
-            // First, create the user
+            // Create user without id_number
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'id_number' => $validated['id_number'],
                 'password' => Hash::make($validated['password']),
                 'role' => 'student',
                 'is_active' => true
             ]);
 
-            // Then create the student record
+            // Create student with student_number
             $student = Student::create([
                 'user_id' => $user->id,
+                'student_number' => $validated['student_number'],
                 'course_id' => $validated['course_id'],
                 'year_level' => $validated['year_level'],
-                'section' => $validated['section']
+                'section' => $validated['section'],
+                'total_xp' => 0,
+                'current_level' => 1,
+                'performance_rating' => 0.00
             ]);
 
             // Attach subjects if provided
@@ -74,7 +77,7 @@ class StudentManagementController extends Controller
             }
 
             DB::commit();
-            // Log activity
+
             $this->logActivity(
                 "Created Student",
                 "Student",
@@ -82,6 +85,7 @@ class StudentManagementController extends Controller
                 [
                     'name' => $user->name,
                     'email' => $user->email,
+                    'student_number' => $student->student_number,
                     'course' => $validated['course_id']
                 ]
             );
@@ -345,30 +349,95 @@ class StudentManagementController extends Controller
     public function update(Request $request, Student $student)
     {
         $validated = $request->validate([
-            'course_id' => 'required|string|max:100',
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'email', Rule::unique('users')->ignore($student->user_id)],
+            'student_number' => ['required', 'string', Rule::unique('students')->ignore($student->id)],
+            'course_id' => 'required|exists:courses,id',
             'year_level' => 'required|integer|min:1|max:5',
             'section' => 'required|string|max:50',
-            'subjects' => 'array|exists:subjects,id'
+            'subjects' => 'array',
+            'subjects.*' => 'exists:subjects,id'
         ]);
 
-        $student->update($validated);
+        try {
+            DB::beginTransaction();
 
-        if(isset($validated['subjects'])) {
-            $student->subjects()->sync($validated['subjects']);
+            $student->user->update([
+                'name' => $validated['name'],
+                'email' => $validated['email']
+            ]);
+
+            $student->update([
+                'student_number' => $validated['student_number'],
+                'course_id' => $validated['course_id'],
+                'year_level' => $validated['year_level'],
+                'section' => $validated['section']
+            ]);
+
+            if (isset($validated['subjects'])) {
+                $student->subjects()->sync($validated['subjects']);
+            }
+
+            DB::commit();
+
+            $this->logActivity(
+                "Updated Student",
+                "Student",
+                $student->id,
+                [
+                    'student_id' => $student->id,
+                    'changes' => $student->getChanges()
+                ]
+            );
+
+            return redirect()->route('admin.student.show', $student)
+                ->with('success', 'Student updated successfully');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()
+                ->with('error', 'Error updating student: ' . $e->getMessage());
+        }
+    }
+
+    private function autoCreateStudent($email, $rowNumber, &$warnings, &$createdStudents)
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return null;
         }
 
-        $this->logActivity(
-            "Updated Student",
-            "Student",
-            $student->id,
-            [
-                'student_id' => $student->id,
-                'changes' => $student->getChanges()
-            ]
-        );
+        try {
+            DB::beginTransaction();
 
-        return redirect()->route('admin.student.show', $student)
-            ->with('success', 'Student updated successfully');
+            $user = User::create([
+                'name' => $this->extractNameFromEmail($email),
+                'email' => $email,
+                'password' => bcrypt($this->generateTemporaryPassword()),
+                'role' => 'student',
+                'email_verified_at' => null
+            ]);
+
+            $student = Student::create([
+                'user_id' => $user->id,
+                'student_number' => 'STU' . date('Y') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT),
+                'course_id' => null, // This should be set later
+                'year_level' => 1,
+                'section' => null,
+                'total_xp' => 0,
+                'current_level' => 1,
+                'performance_rating' => 0.00
+            ]);
+
+            DB::commit();
+            $warnings[] = "Row {$rowNumber}: Created student account for '{$email}'";
+            $createdStudents[] = $email;
+            return $student;
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $warnings[] = "Row {$rowNumber}: Failed to create student account for '{$email}': " . $e->getMessage();
+            return null;
+        }
     }
 
     public function destroy(Student $student)

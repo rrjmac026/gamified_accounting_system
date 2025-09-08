@@ -63,6 +63,7 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-[#595758] uppercase tracking-wider">Name</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-[#595758] uppercase tracking-wider">Email</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-[#595758] uppercase tracking-wider">Department</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-[#595758] uppercase tracking-wider">Assigned Subjects</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-[#595758] uppercase tracking-wider">Status</th>
                                     </tr>
                                 </thead>
@@ -73,12 +74,23 @@
                                             <td class="px-6 py-4 text-sm text-gray-500">{{ $instructor->user->email }}</td>
                                             <td class="px-6 py-4 text-sm text-gray-500">{{ $instructor->department ?? 'N/A' }}</td>
                                             <td class="px-6 py-4 text-sm">
+                                                @if($instructor->subjects->count() > 0)
+                                                    <ul class="list-disc list-inside">
+                                                        @foreach($instructor->subjects as $subject)
+                                                            <li class="text-gray-500">{{ $subject->subject_name }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                @else
+                                                    <span class="text-gray-500">No subjects assigned</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-6 py-4 text-sm">
                                                 <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Active</span>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="px-6 py-4 text-sm text-center text-gray-500">No instructors assigned</td>
+                                            <td colspan="5" class="px-6 py-4 text-sm text-center text-gray-500">No instructors assigned</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

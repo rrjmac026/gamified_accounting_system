@@ -22,7 +22,8 @@ return new class extends Migration
             // Grading details
             $table->decimal('score', 5, 2)->nullable();
             $table->unsignedInteger('xp_earned')->default(0);
-            $table->enum('status', ['pending', 'graded', 'late', 'incomplete'])->default('pending');
+            $table->enum('status', ['pending', 'submitted', 'graded', 'late', 'incomplete'])
+                ->default('pending');
             $table->timestamp('submitted_at')->nullable();
             $table->timestamp('graded_at')->nullable();
             $table->text('feedback')->nullable();

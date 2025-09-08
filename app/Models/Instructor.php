@@ -28,8 +28,7 @@ class Instructor extends Model
 
     public function subjects()
     {
-        return $this->belongsToMany(Subject::class, 'instructor_subject')
-                    ->withTimestamps();
+        return $this->belongsToMany(Subject::class, 'instructor_subject');
     }
 
     public function tasks()
@@ -84,3 +83,4 @@ class Instructor extends Model
     }
 
 }
+

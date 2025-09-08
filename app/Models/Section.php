@@ -12,7 +12,7 @@ class Section extends Model
     protected $fillable = [
         'section_code',
         'name',
-        'course_id',   // optional if sections belong to a course
+        'course_id',
         'capacity',
         'notes',
     ];

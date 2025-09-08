@@ -1,14 +1,6 @@
 <x-app-layout>
     <div class="flex justify-end px-4 sm:px-8 mt-4">
         <div class="flex gap-4">
-            <button onclick="toggleUploadForm()" 
-                   class="w-full sm:w-auto inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#8B5CF6] hover:bg-[#7C3AED] rounded-lg shadow-sm hover:shadow">
-                <i class="fas fa-file-upload mr-2"></i>Bulk Upload Student Tasks
-            </button>
-            <a href="{{ route('instructors.tasks.download-csv-template') }}" 
-               class="w-full sm:w-auto inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-sm hover:shadow">
-                <i class="fas fa-download mr-2"></i>Download Template
-            </a>
             <a href="{{ route('instructors.tasks.create') }}" 
                class="w-full sm:w-auto inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#FF92C2] hover:bg-[#ff6fb5] rounded-lg shadow-sm hover:shadow">
                 <i class="fas fa-plus mr-2"></i>Create New Task
@@ -17,38 +9,7 @@
     </div>
 
     <!-- Upload Section -->
-    <div id="uploadSection" class="max-w-4xl mx-auto mt-4 px-4 hidden">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold mb-4">Bulk Upload Student Task Assignments</h3>
-            <p class="text-sm text-gray-600 mb-4">
-                Upload a CSV file to assign existing tasks to students. The system will automatically create student accounts for new email addresses.
-            </p>
-            <form action="{{ route('instructors.tasks.csv-upload') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">CSV File</label>
-                        <input type="file" name="csv_file" accept=".csv,.txt" required 
-                               class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 
-                                      file:rounded-full file:border-0 file:text-sm file:font-semibold
-                                      file:bg-[#FF92C2] file:text-white hover:file:bg-[#ff6fb5]">
-                        <p class="text-xs text-gray-500 mt-1">
-                            CSV should include: student_email, task_id, status, score (optional), xp_earned (optional), submitted_at (optional), graded_at (optional)
-                        </p>
-                    </div>
-                    <div class="flex justify-end gap-3">
-                        <button type="button" onclick="toggleUploadForm()" 
-                                class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
-                            Cancel
-                        </button>
-                        <button type="submit" class="px-4 py-2 bg-[#FF92C2] text-white rounded-lg hover:bg-[#ff6fb5]">
-                            Upload
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
+
 
     <div class="py-6 sm:py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

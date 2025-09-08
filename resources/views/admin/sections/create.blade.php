@@ -42,13 +42,27 @@
 
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Assign Instructors</label>
-                            <div class="space-y-2 max-h-48 overflow-y-auto border border-[#FFC8FB] rounded-lg p-2">
+                            <div class="space-y-2 max-h-64 overflow-y-auto border border-[#FFC8FB] rounded-lg p-4">
                                 @foreach($instructors as $instructor)
-                                    <label class="flex items-center gap-2">
-                                        <input type="checkbox" name="instructors[]" value="{{ $instructor->id }}"
-                                               class="rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
-                                        <span>{{ $instructor->name }}</span>
-                                    </label>
+                                    <div class="p-3 bg-white rounded-lg mb-2 hover:bg-pink-50 transition-colors">
+                                        <label class="flex items-center gap-2">
+                                            <input type="checkbox" name="instructors[]" value="{{ $instructor->id }}"
+                                                   class="rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
+                                            <span class="font-medium">{{ $instructor->user->name }}</span>
+                                        </label>
+                                        @if($instructor->subjects->count() > 0)
+                                            <div class="ml-6 mt-2">
+                                                <p class="text-sm text-gray-500 mb-1">Subjects:</p>
+                                                <ul class="list-disc list-inside space-y-1">
+                                                    @foreach($instructor->subjects as $subject)
+                                                        <li class="text-sm text-gray-600">{{ $subject->subject_name }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        @else
+                                            <p class="ml-6 mt-1 text-sm text-gray-500">No subjects assigned</p>
+                                        @endif
+                                    </div>
                                 @endforeach
                             </div>
                         </div>

@@ -20,9 +20,10 @@ return new class extends Migration
                   ->onDelete('cascade');
 
             // Pivot fields
-            $table->enum('status', ['assigned', 'in_progress', 'submitted', 'graded', 'overdue'])
-                  ->default('assigned');
+            $table->enum('status', ['assigned', 'in_progress', 'submitted', 'late', 'graded',
+                ])->default('assigned');
             $table->decimal('score', 5, 2)->nullable();
+            $table->integer('penalty')->nullable();
             $table->integer('xp_earned')->default(0);
             $table->timestamp('submitted_at')->nullable();
             $table->timestamp('graded_at')->nullable();

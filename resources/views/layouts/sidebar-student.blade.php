@@ -26,19 +26,22 @@
             Assessment
         </span>
         <div class="mt-2 space-y-1">
-            <a href="#" 
-               class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 
-               {{ request()->routeIs('students.quizzes') ? 'bg-[#FFC8FB] text-[#595758]' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFEEF2]' }}">
+            <a href="{{ route('students.tasks.index') }}" 
+            class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 
+            {{ request()->routeIs('students.tasks.*') ? 'bg-[#FFC8FB] text-[#595758]' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFEEF2]' }}">
                 <i class="fas fa-tasks w-5 h-5"></i>
-                <span>Quizzes</span>
+                <span>Tasks</span>
             </a>
-            <a href="#" 
-               class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 
-               {{ request()->routeIs('students.exercises') ? 'bg-[#FFC8FB] text-[#595758]' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFEEF2]' }}">
-                <i class="fas fa-pencil-alt w-5 h-5"></i>
-                <span>Exercises</span>
+            <a href="{{ route('students.todo') }}" 
+            class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 
+            {{ request()->routeIs('students.todo') ? 'bg-[#FFC8FB] text-[#595758]' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFEEF2]' }}">
+                <i class="fas fa-list-check w-5 h-5"></i>
+                <span>To-Do</span>
             </a>
         </div>
+
+        
+
     </div>
 
     <!-- Progress -->

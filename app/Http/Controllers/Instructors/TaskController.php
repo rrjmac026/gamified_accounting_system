@@ -8,6 +8,7 @@ use App\Models\Subject;
 use App\Models\Instructor;
 use App\Models\Student;
 use App\Models\User;
+use App\Models\Section;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,26 +16,62 @@ use Illuminate\Support\Facades\Validator;
 
 class TaskController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware(function ($request, $next) {
+            // Get task parameter from route
+            $taskId = $request->route('task');
+            $task = null;
+            
+            // Get task instance if taskId exists
+            if ($taskId) {
+                if ($taskId instanceof Task) {
+                    $task = $taskId;
+                } else {
+                    $task = Task::find($taskId);
+                }
+
+                // If task exists, check ownership
+                if ($task) {
+                    $currentInstructorId = Auth::user()->instructor->id;
+                    if ($task->instructor_id !== $currentInstructorId) {
+                        abort(403, 'Unauthorized access to this task');
+                    }
+                }
+            }
+            
+            return $next($request);
+        })->except(['create', 'store']);
+    }
+
     public function index()
     {
-        $tasks = Task::with(['subject', 'instructor'])->get();
+        // Get current instructor's ID
+        $instructorId = Auth::user()->instructor->id;
+        
+        // Only fetch tasks belonging to the current instructor
+        $tasks = Task::with(['subject', 'instructor'])
+            ->where('instructor_id', $instructorId)
+            ->get();
+
         return view('instructors.tasks.index', compact('tasks'));
     }
 
     public function create()
     {
+        // Get the currently authenticated instructor
         $instructor = Auth::user()->instructor;
-        $subjects = $instructor->subjects;
         
-        // Get only students from sections where this instructor teaches
-        $students = Student::whereHas('sections', function($query) use ($instructor) {
-            $query->whereHas('instructors', function($q) use ($instructor) {
-                $q->where('instructors.id', $instructor->id);
-            });
-        })->with('user')->get();
+        // Get only the subjects assigned to this instructor
+        $subjects = $instructor->subjects()->with('section')->get();
+        
+        // Get sections where this instructor is assigned
+        $sections = $instructor->sections;
 
-        return view('instructors.tasks.create', compact('subjects', 'students', 'instructor',));
+        return view('instructors.tasks.create', compact('subjects', 'sections'));
     }
+
 
     public function store(Request $request)
     {
@@ -43,6 +80,7 @@ class TaskController extends Controller
             'description' => 'required|string',
             'type' => 'required|in:assignment,exercise,quiz,project',
             'subject_id' => 'required|exists:subjects,id',
+            'section_id' => 'required|exists:sections,id',
             'difficulty_level' => 'required|integer|between:1,5',
             'retry_limit' => 'required|integer|min:1',
             'late_penalty' => 'nullable|integer|min:0',
@@ -51,27 +89,52 @@ class TaskController extends Controller
             'due_date' => 'required|date',
             'instructions' => 'required|string',
             'is_active' => 'required|boolean',
-            'auto_grade' => 'required|boolean'
+            'auto_grade' => 'required|boolean',
+            'attachment' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,png|max:10240', // <= file
         ]);
 
         $validated['instructor_id'] = Auth::user()->instructor->id;
-        $task = Task::create($validated); // <-- assign to $task
 
-        if ($request->filled('student_ids')) {
-            $task->students()->attach($request->student_ids, [
-                'status' => $request->status,
+        // Handle file upload
+        if ($request->hasFile('attachment')) {
+            $path = $request->file('attachment')->store('task_attachments', 'public');
+            $validated['attachment'] = $path;
+        }
+
+        // Create task
+        $task = Task::create($validated);
+
+        // Auto-assign to section students
+        $section = \App\Models\Section::with('students')->findOrFail($validated['section_id']);
+        $attachData = [];
+        foreach ($section->students as $student) {
+            $attachData[$student->id] = [
+                'status' => 'assigned',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]);
+            ];
+        }
+
+        if (!empty($attachData)) {
+            $task->students()->attach($attachData);
         }
 
         return redirect()->route('instructors.tasks.index')
-            ->with('success', 'Task created successfully');
+            ->with('success', 'Task created (with attachment if uploaded) and assigned to students.');
     }
+
+
 
     public function show(Task $task)
     {
-        $task->load(['subject', 'instructor', 'submissions', 'questions']);
+        $task->load([
+            'subject',
+            'instructor.user',
+            'submissions',
+            'questions',
+            'students.user'
+        ]);
+        
         return view('instructors.tasks.show', compact('task'));
     }
 
@@ -89,6 +152,7 @@ class TaskController extends Controller
             'description' => 'required|string',
             'type' => 'required|in:assignment,exercise,quiz,project',
             'subject_id' => 'required|exists:subjects,id',
+            'section_id' => 'required|exists:sections,id',
             'difficulty_level' => 'required|integer|between:1,5',
             'retry_limit' => 'required|integer|min:1',
             'late_penalty' => 'nullable|integer|min:0',
@@ -97,13 +161,36 @@ class TaskController extends Controller
             'due_date' => 'required|date',
             'instructions' => 'required|string',
             'is_active' => 'required|boolean',
-            'auto_grade' => 'required|boolean'
+            'auto_grade' => 'required|boolean',
+            'attachment' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,png|max:10240',
         ]);
 
+        // Handle file upload
+        if ($request->hasFile('attachment')) {
+            // Delete old file if exists
+            if ($task->attachment && \Storage::disk('public')->exists($task->attachment)) {
+                \Storage::disk('public')->delete($task->attachment);
+            }
+
+            // Save new file
+            $path = $request->file('attachment')->store('task_attachments', 'public');
+            $validated['attachment'] = $path;
+        }
+
+        // If user wants to remove the file (optional)
+        if ($request->has('remove_attachment') && $request->remove_attachment == '1') {
+            if ($task->attachment && \Storage::disk('public')->exists($task->attachment)) {
+                \Storage::disk('public')->delete($task->attachment);
+            }
+            $validated['attachment'] = null;
+        }
+
         $task->update($validated);
+
         return redirect()->route('instructors.tasks.index')
             ->with('success', 'Task updated successfully');
     }
+
 
     public function destroy(Task $task)
     {
@@ -178,7 +265,7 @@ class TaskController extends Controller
             ->with('success', 'Question deleted successfully');
     }
 
-    // === STUDENT TASK ASSIGNMENT METHODS ===
+    // === STUDENT TASK ASSIGNMENT METHODS ===1
     
     public function assignToStudent(Request $request, Task $task)
     {
@@ -188,7 +275,7 @@ class TaskController extends Controller
             'due_date' => 'nullable|date',
         ]);
 
-        // Check if already assigned
+        
         if ($task->students()->where('student_id', $validated['student_id'])->exists()) {
             return back()->with('error', 'Task already assigned to this student');
         }
@@ -306,259 +393,4 @@ class TaskController extends Controller
             ->with('success', 'Student graded successfully');
     }
 
-    // === CSV UPLOAD METHODS ===
-
-    public function csvUpload(Request $request)
-    {
-        $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
-        ]);
-
-        try {
-            $path = $request->file('csv_file')->getRealPath();
-            $csvData = $this->parseCsv($path);
-            
-            $validatedTasks = $this->validateCsvData($csvData);
-            $createdCount = $this->createTasksFromCsv($validatedTasks);
-
-            $successMessage = "Successfully uploaded and created {$createdCount} student task assignments!";
-            
-            $warnings = session('csv_warnings', []);
-            $createdStudents = session('csv_created_students', []);
-            
-            if (!empty($createdStudents)) {
-                $successMessage .= "\n\nNew student accounts created: " . count($createdStudents);
-            }
-            
-            if (!empty($warnings)) {
-                session(['upload_warnings' => $warnings]);
-            }
-
-            return redirect()->route('instructors.tasks.index')
-                ->with('success', $successMessage)
-                ->with('warnings', $warnings);
-
-        } catch (\Exception $e) {
-            return back()->withErrors(['csv_file' => 'Error processing CSV: ' . $e->getMessage()]);
-        }
-    }
-
-    public function downloadCsvTemplate()
-    {
-        $filename = 'student_tasks_template.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-
-        $callback = function () {
-            $file = fopen('php://output', 'w');
-            
-            fputcsv($file, [
-                'student_email',
-                'task_id',
-                'status',
-                'score',
-                'xp_earned',
-                'submitted_at',
-                'graded_at'
-            ]);
-
-            fputcsv($file, [
-                'student@example.com',
-                '1',
-                'assigned',
-                '',
-                '',
-                '',
-                ''
-            ]);
-
-            fputcsv($file, [
-                'student2@example.com',
-                '2',
-                'submitted',
-                '85',
-                '50',
-                '2024-03-15 14:30:00',
-                ''
-            ]);
-
-            fputcsv($file, [
-                'student3@example.com',
-                '1',
-                'graded',
-                '92',
-                '75',
-                '2024-03-14 16:45:00',
-                '2024-03-16 09:20:00'
-            ]);
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
-
-    private function parseCsv($filePath)
-    {
-        $csvData = [];
-        $header = null;
-
-        if (($handle = fopen($filePath, 'r')) !== false) {
-            while (($row = fgetcsv($handle, 1000, ',')) !== false) {
-                if (!$header) {
-                    $header = array_map('trim', $row);
-                } else {
-                    $csvData[] = array_combine($header, array_map('trim', $row));
-                }
-            }
-            fclose($handle);
-        }
-
-        return $csvData;
-    }
-
-    private function validateCsvData($csvData)
-    {
-        $validatedTasks = [];
-        $errors = [];
-        $warnings = [];
-        $createdStudents = [];
-
-        foreach ($csvData as $index => $row) {
-            $rowNumber = $index + 2;
-
-            $student = Student::whereHas('user', function($query) use ($row) {
-                $query->where('email', $row['student_email']);
-            })->first();
-
-            if (!$student) {
-                $student = $this->autoCreateStudent($row['student_email'], $rowNumber, $warnings, $createdStudents);
-                if (!$student) continue;
-            }
-
-            $task = Task::find($row['task_id']);
-            if (!$task) {
-                $errors[] = "Row {$rowNumber}: Task with ID '{$row['task_id']}' not found";
-                continue;
-            }
-
-            // Check for duplicate assignment
-            if ($task->students()->where('student_id', $student->id)->exists()) {
-                $errors[] = "Row {$rowNumber}: Task '{$task->title}' is already assigned to '{$row['student_email']}'";
-                continue;
-            }
-
-            $validator = Validator::make($row, [
-                'student_email' => 'required|email',
-                'task_id' => 'required|integer',
-                'status' => 'required|in:assigned,in_progress,submitted,graded,overdue',
-                'score' => 'nullable|numeric|min:0',
-                'xp_earned' => 'nullable|integer|min:0',
-                'submitted_at' => 'nullable|date',
-                'graded_at' => 'nullable|date'
-            ]);
-
-            if ($validator->fails()) {
-                $errors[] = "Row {$rowNumber}: " . implode(', ', $validator->errors()->all());
-                continue;
-            }
-
-            $validatedTasks[] = [
-                'task_id' => $task->id,
-                'student_id' => $student->id,
-                'pivot_data' => [
-                    'status' => $row['status'],
-                    'score' => !empty($row['score']) ? (float) $row['score'] : null,
-                    'xp_earned' => !empty($row['xp_earned']) ? (int) $row['xp_earned'] : 0,
-                    'submitted_at' => !empty($row['submitted_at']) ? $row['submitted_at'] : null,
-                    'graded_at' => !empty($row['graded_at']) ? $row['graded_at'] : null,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]
-            ];
-        }
-
-        if (!empty($errors)) {
-            throw new \Exception("CSV validation failed:\n" . implode("\n", $errors));
-        }
-
-        session(['csv_warnings' => $warnings, 'csv_created_students' => $createdStudents]);
-        return $validatedTasks;
-    }
-
-    private function createTasksFromCsv($validatedTasks)
-    {
-        $createdCount = 0;
-        
-        DB::transaction(function () use ($validatedTasks, &$createdCount) {
-            foreach ($validatedTasks as $taskData) {
-                $task = Task::find($taskData['task_id']);
-                $task->students()->attach($taskData['student_id'], $taskData['pivot_data']);
-                $createdCount++;
-            }
-        });
-
-        return $createdCount;
-    }
-
-    private function autoCreateStudent($email, $rowNumber, &$warnings, &$createdStudents)
-    {
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return null;
-        }
-
-        $existingUser = User::where('email', $email)->first();
-        if ($existingUser && $existingUser->student) {
-            return $existingUser->student;
-        }
-
-        try {
-            DB::beginTransaction();
-
-            if ($existingUser) {
-                $student = Student::create([
-                    'user_id' => $existingUser->id,
-                    'enrollment_date' => now(),
-                    'status' => 'active'
-                ]);
-            } else {
-                $user = User::create([
-                    'name' => $this->extractNameFromEmail($email),
-                    'email' => $email,
-                    'password' => bcrypt($this->generateTemporaryPassword()),
-                    'email_verified_at' => null
-                ]);
-
-                $student = Student::create([
-                    'user_id' => $user->id,
-                    'enrollment_date' => now(),
-                    'status' => 'pending'
-                ]);
-            }
-
-            DB::commit();
-            $warnings[] = "Row {$rowNumber}: Created student account for '{$email}'";
-            $createdStudents[] = $email;
-            return $student;
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $warnings[] = "Row {$rowNumber}: Failed to create student account for '{$email}': " . $e->getMessage();
-            return null;
-        }
-    }
-
-    private function extractNameFromEmail($email)
-    {
-        $localPart = explode('@', $email)[0];
-        $nameParts = explode('.', $localPart);
-        return ucwords(implode(' ', $nameParts));
-    }
-
-    private function generateTemporaryPassword()
-    {
-        return 'TempPass' . rand(1000, 9999) . '!';
-    }
 }

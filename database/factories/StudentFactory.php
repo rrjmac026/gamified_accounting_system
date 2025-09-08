@@ -22,7 +22,7 @@ class StudentFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(),   // creates a new User if not provided
+            'user_id' => User::factory()->student(),  // creates a new User if not provided
             'student_number' => $this->faker->unique()->numerify('S########'),
             'course_id' => Course::factory(), // creates a new Course if not provided
             'year_level' => $this->faker->numberBetween(1, 4), // assuming 1st to 4th year

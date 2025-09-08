@@ -25,6 +25,7 @@ class StudentTask extends Model
         'xp_earned' => 'integer',
         'submitted_at' => 'datetime',
         'graded_at' => 'datetime'
+        
     ];
 
     public function student()

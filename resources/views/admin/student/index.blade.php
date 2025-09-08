@@ -89,87 +89,103 @@
                     </div>
 
                     {{-- Students Table --}}
-                    <div class="overflow-x-auto bg-white rounded-lg shadow">
-                        <div class="inline-block min-w-full align-middle">
-                            <table class="min-w-full divide-y divide-[#FFC8FB]">
-                                <thead class="bg-[#FFC8FB]">
-                                    <tr>
-                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Name</th>
-                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Email</th>
-                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Student ID</th>
-                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Course</th>
-                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Year Level</th>
-                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Section</th>
-                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Status</th>
-                                        <th class="py-3 px-6 text-left text-sm font-medium text-pink-900">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-[#FFF6FD] divide-y divide-[#FFC8FB]">
-                                    @forelse ($students as $student)
-                                        <tr class="hover:bg-[#FFD9FF] transition-colors duration-150">
-                                            <td class="py-4 px-6 text-sm text-gray-700">
-                                                {{ $student->user->name ?? 'N/A' }}
-                                            </td>
-                                            <td class="py-4 px-6 text-sm text-gray-700">
+                    <div class="overflow-x-auto relative sm:rounded-lg">
+                        <table class="w-full text-sm text-left text-gray-700">
+                            <thead class="bg-[#FFC8FB] text-xs uppercase">
+                                <tr>
+                                    <th scope="col" class="py-3 px-4">
+                                        <div class="flex items-center">
+                                            Name/Email
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="hidden md:table-cell py-3 px-4">
+                                        Student ID
+                                    </th>
+                                    <th scope="col" class="hidden sm:table-cell py-3 px-4">
+                                        Course
+                                    </th>
+                                    <th scope="col" class="hidden lg:table-cell py-3 px-4">
+                                        Year/Section
+                                    </th>
+                                    <th scope="col" class="py-3 px-4">
+                                        Status
+                                    </th>
+                                    <th scope="col" class="py-3 px-4">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($students as $student)
+                                    <tr class="bg-white border-b border-[#FFC8FB] hover:bg-[#FFD9FF]">
+                                        <td class="py-3 px-4 font-medium">
+                                            {{ $student->user->name ?? 'N/A' }}
+                                            <div class="text-xs text-gray-500 mt-1">
                                                 {{ $student->user->email ?? 'N/A' }}
-                                            </td>
-                                            <td class="py-4 px-6 text-sm text-gray-700">
-                                                {{ $student->user->student_number ?? $student->student_number }}
-                                            </td>
-                                            <td class="py-4 px-6 text-sm text-gray-700">
-                                                {{ $student->course->course_name ?? '-' }}
-                                            </td>
-                                            <td class="py-4 px-6 text-sm text-gray-700">
-                                                {{ $student->year_level ?? '-' }}
-                                            </td>
-                                            <td class="py-4 px-6 text-sm text-gray-700">
-                                                {{ $student->section ?? '-' }}
-                                            </td>
-                                            <td class="py-4 px-6 text-sm text-gray-700">
-                                                @if($student->user && $student->user->is_active)
-                                                    <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                                        Active
-                                                    </span>
-                                                @else
-                                                    <span class="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
-                                                        Inactive
-                                                    </span>
-                                                @endif
-                                            </td>
-                                            <td class="py-4 px-6 text-sm space-x-2">
-                                                <a href="{{ route('admin.student.show', $student->id) }}" class="text-[#FF92C2] hover:text-[#ff6fb5]">
+                                            </div>
+                                        </td>
+                                        <td class="hidden md:table-cell py-3 px-4">
+                                            {{ $student->user->student_number ?? $student->student_number }}
+                                        </td>
+                                        <td class="hidden sm:table-cell py-3 px-4">
+                                            {{ $student->course->course_name ?? '-' }}
+                                        </td>
+                                        <td class="hidden lg:table-cell py-3 px-4">
+                                            <span class="whitespace-nowrap">
+                                                Year {{ $student->year_level ?? '-' }}
+                                            </span>
+                                            <span class="block text-sm text-gray-500">
+                                                Section {{ $student->section ?? '-' }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            @if($student->user && $student->user->is_active)
+                                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                                                    Active
+                                                </span>
+                                            @else
+                                                <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                                                    Inactive
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <div class="flex flex-col sm:flex-row gap-2">
+                                                <a href="{{ route('admin.student.show', $student->id) }}" 
+                                                   class="text-indigo-600 hover:text-indigo-900">
                                                     <i class="fas fa-eye"></i>
+                                                    <span class="sm:hidden ml-1">View</span>
                                                 </a>
-                                                <a href="{{ route('admin.student.edit', $student->id) }}" class="text-[#FF92C2] hover:text-[#ff6fb5]">
+                                                <a href="{{ route('admin.student.edit', $student->id) }}" 
+                                                   class="text-yellow-600 hover:text-yellow-900">
                                                     <i class="fas fa-edit"></i>
+                                                    <span class="sm:hidden ml-1">Edit</span>
                                                 </a>
                                                 <button type="button" 
-                                                    onclick="return confirmAction('Are you sure you want to delete this student?', 'delete-student-{{ $student->id }}')"
-                                                    class="text-red-500 hover:text-red-700 transition-colors duration-150">
+                                                        onclick="return confirmAction('Are you sure?', 'delete-student-{{ $student->id }}')"
+                                                        class="text-red-600 hover:text-red-900">
                                                     <i class="fas fa-trash"></i>
+                                                    <span class="sm:hidden ml-1">Delete</span>
                                                 </button>
-                                                <form id="delete-student-{{ $student->id }}" action="{{ route('admin.student.destroy', $student->id) }}" method="POST" class="hidden">
+                                                <form id="delete-student-{{ $student->id }}" 
+                                                      action="{{ route('admin.student.destroy', $student->id) }}" 
+                                                      method="POST" 
+                                                      class="hidden">
                                                     @csrf
                                                     @method('DELETE')
                                                 </form>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="7" class="py-8 px-6 text-sm text-center text-gray-600">
-                                                <div class="flex flex-col items-center">
-                                                    <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                                                    </svg>
-                                                    <p class="text-lg font-medium text-gray-900 mb-1">No students found</p>
-                                                    <p class="text-gray-600">Import a CSV or Excel file to get started</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="py-4 px-4 text-center text-gray-500">
+                                            No students found.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
 
                     {{-- Pagination --}}

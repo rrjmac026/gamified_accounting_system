@@ -34,13 +34,13 @@ class Student extends Model
     }
     
 
-    public function assignedTasks()
+    public function tasks()
     {
-        // Quick access: gives you Task models with pivot info
         return $this->belongsToMany(Task::class, 'student_tasks')
                     ->withPivot('status', 'score', 'xp_earned', 'submitted_at', 'graded_at', 'retry_count')
                     ->withTimestamps();
     }
+
 
     public function studentTasks()
     {
@@ -51,6 +51,17 @@ class Student extends Model
     public function submissions()
     {
         return $this->hasMany(TaskSubmission::class);
+    }
+
+    public function taskSubmissions()
+    {
+        return $this->hasMany(\App\Models\TaskSubmission::class);
+    }
+
+    public function submittedTasks()
+    {
+        return $this->belongsToMany(\App\Models\Task::class, 'task_submissions')
+                    ->withPivot(['status', 'score', 'xp_earned', 'submitted_at', 'graded_at']);
     }
 
     public function performanceLogs()

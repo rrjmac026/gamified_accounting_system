@@ -24,7 +24,7 @@ class SectionController extends Controller
     public function create()
     {
         $courses = Course::where('is_active', true)->get();
-        $instructors = \App\Models\Instructor::all();
+        $instructors = \App\Models\Instructor::with(['user', 'subjects'])->get();
         $students = Student::doesntHave('sections')->get();
         return view('admin.sections.create', compact('courses', 'students', 'instructors'));
     }
@@ -65,8 +65,12 @@ class SectionController extends Controller
     // Show details of a section (students & subjects)
     public function show(Section $section)
     {
-        $section->load(['students.user', 'subjects.instructor', 'instructors.user']);
-        return view('admin.sections.show', compact('section',));
+        $section->load([
+            'students.user', 
+            'instructors.user',
+            'instructors.subjects' // Load the subjects for each instructor
+        ]);
+        return view('admin.sections.show', compact('section'));
     }
 
     // Show form to edit a section

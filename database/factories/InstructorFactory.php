@@ -16,7 +16,7 @@ class InstructorFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(), // ✅ ensures user exists
+            'user_id' => User::factory()->instructor(),
             'employee_id' => $this->faker->unique()->numberBetween(1000, 9999),
             'department' => $this->faker->randomElement(['Mathematics', 'Science', 'Arts', 'History', 'Physical Education']),
             'specialization' => $this->faker->randomElement(['Algebra', 'Biology', 'Painting', 'World History', 'Sports Science']),

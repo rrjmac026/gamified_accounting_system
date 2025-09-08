@@ -13,6 +13,7 @@ class Task extends Model
         'type',
         'subject_id',
         'instructor_id',
+        'section_id',
         'difficulty_level',
         'max_score',
         'xp_reward',
@@ -23,7 +24,8 @@ class Task extends Model
         'status',
         'is_active',
         'auto_grade',
-        'parent_task_id', // For linking questions to main tasks
+        'parent_task_id',
+        'attachment',
 
         // Question fields (when type = 'question')
         'question_type', 

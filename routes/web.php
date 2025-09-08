@@ -28,9 +28,11 @@ use App\Http\Controllers\Instructors\InstructorController;
 use App\Http\Controllers\Instructors\TaskQuestionController;
 use App\Http\Controllers\Instructors\TaskController;
 use App\Http\Controllers\Instructors\StudentTaskController;
+use App\Http\Controllers\Instructors\TaskSubmissionController;
 
 //Student Controllers
 use App\Http\Controllers\Students\StudentController;
+use App\Http\Controllers\Students\TodoController;
 
 
 Route::get('/', function () {
@@ -109,18 +111,16 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
         // Dashboard
         Route::get('/dashboard', [InstructorController::class, 'dashboard'])
             ->name('dashboard');
-
-        // Task submissions
+            
+        // Task Submissions Routes
         Route::get('/task-submissions', [TaskSubmissionController::class, 'index'])
             ->name('task-submissions.index');
-        Route::get('/task-submissions/{taskSubmission}/edit', [TaskSubmissionController::class, 'edit'])
-            ->name('task-submissions.edit');
-        Route::put('/task-submissions/{taskSubmission}', [TaskSubmissionController::class, 'update'])
-            ->name('task-submissions.update');
+        Route::get('/task-submissions/{taskSubmission}', [TaskSubmissionController::class, 'show'])
+            ->name('task-submissions.show');
         Route::post('/task-submissions/{taskSubmission}/grade', [TaskSubmissionController::class, 'grade'])
             ->name('task-submissions.grade');
-        
-             // CSV Upload/Download routes
+
+        // CSV Upload/Download routes
         Route::post('tasks/csv-upload', [TaskController::class, 'csvUpload'])->name('tasks.csv-upload');
         Route::get('tasks/download-csv-template', [TaskController::class, 'downloadCsvTemplate'])->name('tasks.download-csv-template');
         
@@ -130,6 +130,8 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
         ->name('tasks.assign-students-form');
        
         Route::resource('tasks', TaskController::class);
+
+          
        
         // Question management routes
         Route::post('tasks/{task}/add-question', [TaskController::class, 'addQuestion'])->name('tasks.add-question');
@@ -151,23 +153,25 @@ Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.
         Route::get('/progress', [StudentController::class, 'viewProgress'])->name('progress');
         Route::get('/assignments', [StudentController::class, 'viewAssignments'])->name('assignments');
         // Route::get('/xp', [StudentController::class, 'viewXp'])->name('xp');
-        Route::get('/task-submissions', [TaskSubmissionController::class, 'index'])
-            ->name('task-submissions.index');
-        Route::get('/task-submissions/{taskSubmission}/edit', [TaskSubmissionController::class, 'edit'])
-            ->name('task-submissions.edit');
-        Route::put('/task-submissions/{taskSubmission}', [TaskSubmissionController::class, 'update'])
-            ->name('task-submissions.update');
-        Route::post('/task-submissions/{taskSubmission}/grade', [TaskSubmissionController::class, 'grade'])
-            ->name('task-submissions.grade');
-
-
+        Route::get('tasks', [\App\Http\Controllers\Students\TaskController::class, 'index'])->name('tasks.index');
+        Route::get('tasks/{task}', [\App\Http\Controllers\Students\TaskController::class, 'show'])->name('tasks.show');
+        Route::post('tasks/{task}/submit', [\App\Http\Controllers\Students\TaskController::class, 'submit'])->name('tasks.submit');
         Route::resource('feedback', FeedbackController::class)->only(['create', 'store', 'index', 'show']);
+        Route::get('/todo', [TodoController::class, 'index'])->name('todo');
 });
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'show'])->name('login');
     Route::post('login', [LoginController::class, 'authenticate']);
 });
+
+Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+
+
+// Route::post('/admin/backup-now', [DataBackupController::class, 'backupNow'])
+//     ->name('admin.backup.now')
+//     ->middleware(['auth', 'is_admin']);
+
 
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 

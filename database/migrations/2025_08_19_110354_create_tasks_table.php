@@ -16,6 +16,7 @@ return new class extends Migration
             $table->text('description');
             $table->enum('type', ['assignment', 'exercise', 'quiz', 'project', 'question']);
             $table->foreignId('subject_id')->constrained()->onDelete('cascade');
+            $table->foreignId('section_id')->constrained()->onDelete('cascade');
             $table->foreignId('instructor_id')->constrained()->onDelete('cascade');
             $table->foreignId('parent_task_id')->nullable()->constrained('tasks')->onDelete('cascade');
             $table->integer('difficulty_level');
@@ -28,6 +29,7 @@ return new class extends Migration
             $table->enum('status', ['draft', 'pending', 'active', 'completed', 'archived'])->default('pending');
             $table->boolean('is_active')->default(true);
             $table->boolean('auto_grade')->default(false);
+            $table->string('attachment')->nullable();
             
             // Question-specific fields
             $table->enum('question_type', ['multiple_choice', 'true_false', 'essay', 'calculation'])->nullable();

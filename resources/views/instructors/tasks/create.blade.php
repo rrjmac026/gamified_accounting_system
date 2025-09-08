@@ -4,7 +4,7 @@
             <div class="bg-[#FFF0FA] backdrop-blur-sm overflow-hidden shadow-lg rounded-lg p-8 border border-[#FFC8FB]/50">
                 <h2 class="text-2xl font-bold text-[#FF92C2] mb-6">Create New Task</h2>
 
-                <form action="{{ route('instructors.tasks.store') }}" method="POST" class="space-y-6">
+                <form action="{{ route('instructors.tasks.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                     @csrf
                     
                     @if ($errors->any())
@@ -34,6 +34,7 @@
                             <input type="text" name="title" value="{{ old('title') }}" required
                                    class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
                         </div>
+                        
 
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Type</label>
@@ -45,6 +46,12 @@
                                     </option>
                                 @endforeach
                             </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Attachment</label>
+                            <input type="file" name="attachment"
+                                class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
                         </div>
 
                         <div>
@@ -66,19 +73,16 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Assign Students</label>
-                            <div class="space-y-2 max-h-48 overflow-y-auto border border-[#FFC8FB] rounded-lg p-2">
-                                <div class="flex justify-between mb-1">
-                                    <button type="button" id="select-all" class="text-sm text-[#FF92C2] hover:underline">Select All</button>
-                                    <button type="button" id="deselect-all" class="text-sm text-[#FF92C2] hover:underline">Deselect All</button>
-                                </div>
-                                @foreach($students as $student)
-                                    <label class="flex items-center gap-2">
-                                        <input type="checkbox" name="student_ids[]" value="{{ $student->id }}" class="student-checkbox rounded border-[#FFC8FB]">
-                                        <span>{{ $student->user->name }} ({{ $student->user->email }})</span>
-                                    </label>
+                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Section</label>
+                            <select name="section_id" required
+                                    class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
+                                <option value="">Select Section</option>
+                                @foreach($sections as $section)
+                                    <option value="{{ $section->id }}" {{ old('section_id') == $section->id ? 'selected' : '' }}>
+                                        {{ $section->name }} ({{ $section->section_code }})
+                                    </option>
                                 @endforeach
-                            </div>
+                            </select>
                         </div>
 
                         <div>

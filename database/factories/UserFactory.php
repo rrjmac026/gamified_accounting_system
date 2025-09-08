@@ -35,6 +35,19 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
         ];
     }
+    public function student(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'student',
+        ]);
+    }
+
+    public function instructor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'instructor',
+        ]);
+    }
 
     /**
      * Indicate that the model's email address should be unverified.

@@ -35,10 +35,10 @@ class FeedbackController extends Controller
     public function store(FeedbackRecordRequest $request)
     {
         FeedbackRecord::create([
-            'student_id' => Auth::user()->student->id, // ensure it belongs to the logged-in student
+            'student_id' => Auth::user()->student->id, 
             'task_id'    => $request->task_id,
             'content'    => $request->content,
-            'rating'     => $request->rating ?? null, // optional rating if you allow it
+            'rating'     => $request->rating ?? null,
         ]);
 
         return redirect()->route('students.feedback.index')

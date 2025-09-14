@@ -90,8 +90,12 @@ class TaskController extends Controller
             'instructions' => 'required|string',
             'is_active' => 'required|boolean',
             'auto_grade' => 'required|boolean',
-            'attachment' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,png|max:10240', // <= file
+            'attachment' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,png|max:10240',
+            'allow_late_submission' => 'sometimes|boolean',
+
+            
         ]);
+        $validated['allow_late_submission'] = $request->has('allow_late_submission');
 
         $validated['instructor_id'] = Auth::user()->instructor->id;
 
@@ -110,10 +114,12 @@ class TaskController extends Controller
         foreach ($section->students as $student) {
             $attachData[$student->id] = [
                 'status' => 'assigned',
+                'due_date' => \Carbon\Carbon::parse($validated['due_date'])->format('Y-m-d H:i:s'),
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
         }
+
 
         if (!empty($attachData)) {
             $task->students()->attach($attachData);
@@ -163,7 +169,10 @@ class TaskController extends Controller
             'is_active' => 'required|boolean',
             'auto_grade' => 'required|boolean',
             'attachment' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,png|max:10240',
+            'allow_late_submission' => 'sometimes|boolean',
         ]);
+
+        $validated['allow_late_submission'] = $request->has('allow_late_submission');
 
         // Handle file upload
         if ($request->hasFile('attachment')) {
@@ -282,9 +291,13 @@ class TaskController extends Controller
 
         $task->students()->attach($validated['student_id'], [
             'status' => $validated['status'],
+            'due_date' => $validated['due_date'] ? 
+                \Carbon\Carbon::parse($validated['due_date'])->format('Y-m-d H:i:s') : 
+                \Carbon\Carbon::parse($task->due_date)->format('Y-m-d H:i:s'),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
 
         return redirect()->route('instructors.tasks.show', $task)
             ->with('success', 'Task assigned to student successfully');

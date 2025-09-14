@@ -11,6 +11,18 @@
                         </a>
                     </div>
 
+                    @if(session('success'))
+                        <div class="mb-4 p-3 rounded bg-green-100 text-green-800">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if($errors->any())
+                        <div class="mb-4 p-3 rounded bg-red-100 text-red-800">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
+
                     <!-- Task Information -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div>
@@ -28,15 +40,17 @@
                         <div>
                             <h3 class="text-sm font-semibold text-pink-600 mb-1">Status</h3>
                             <span @class([
-                                'px-2 py-1 text-xs rounded-full font-medium',
-                                'bg-yellow-100 text-yellow-800' => $studentTask->pivot->status === 'assigned',
-                                'bg-blue-100 text-blue-800' => $studentTask->pivot->status === 'in_progress',
-                                'bg-green-100 text-green-800' => $studentTask->pivot->status === 'submitted',
-                                'bg-purple-100 text-purple-800' => $studentTask->pivot->status === 'graded',
-                                'bg-red-100 text-red-800' => $studentTask->pivot->status === 'overdue'
-                            ])>
-                                {{ $submission ? ucfirst($submission->status) : 'Not submitted' }}
+                                    'px-2 py-1 text-xs rounded-full font-medium',
+                                    'bg-yellow-100 text-yellow-800' => $studentTask->pivot->status === 'assigned',
+                                    'bg-blue-100 text-blue-800' => $studentTask->pivot->status === 'in_progress',
+                                    'bg-green-100 text-green-800' => $studentTask->pivot->status === 'submitted',
+                                    'bg-purple-100 text-purple-800' => $studentTask->pivot->status === 'graded',
+                                    'bg-red-100 text-red-800' => $studentTask->pivot->status === 'overdue',
+                                    'bg-gray-200 text-gray-600' => $studentTask->pivot->status === 'missing', // 👈 add this
+                                ])>
+                                    {{ ucfirst($studentTask->pivot->status) }}
                             </span>
+
                         </div>
                     </div>
 

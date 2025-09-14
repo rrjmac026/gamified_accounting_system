@@ -42,10 +42,11 @@
                                                 'bg-blue-100 text-blue-800' => $task->pivot->status === 'in_progress',
                                                 'bg-green-100 text-green-800' => $task->pivot->status === 'submitted',
                                                 'bg-purple-100 text-purple-800' => $task->pivot->status === 'graded',
-                                                'bg-red-100 text-red-800' => $task->pivot->status === 'overdue'
+                                                'bg-red-100 text-red-800' => in_array($task->pivot->status, ['late', 'missing', 'overdue'])
                                             ])>
-                                                {{ $submission ? ucfirst($submission->status) : 'Not submitted' }}
+                                                {{ ucfirst($task->pivot->status) }}
                                             </span>
+
                                         </td>
                                         <td class="px-6 py-4 text-gray-900 dark:text-[#FFC8FB]">
                                             {{ $submission && $submission->score !== null ? $submission->score : 'Not graded' }}

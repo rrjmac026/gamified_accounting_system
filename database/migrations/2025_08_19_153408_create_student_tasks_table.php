@@ -20,8 +20,18 @@ return new class extends Migration
                   ->onDelete('cascade');
 
             // Pivot fields
-            $table->enum('status', ['assigned', 'in_progress', 'submitted', 'late', 'graded',
-                ])->default('assigned');
+            $table->enum('status', [
+                'assigned',
+                'in_progress',
+                'submitted',
+                'graded',
+                'late',
+                'overdue',
+                'missing',
+            ])->default('assigned');
+
+            $table->timestamp('due_date')->nullable();
+
             $table->decimal('score', 5, 2)->nullable();
             $table->integer('penalty')->nullable();
             $table->integer('xp_earned')->default(0);
@@ -31,7 +41,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            // 🔑 If you only want ONE record per (student, task), uncomment this:
+            // 🔑 If you only want ONE record per (student, task):
             // $table->unique(['student_id', 'task_id']);
         });
     }

@@ -72,51 +72,55 @@ class TaskController extends Controller
             'answers' => 'nullable|array',
         ]);
 
-        $filePath = null;
-        if ($request->hasFile('file')) {
-            $filePath = $request->file('file')->store('submissions', 'public');
+        $filePath = $request->hasFile('file')
+            ? $request->file('file')->store('submissions', 'public')
+            : null;
+
+        // === Late handling ===
+        $isLate = now()->gt($task->due_date);
+
+        if ($isLate && !$task->allow_late_submission) {
+            return back()->withErrors(['error' => 'Late submission is not allowed for this task.']);
         }
 
-        // === Late submission handling ===
-        $isLate = now()->greaterThan($task->due_date);
-
-        // MODE 1: Reject late
-        if ($isLate && $task->late_penalty === null) {
+        if ($isLate && is_null($task->late_penalty)) {
             return back()->withErrors(['error' => 'The deadline has passed. You cannot submit this task.']);
         }
 
-        // MODE 2: Accept with penalty
         $penaltyApplied = $isLate && $task->late_penalty > 0;
 
+        // Get next attempt number
+        $lastAttempt = TaskSubmission::where('task_id', $task->id)
+            ->where('student_id', $student->id)
+            ->max('attempt_number');
+        $attemptNumber = $lastAttempt ? $lastAttempt + 1 : 1;
+
+        // Save submission
         $submission = TaskSubmission::updateOrCreate(
-            [
-                'task_id' => $task->id,
-                'student_id' => $student->id,
-            ],
+            ['task_id' => $task->id, 'student_id' => $student->id],
             [
                 'submission_data' => $validated['answers'] ?? [],
                 'file_path' => $filePath,
                 'status' => $isLate ? 'late' : 'submitted',
                 'submitted_at' => now(),
-                'attempt_number' => 1
+                'attempt_number' => $attemptNumber,
             ]
         );
 
-        // Update pivot table
+        // Update pivot
         $pivotData = [
             'status' => $isLate ? 'late' : 'submitted',
             'submitted_at' => now(),
         ];
-
         if ($penaltyApplied) {
-            $pivotData['penalty'] = $task->late_penalty; 
+            $pivotData['penalty'] = $task->late_penalty;
         }
-
         $student->tasks()->updateExistingPivot($task->id, $pivotData);
 
         return redirect()->route('students.tasks.show', $task)
             ->with('success', $isLate
-                ? 'Task submitted late. A penalty will apply.'
-                : 'Task submitted successfully!');
+                ? '⚠️ Task submitted late. A penalty will apply.'
+                : '✅ Task submitted successfully!');
     }
+
 }

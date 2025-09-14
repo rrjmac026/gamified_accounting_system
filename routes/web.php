@@ -29,6 +29,7 @@ use App\Http\Controllers\Instructors\TaskQuestionController;
 use App\Http\Controllers\Instructors\TaskController;
 use App\Http\Controllers\Instructors\StudentTaskController;
 use App\Http\Controllers\Instructors\TaskSubmissionController;
+use App\Http\Controllers\QuizController;
 
 //Student Controllers
 use App\Http\Controllers\Students\StudentController;
@@ -120,15 +121,13 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
         Route::post('/task-submissions/{taskSubmission}/grade', [TaskSubmissionController::class, 'grade'])
             ->name('task-submissions.grade');
 
-        // CSV Upload/Download routes
-        Route::post('tasks/csv-upload', [TaskController::class, 'csvUpload'])->name('tasks.csv-upload');
-        Route::get('tasks/download-csv-template', [TaskController::class, 'downloadCsvTemplate'])->name('tasks.download-csv-template');
-        
         Route::post('/tasks/{task}/assign-students', [TaskController::class, 'assignToStudent'])
         ->name('tasks.assign-students');
         Route::get('/tasks/{task}/assign-students', [TaskController::class, 'showAssignStudentsForm'])
         ->name('tasks.assign-students-form');
-       
+
+        Route::post('/quizzes/{taskId}/import', [QuizController::class, 'import'])->name('quizzes.import');
+        Route::resource('/quizzes', QuizController::class);
         Route::resource('tasks', TaskController::class);
 
           
@@ -157,7 +156,14 @@ Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.
         Route::get('tasks/{task}', [\App\Http\Controllers\Students\TaskController::class, 'show'])->name('tasks.show');
         Route::post('tasks/{task}/submit', [\App\Http\Controllers\Students\TaskController::class, 'submit'])->name('tasks.submit');
         Route::resource('feedback', FeedbackController::class)->only(['create', 'store', 'index', 'show']);
-        Route::get('/todo', [TodoController::class, 'index'])->name('todo');
+        
+        Route::prefix('todo')->group(function () {
+        Route::get('/{status?}', [TodoController::class, 'index'])
+            ->where('status', 'missing|assigned|in_progress|late|submitted|graded')
+            ->name('todo.index');
+        });
+
+        Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submitAnswer'])->name('quizzes.submit');
 });
 
 Route::middleware('guest')->group(function () {

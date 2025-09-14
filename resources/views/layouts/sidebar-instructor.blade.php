@@ -50,6 +50,14 @@
                 <span>Submissions</span>
             </a>
         </div>
+        <div class="mt-2 space-y-1">
+            <a href="{{ route('instructors.quizzes.index') }}" 
+               class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 
+               {{ request()->routeIs('instructors.quizzes.*') ? 'bg-[#FFC8FB] text-[#595758]' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-[#FFEEF2]' }}">
+                <i class="fas fa-file-alt w-5 h-5"></i>
+                <span>Quizzes</span>
+            </a>
+        </div>
     </div>
 
     <!-- Reports -->

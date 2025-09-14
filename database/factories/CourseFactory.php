@@ -15,12 +15,12 @@ class CourseFactory extends Factory
     public function definition(): array
     {
         return [
-            'course_code' => $this->faker->unique()->bothify('CS###'),  // Example: CS101
-            'course_name' => $this->faker->words(3, true),              // Example: "Computer Science Basics"
+            'course_code' => $this->faker->unique()->bothify('CS###'),
+            'course_name' => $this->faker->words(3, true),              
             'description' => $this->faker->sentence(10),
             'department' => $this->faker->randomElement(['Engineering', 'Business', 'Arts', 'Science']),
             'duration_years' => $this->faker->numberBetween(2, 6),
-            'is_active' => $this->faker->boolean(90), // 90% chance true
+            'is_active' => $this->faker->boolean(90), 
         ];
     }
 }

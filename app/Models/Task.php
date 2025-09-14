@@ -26,13 +26,6 @@ class Task extends Model
         'auto_grade',
         'parent_task_id',
         'attachment',
-
-        // Question fields (when type = 'question')
-        'question_type', 
-        'correct_answer',
-        'points',
-        'order_index',
-        'options',
     ];
 
     protected $casts = [

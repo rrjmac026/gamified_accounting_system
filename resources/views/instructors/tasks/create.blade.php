@@ -96,12 +96,6 @@
 
                         <!-- Task Settings -->
                         <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Difficulty Level (1-5)</label>
-                            <input type="number" name="difficulty_level" value="{{ old('difficulty_level', 1) }}" min="1" max="5" required
-                                   class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
-                        </div>
-
-                        <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Retry Limit</label>
                             <input type="number" name="retry_limit" value="{{ old('retry_limit', 1) }}" min="1" required
                                    class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
@@ -156,6 +150,12 @@
                                    class="rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
                             <span class="ml-2 text-sm text-gray-700">Auto Grade</span>
                         </label>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" name="allow_late_submission" value="1"
+                            @checked(old('allow_late_submission', $task->allow_late_submission ?? false))>
+                        <label class="ml-2 text-sm text-gray-700">Allow late submissions</label>
                     </div>
 
                     <div class="flex justify-end gap-4">

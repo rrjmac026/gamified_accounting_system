@@ -81,7 +81,6 @@ class TaskController extends Controller
             'type' => 'required|in:assignment,exercise,quiz,project',
             'subject_id' => 'required|exists:subjects,id',
             'section_id' => 'required|exists:sections,id',
-            'difficulty_level' => 'required|integer|between:1,5',
             'retry_limit' => 'required|integer|min:1',
             'late_penalty' => 'nullable|integer|min:0',
             'max_score' => 'required|integer|min:0',
@@ -159,7 +158,6 @@ class TaskController extends Controller
             'type' => 'required|in:assignment,exercise,quiz,project',
             'subject_id' => 'required|exists:subjects,id',
             'section_id' => 'required|exists:sections,id',
-            'difficulty_level' => 'required|integer|between:1,5',
             'retry_limit' => 'required|integer|min:1',
             'late_penalty' => 'nullable|integer|min:0',
             'max_score' => 'required|integer|min:0',
@@ -172,7 +170,8 @@ class TaskController extends Controller
             'allow_late_submission' => 'sometimes|boolean',
         ]);
 
-        $validated['allow_late_submission'] = $request->has('allow_late_submission');
+        $validated['allow_late_submission'] = $request->boolean('allow_late_submission');
+
 
         // Handle file upload
         if ($request->hasFile('attachment')) {

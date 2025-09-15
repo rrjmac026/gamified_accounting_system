@@ -7,6 +7,7 @@ use App\Models\Section;
 use App\Models\Course;
 use App\Models\Subject;
 use App\Models\Student;
+use App\Models\Instructor;
 use Illuminate\Http\Request;
 
 class SectionController extends Controller
@@ -77,7 +78,10 @@ class SectionController extends Controller
     public function edit(Section $section)
     {
         $courses = Course::where('is_active', true)->get();
-        return view('admin.sections.edit', compact('section', 'courses'));
+        $instructors = Instructor::with('user')->get();
+        $students = Student::all();
+         $section->load(['instructors', 'students']);
+        return view('admin.sections.edit', compact('section', 'instructors', 'courses', 'students'));
     }
 
     // Update a section

@@ -18,7 +18,6 @@ class Badge extends Model
     ];
 
     protected $casts = [
-        'criteria' => 'array',
         'xp_threshold' => 'integer',
         'is_active' => 'boolean'
     ];

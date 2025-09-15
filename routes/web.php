@@ -34,6 +34,9 @@ use App\Http\Controllers\QuizController;
 //Student Controllers
 use App\Http\Controllers\Students\StudentController;
 use App\Http\Controllers\Students\TodoController;
+use App\Http\Controllers\Students\StudentSubjectController;
+use App\Http\Controllers\Students\StudentProgressController;
+
 
 
 Route::get('/', function () {
@@ -162,6 +165,16 @@ Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.
             ->where('status', 'missing|assigned|in_progress|late|submitted|graded')
             ->name('todo.index');
         });
+
+        Route::get('/progress', [StudentProgressController::class, 'progress'])->name('progress');
+        Route::get('/achievements', [StudentProgressController::class, 'achievements'])->name('achievements');
+
+        
+        //subjects
+        Route::get('/subjects', [\App\Http\Controllers\Students\StudentSubjectController::class, 'index'])
+            ->name('subjects.index');
+        Route::get('/subjects/{id}', [\App\Http\Controllers\Students\StudentSubjectController::class, 'show'])
+            ->name('subjects.show');
 
         Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submitAnswer'])->name('quizzes.submit');
 });

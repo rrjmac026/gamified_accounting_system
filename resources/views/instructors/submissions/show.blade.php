@@ -27,15 +27,26 @@
                         </div>
                         <div>
                             <h3 class="text-sm font-semibold text-gray-600">Status</h3>
+                            @php
+                                $submittedAt = $taskSubmission->submitted_at;
+                                $dueAt = $taskSubmission->task->due_date;
+                                $isLate = $submittedAt && $submittedAt->gt($dueAt);
+                            @endphp
+
                             <span @class([
                                 'px-2 py-1 text-sm rounded-full',
                                 'bg-yellow-100 text-yellow-800' => $taskSubmission->status === 'pending',
                                 'bg-green-100 text-green-800' => $taskSubmission->status === 'graded',
-                                'bg-red-100 text-red-800' => $taskSubmission->status === 'late'
+                                'bg-red-100 text-red-800' => $isLate && !$taskSubmission->task->allow_late_submission,
+                                'bg-yellow-200 text-yellow-900' => $isLate && $taskSubmission->task->allow_late_submission,
                             ])>
                                 {{ Str::title($taskSubmission->status) }}
+                                @if($isLate)
+                                    (Late Submission)
+                                @endif
                             </span>
                         </div>
+
                     </div>
 
                     <!-- Submission Content -->

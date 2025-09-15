@@ -107,13 +107,13 @@ trait Loggable
         // Create a descriptive string based on model type and identifiers
         switch ($modelName) {
             case 'User':
-                return ucfirst($action) . " user: {$identifiers['name']} ({$identifiers['email']})";
+                return ucfirst($action) . " user: " . ($identifiers['name'] ?? 'Unknown') . " (" . ($identifiers['email'] ?? 'Unknown') . ")";
                 
             case 'Student':
                 $name = $identifiers['user.name'] ?? $identifiers['name'] ?? 'Unknown';
-                $course = $identifiers['course'] ?? '';
+                $course = $identifiers['course.course_code'] ?? '';
                 $year = $identifiers['year_level'] ?? '';
-                $section = $identifiers['section'] ?? '';
+                $section = $identifiers['section.section_name'] ?? '';
                 return ucfirst($action) . " student: {$name}" . 
                        ($course ? " - {$course}" : '') .
                        ($year ? " Year {$year}" : '') .
@@ -128,7 +128,9 @@ trait Loggable
                        ($dept ? " - {$dept}" : '');
                        
             case 'Course':
-                return ucfirst($action) . " course: {$identifiers['course_code']} - {$identifiers['course_name']}";
+                $courseCode = $identifiers['course_code'] ?? 'Unknown';
+                $courseName = $identifiers['course_name'] ?? 'Unknown';
+                return ucfirst($action) . " course: {$courseCode} - {$courseName}";
                 
             case 'Subject':
                 $code = $identifiers['subject_code'] ?? '';
@@ -148,7 +150,9 @@ trait Loggable
                 return ucfirst($action) . " {$type}: {$title}" . ($subject ? " in {$subject}" : '');
                 
             case 'Badge':
-                return ucfirst($action) . " badge: {$identifiers['name']} ({$identifiers['points_required']} points)";
+                $name = $identifiers['name'] ?? 'Unknown Badge';
+                $pointsRequired = $identifiers['points_required'] ?? null;
+                return ucfirst($action) . " badge: {$name}" . ($pointsRequired !== null ? " ({$pointsRequired} points)" : '');
                 
             case 'Grade':
                 $student = $identifiers['student.user.name'] ?? 'Unknown Student';

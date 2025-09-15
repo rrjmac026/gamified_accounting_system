@@ -29,9 +29,10 @@ return new class extends Migration
                 'overdue',
                 'missing',
             ])->default('assigned');
-
+            
+            $table->boolean('was_late')->default(false);
             $table->timestamp('due_date')->nullable();
-
+            
             $table->decimal('score', 5, 2)->nullable();
             $table->integer('penalty')->nullable();
             $table->integer('xp_earned')->default(0);
@@ -40,9 +41,7 @@ return new class extends Migration
             $table->integer('retry_count')->default(0);
 
             $table->timestamps();
-
-            // 🔑 If you only want ONE record per (student, task):
-            // $table->unique(['student_id', 'task_id']);
+            $table->unique(['student_id','task_id']);
         });
     }
 

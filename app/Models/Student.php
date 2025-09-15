@@ -15,7 +15,6 @@ class Student extends Model
         'student_number',
         'course_id',
         'year_level',
-        'section',
         'total_xp',
         'current_level',
         'performance_rating'
@@ -37,9 +36,10 @@ class Student extends Model
     public function tasks()
     {
         return $this->belongsToMany(Task::class, 'student_tasks')
-                    ->withPivot('status', 'score', 'xp_earned', 'submitted_at', 'graded_at', 'retry_count')
+                    ->withPivot('status', 'score', 'xp_earned', 'submitted_at', 'graded_at', 'retry_count', 'due_date')
                     ->withTimestamps();
     }
+
 
 
     public function studentTasks()
@@ -98,8 +98,58 @@ class Student extends Model
         return $this->belongsTo(Course::class, 'course_id');
     }
 
+    public function section()
+    {
+        return $this->belongsTo(Section::class);
+    }
+
     public function sections()
     {
-        return $this->belongsToMany(Section::class, 'section_student');
+        return $this->belongsToMany(Section::class, 'section_student')
+                    ->withTimestamps();
+    }
+
+    public function getLeaderboardRank()
+    {
+        // Example: rank within same section
+        $sectionIds = $this->sections->pluck('id');
+
+        $studentsInSection = Student::whereHas('sections', fn($q) => $q->whereIn('sections.id', $sectionIds))
+            ->with('xpTransactions')
+            ->get();
+
+        $ranked = $studentsInSection->sortByDesc(fn($s) => $s->xpTransactions->sum('amount'))->values();
+
+        return $ranked->search(fn($s) => $s->id === $this->id) + 1;
+    }
+
+    public function getTotalXp()
+    {
+        return $this->xpTransactions()->sum('amount') ?? 0;
+    }
+
+    public function checkAndAwardBadges()
+    {
+        $totalXp = $this->getTotalXp();
+        
+        // Get badges that student hasn't earned yet but qualifies for
+        // Modified to check all badge types, not just 'xp' criteria
+        $eligibleBadges = Badge::where(function($query) use ($totalXp) {
+                $query->where('xp_threshold', '<=', $totalXp)
+                      ->where('is_active', true);
+            })
+            ->whereNotIn('id', $this->badges()->pluck('badges.id'))
+            ->get();
+        
+        $newlyAwarded = [];
+        foreach ($eligibleBadges as $badge) {
+            // Actually award the badge by adding to pivot table
+            $this->badges()->attach($badge->id, [
+                'earned_at' => now(),
+            ]);
+            $newlyAwarded[] = $badge;
+        }
+        
+        return collect($newlyAwarded);
     }
 }

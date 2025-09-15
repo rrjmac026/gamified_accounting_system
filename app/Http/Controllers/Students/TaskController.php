@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Students;
 
 use App\Http\Controllers\Controller;
 use App\Models\Task;
+use App\Models\Badge;
 use App\Models\TaskSubmission;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -17,19 +18,23 @@ class TaskController extends Controller
     {
         $student = auth()->user()->student;
 
-        $tasks = $student->tasks()
-            ->with([
-                'subject',
-                'submissions' => function ($query) use ($student) {
-                    $query->where('student_id', $student->id)
-                        ->latest('submitted_at');
-                }
-            ])
-            ->get();
+        // Load tasks assigned to this student
+        $tasks = $student->tasks()->with('subject')->get();
 
+        // Update statuses for overdue tasks
+        foreach ($tasks as $task) {
+            $pivot = $task->students()->where('student_id', $student->id)->first()->pivot;
+
+            if (in_array($pivot->status, ['assigned', 'in_progress']) && $task->due_date < now()) {
+                $task->students()->updateExistingPivot($student->id, [
+                    'status' => 'missing',
+                ]);
+            }
+        }
 
         return view('students.tasks.index', compact('tasks'));
     }
+
 
     /**
      * Show details of a single assigned task.
@@ -40,8 +45,9 @@ class TaskController extends Controller
 
         // Get the student-task pivot (status, score, etc.)
         $studentTask = $student->tasks()
-            ->where('tasks.id', $task->id)
-            ->firstOrFail();
+        ->where('tasks.id', $task->id)
+        ->withPivot(['score', 'xp_earned', 'status', 'was_late', 'submitted_at', 'graded_at', 'penalty'])
+        ->firstOrFail();
 
         // Load relations for displaying task details
         $task->load(['subject', 'instructor.user', 'questions']);
@@ -59,6 +65,9 @@ class TaskController extends Controller
     /**
      * Store student submission (file upload or answers).
      */
+    /**
+ * Store student submission (file upload or answers).
+ */
     public function submit(Request $request, Task $task)
     {
         $student = Auth::user()->student;
@@ -83,10 +92,7 @@ class TaskController extends Controller
             return back()->withErrors(['error' => 'Late submission is not allowed for this task.']);
         }
 
-        if ($isLate && is_null($task->late_penalty)) {
-            return back()->withErrors(['error' => 'The deadline has passed. You cannot submit this task.']);
-        }
-
+        // If late submission is allowed, apply penalty if set
         $penaltyApplied = $isLate && $task->late_penalty > 0;
 
         // Get next attempt number
@@ -107,20 +113,40 @@ class TaskController extends Controller
             ]
         );
 
-        // Update pivot
-        $pivotData = [
-            'status' => $isLate ? 'late' : 'submitted',
+        // Update pivot - Fixed the logic
+        $student->tasks()->updateExistingPivot($task->id, [
+            'status' => 'submitted',
             'submitted_at' => now(),
-        ];
-        if ($penaltyApplied) {
-            $pivotData['penalty'] = $task->late_penalty;
-        }
-        $student->tasks()->updateExistingPivot($task->id, $pivotData);
-
+            'was_late' => $isLate,
+            'penalty' => $penaltyApplied ? $task->late_penalty : null,
+        ]);
+        
+        $this->checkAndAssignBadges($student);
+        // FIXED: Add proper redirect with success message
+        $message = $isLate 
+            ? 'Late submission completed successfully' . ($penaltyApplied ? ' (penalty applied)' : '') 
+            : 'Task submitted successfully!';
+        
         return redirect()->route('students.tasks.show', $task)
-            ->with('success', $isLate
-                ? '⚠️ Task submitted late. A penalty will apply.'
-                : '✅ Task submitted successfully!');
+            ->with('success', $message);
+    }
+
+    protected function checkAndAssignBadges($student)
+    {
+        // Example: total XP earned so far
+        $totalXp = $student->xpTransactions()->sum('amount');
+
+        // Find all active badges that match criteria
+        $eligibleBadges = Badge::where('is_active', true)
+            ->where('xp_threshold', '<=', $totalXp)
+            ->get();
+
+        foreach ($eligibleBadges as $badge) {
+            // Attach if not already earned
+            $student->badges()->syncWithoutDetaching([
+                $badge->id => ['earned_at' => now()]
+            ]);
+        }
     }
 
 }

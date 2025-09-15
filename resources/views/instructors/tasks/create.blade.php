@@ -140,22 +140,25 @@
                         <label class="flex items-center">
                             <input type="hidden" name="is_active" value="0">
                             <input type="checkbox" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}
-                                   class="rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
+                                class="rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
                             <span class="ml-2 text-sm text-gray-700">Active</span>
                         </label>
 
                         <label class="flex items-center">
                             <input type="hidden" name="auto_grade" value="0">
                             <input type="checkbox" name="auto_grade" value="1" {{ old('auto_grade') ? 'checked' : '' }}
-                                   class="rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
+                                class="rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
                             <span class="ml-2 text-sm text-gray-700">Auto Grade</span>
                         </label>
-                    </div>
 
-                    <div class="flex items-center">
-                        <input type="checkbox" name="allow_late_submission" value="1"
-                            @checked(old('allow_late_submission', $task->allow_late_submission ?? false))>
-                        <label class="ml-2 text-sm text-gray-700">Allow late submissions</label>
+                        <!-- Fixed: Remove reference to $task since it doesn't exist in create view -->
+                        <label class="flex items-center">
+                            <input type="hidden" name="allow_late_submission" value="0">
+                            <input type="checkbox" name="allow_late_submission" value="1" 
+                                {{ old('allow_late_submission') ? 'checked' : '' }}
+                                class="rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
+                            <span class="ml-2 text-sm text-gray-700">Allow late submissions</span>
+                        </label>
                     </div>
 
                     <div class="flex justify-end gap-4">

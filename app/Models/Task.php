@@ -14,7 +14,6 @@ class Task extends Model
         'subject_id',
         'instructor_id',
         'section_id',
-        'difficulty_level',
         'max_score',
         'xp_reward',
         'retry_limit',
@@ -26,6 +25,7 @@ class Task extends Model
         'auto_grade',
         'parent_task_id',
         'attachment',
+        'allow_late_submission',
     ];
 
     protected $casts = [

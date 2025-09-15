@@ -39,16 +39,26 @@
                         </div>
                         <div>
                             <h3 class="text-sm font-semibold text-pink-600 mb-1">Status</h3>
+                            @php
+                                $status = ucfirst($studentTask->pivot->status);
+                                $isLate = $studentTask->pivot->was_late;
+                            @endphp
+
                             <span @class([
-                                    'px-2 py-1 text-xs rounded-full font-medium',
-                                    'bg-yellow-100 text-yellow-800' => $studentTask->pivot->status === 'assigned',
-                                    'bg-blue-100 text-blue-800' => $studentTask->pivot->status === 'in_progress',
-                                    'bg-green-100 text-green-800' => $studentTask->pivot->status === 'submitted',
-                                    'bg-purple-100 text-purple-800' => $studentTask->pivot->status === 'graded',
-                                    'bg-red-100 text-red-800' => $studentTask->pivot->status === 'overdue',
-                                    'bg-gray-200 text-gray-600' => $studentTask->pivot->status === 'missing', // 👈 add this
-                                ])>
-                                    {{ ucfirst($studentTask->pivot->status) }}
+                                'px-2 py-1 text-xs rounded-full font-medium',
+                                'bg-yellow-100 text-yellow-800' => $studentTask->pivot->status === 'assigned',
+                                'bg-blue-100 text-blue-800' => $studentTask->pivot->status === 'in_progress',
+                                'bg-green-100 text-green-800' => $studentTask->pivot->status === 'submitted' && !$isLate,
+                                'bg-purple-100 text-purple-800' => $studentTask->pivot->status === 'graded' && !$isLate,
+                                'bg-red-100 text-red-800' => $isLate && !$task->allow_late_submission,
+                                'bg-yellow-200 text-yellow-900' => $isLate && $task->allow_late_submission,
+                                'bg-red-100 text-red-800' => $studentTask->pivot->status === 'overdue',
+                                'bg-gray-200 text-gray-600' => $studentTask->pivot->status === 'missing',
+                            ])>
+                                {{ $status }}
+                                @if($isLate)
+                                    (Late Submission)
+                                @endif
                             </span>
 
                         </div>
@@ -151,8 +161,26 @@
                             <h3 class="text-lg font-semibold text-pink-600 mb-2">Submission Details</h3>
                             <div class="space-y-2">
                                 <p class="text-gray-700">
-                                    <span class="font-medium">Submitted:</span> {{ isset($studentTask->pivot->submitted_at) ? \Carbon\Carbon::parse($studentTask->pivot->submitted_at)->format('F j, Y g:i A') : 'N/A' }}
+                                    <span class="font-medium">Submitted:</span> 
+                                    {{ isset($studentTask->pivot->submitted_at) ? \Carbon\Carbon::parse($studentTask->pivot->submitted_at)->format('F j, Y g:i A') : 'N/A' }}
                                 </p>
+
+                                @if($studentTask->pivot->submitted_at)
+                                <p class="text-gray-700">
+                                    <span class="font-medium">Late Submission:</span>
+                                    @if($studentTask->pivot->was_late)
+                                        @if($task->allow_late_submission)
+                                            <span class="text-yellow-700 font-semibold">Yes (Allowed)</span>
+                                        @else
+                                            <span class="text-red-700 font-semibold">Yes (Not Allowed)</span>
+                                        @endif
+                                    @else
+                                        <span class="text-green-700 font-semibold">No</span>
+                                    @endif
+                                </p>
+                            @endif
+
+
                                 @if($studentTask->pivot->status === 'graded')
                                     <p class="text-gray-700">
                                         <span class="font-medium">Score:</span> {{ $studentTask->pivot->score }} / {{ $task->max_score }}
@@ -163,6 +191,7 @@
                                 @endif
                             </div>
                         </div>
+
                     @endif
 
                     <div class="mt-6 bg-gray-50 p-6 rounded-lg shadow border border-gray-200">

@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name'); // Badge name
             $table->text('description')->nullable(); // Optional badge description
             $table->string('icon_path')->nullable(); // Path to badge icon/image
-            $table->json('criteria')->nullable(); // Store multiple conditions as JSON
+            $table->string('criteria')->nullable(); // Store multiple conditions as JSON
             $table->integer('xp_threshold')->default(0); // XP required to earn badge
             $table->boolean('is_active')->default(true); // Whether badge is active
             $table->timestamps();

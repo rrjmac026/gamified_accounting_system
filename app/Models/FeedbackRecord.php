@@ -11,11 +11,13 @@ class FeedbackRecord extends Model
     protected $fillable = [
         'student_id',
         'task_id',
-        'feedback_type', // automated, manual, ai_generated
+        'feedback_type',
         'feedback_text',
         'recommendations',
         'generated_at',
-        'is_read'
+        'is_read',
+        'rating',
+        'is_anonymous',
     ];
 
     protected $casts = [

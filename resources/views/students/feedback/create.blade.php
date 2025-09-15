@@ -63,8 +63,8 @@
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Feedback Type</label>
                         <select name="feedback_type" required class="w-full rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 transition-colors duration-200">
                             <option value="">Select Type</option>
-                            <option value="general" {{ old('feedback_type') == 'general' ? 'selected' : '' }}>General</option>
-                            <option value="improvement" {{ old('feedback_type') == 'improvement' ? 'selected' : '' }}>Improvement</option>
+                            <option value="general" {{ old('feedback_type') == 'general' ? 'selected' : '' }}>General Feedback</option>
+                            <option value="improvement" {{ old('feedback_type') == 'improvement' ? 'selected' : '' }}>Improvement Suggestion</option>
                             <option value="question" {{ old('feedback_type') == 'question' ? 'selected' : '' }}>Question</option>
                         </select>
                         @error('feedback_type')
@@ -84,9 +84,10 @@
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Recommendations</label>
-                        <textarea name="recommendations" rows="3" required 
+                        <p class="text-sm text-gray-500 mb-2">Enter each recommendation on a new line</p>
+                        <textarea name="recommendations" rows="4" required 
                                   class="w-full rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 transition-colors duration-200"
-                                  placeholder="What suggestions do you have for improvement?">{{ old('recommendations') }}</textarea>
+                                  placeholder="Enter your recommendations here">{{ old('recommendations') }}</textarea>
                         @error('recommendations')
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
@@ -97,20 +98,32 @@
                     <input type="hidden" name="is_read" value="0">
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Rating (Optional)</label>
-                        <div class="flex space-x-6">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                            Rating <span class="text-red-500">*</span>
+                        </label>
+                        <p class="text-sm text-gray-500 mb-3">Please rate your experience with this task</p>
+                        <div class="flex flex-wrap gap-4">
                             @for($i = 1; $i <= 5; $i++)
-                                <label class="flex items-center space-x-2 cursor-pointer">
-                                    <input type="radio" name="rating" value="{{ $i }}" class="text-indigo-600 focus:ring-indigo-500 focus:ring-2">
+                                <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded transition-colors">
+                                    <input type="radio" name="rating" value="{{ $i }}" 
+                                           {{ old('rating') == $i ? 'checked' : '' }}
+                                           {{ $i == 3 && !old('rating') ? 'checked' : '' }}
+                                           class="text-indigo-600 focus:ring-indigo-500 focus:ring-2" required>
                                     <span class="text-gray-700 dark:text-gray-300 font-medium">{{ $i }}</span>
                                     <div class="flex">
                                         @for($j = 1; $j <= $i; $j++)
-                                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                                            <i class="fas fa-star text-amber-400 text-sm"></i>
+                                        @endfor
+                                        @for($k = $i + 1; $k <= 5; $k++)
+                                            <i class="far fa-star text-gray-300 text-sm"></i>
                                         @endfor
                                     </div>
                                 </label>
                             @endfor
                         </div>
+                        @error('rating')
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div class="flex justify-end space-x-4 pt-4">
@@ -127,4 +140,81 @@
             </div>
         </div>
     </div>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ratingInputs = document.querySelectorAll('input[name="rating"]');
+    const ratingLabels = document.querySelectorAll('label[data-rating]');
+    
+    ratingInputs.forEach((input, index) => {
+        input.addEventListener('change', function() {
+            // Update star display when rating is selected
+            updateStarDisplay(parseInt(this.value));
+        });
+        
+        // Add hover effects
+        input.closest('label').addEventListener('mouseenter', function() {
+            const rating = parseInt(input.value);
+            highlightStars(rating);
+        });
+        
+        input.closest('label').addEventListener('mouseleave', function() {
+            const checkedRating = document.querySelector('input[name="rating"]:checked');
+            if (checkedRating) {
+                updateStarDisplay(parseInt(checkedRating.value));
+            } else {
+                resetStars();
+            }
+        });
+    });
+    
+    function highlightStars(rating) {
+        ratingInputs.forEach((input, index) => {
+            const stars = input.closest('label').querySelectorAll('i');
+            const inputRating = parseInt(input.value);
+            
+            stars.forEach((star, starIndex) => {
+                if (starIndex < rating && inputRating <= rating) {
+                    star.className = 'fas fa-star text-amber-400 text-sm';
+                } else if (starIndex < inputRating) {
+                    star.className = 'fas fa-star text-amber-200 text-sm';
+                } else {
+                    star.className = 'far fa-star text-gray-300 text-sm';
+                }
+            });
+        });
+    }
+    
+    function updateStarDisplay(selectedRating) {
+        ratingInputs.forEach((input) => {
+            const stars = input.closest('label').querySelectorAll('i');
+            const inputRating = parseInt(input.value);
+            
+            stars.forEach((star, starIndex) => {
+                if (starIndex < inputRating && inputRating <= selectedRating) {
+                    star.className = 'fas fa-star text-amber-400 text-sm';
+                } else if (starIndex < inputRating) {
+                    star.className = 'far fa-star text-gray-300 text-sm';
+                } else {
+                    star.className = 'far fa-star text-gray-300 text-sm';
+                }
+            });
+        });
+    }
+    
+    function resetStars() {
+        ratingInputs.forEach((input) => {
+            const stars = input.closest('label').querySelectorAll('i');
+            const inputRating = parseInt(input.value);
+            
+            stars.forEach((star, starIndex) => {
+                if (starIndex < inputRating) {
+                    star.className = 'fas fa-star text-amber-400 text-sm';
+                } else {
+                    star.className = 'far fa-star text-gray-300 text-sm';
+                }
+            });
+        });
+    }
+});
+</script>
 </x-app-layout>

@@ -61,9 +61,8 @@
                                     <th class="px-6 py-3 text-left text-sm font-semibold">Type</th>
                                     <th class="px-6 py-3 text-left text-sm font-semibold">Subject</th>
                                     <th class="px-6 py-3 text-left text-sm font-semibold">Due Date</th>
-                                    <th class="px-6 py-3 text-left text-sm font-semibold">Level</th>
                                     <th class="px-6 py-3 text-left text-sm font-semibold">Status</th>
-                                    <th class="px-6 py-3 text-left text-sm font-semibold">Students</th>
+                                    <th class="px-6 py-3 text-left text-sm font-semibold">Submissions</th>
                                     <th class="px-6 py-3 text-left text-sm font-semibold">Actions</th>
                                 </tr>
                             </thead>
@@ -74,7 +73,6 @@
                                         <td class="px-6 py-4 capitalize">{{ $task->type }}</td>
                                         <td class="px-6 py-4">{{ $task->subject->subject_name }}</td>
                                         <td class="px-6 py-4">{{ $task->due_date->format('M d, Y H:i') }}</td>
-                                        <td class="px-6 py-4">{{ $task->difficulty_level }}</td>
                                         <td class="px-6 py-4">
                                             <span class="px-2 py-1 text-xs rounded-full 
                                                 {{ $task->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
@@ -82,9 +80,14 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <span class="text-sm text-gray-600">
-                                                {{ $task->students->count() }} assigned
-                                            </span>
+                                            <div class="text-sm">
+                                                <div class="text-gray-900 font-medium">
+                                                    {{ $task->submissions->count() }} submitted
+                                                </div>
+                                                <div class="text-gray-500 text-xs">
+                                                    of {{ $task->students->count() }} assigned
+                                                </div>
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4 space-x-3">
                                             <a href="{{ route('instructors.tasks.show', $task) }}" 
@@ -131,8 +134,8 @@
                     <p class="text-2xl font-bold text-green-600">{{ $tasks->where('parent_task_id', null)->where('is_active', true)->count() }}</p>
                 </div>
                 <div class="bg-white p-4 rounded-lg shadow border border-[#FFC8FB]/30">
-                    <h3 class="text-sm font-medium text-gray-500">Student Assignments</h3>
-                    <p class="text-2xl font-bold text-blue-600">{{ $tasks->where('parent_task_id', null)->sum(function($task) { return $task->students->count(); }) }}</p>
+                    <h3 class="text-sm font-medium text-gray-500">Total Submissions</h3>
+                    <p class="text-2xl font-bold text-blue-600">{{ $tasks->where('parent_task_id', null)->sum(function($task) { return $task->submissions->count(); }) }}</p>
                 </div>
             </div>
         </div>

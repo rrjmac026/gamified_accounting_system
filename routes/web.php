@@ -14,7 +14,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SectionController;
 
 use App\Http\Controllers\Admin\InstructorManagementController;
-use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\Admin\EvaluationController;
 use App\Http\Controllers\Admin\FeedbackRecordController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\StudentManagementController;
@@ -168,7 +168,11 @@ Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.
 
         Route::get('/progress', [StudentProgressController::class, 'progress'])->name('progress');
         Route::get('/achievements', [StudentProgressController::class, 'achievements'])->name('achievements');
-
+        
+        //Evaluation Routes
+        Route::get('/evaluations/create', [EvaluationController::class, 'create'])->name('evaluations.create');
+        Route::post('/evaluations', [EvaluationController::class, 'store'])->name('evaluations.store');
+        Route::get('/my-evaluations', [EvaluationController::class, 'myEvaluations'])->name('evaluations.index');
         
         //subjects
         Route::get('/subjects', [\App\Http\Controllers\Students\StudentSubjectController::class, 'index'])

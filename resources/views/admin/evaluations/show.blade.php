@@ -20,7 +20,7 @@
 
                     <div>
                         <h3 class="text-sm font-semibold text-[#FF92C2] dark:text-[#FFC8FB] mb-1">Course</h3>
-                        <p class="text-gray-700 dark:text-[#FFC8FB]">{{ $evaluation->course->name }}</p>
+                        <p class="text-gray-700 dark:text-[#FFC8FB]">{{ $evaluation->course->course_name }}</p>
                     </div>
 
                     <div>

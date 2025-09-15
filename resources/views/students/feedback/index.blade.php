@@ -59,20 +59,20 @@
                             <tbody class="bg-[#FFF6FD] divide-y divide-[#FFC8FB]">
                                 @forelse($feedbacks as $feedback)
                                     <tr class="hover:bg-[#FFD9FF] transition-colors duration-150">
-                                        <td class="px-6 py-4 text-gray-900 dark:text-[#FFC8FB]">
+                                        <td class="px-6 py-4 text-gray-900 dark:text-[black]">
                                             {{ $feedback->task->title }}
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex items-center">
                                                 @for($i = 1; $i <= 5; $i++)
-                                                    <i class="fas fa-star {{ $i <= $feedback->rating ? 'text-[#FF92C2]' : 'text-gray-300' }}"></i>
+                                                    <i class="fas fa-star {{ $i <= $feedback->rating ? 'text-yellow-400' : 'text-gray-300' }}"></i>
                                                 @endfor
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 text-gray-900 dark:text-[#FFC8FB] capitalize">
+                                        <td class="px-6 py-4 text-gray-900 dark:text-[black] capitalize">
                                             {{ $feedback->feedback_type }}
                                         </td>
-                                        <td class="px-6 py-4 text-gray-900 dark:text-[#FFC8FB]">
+                                        <td class="px-6 py-4 text-gray-900 dark:text-[black]">
                                             {{ $feedback->created_at->format('M d, Y h:i A') }}
                                         </td>
                                         <td class="px-6 py-4">

@@ -140,7 +140,7 @@
                 <i class="fas fa-comments w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>
                 <span>Feedback</span>
             </a>
-            <a href="#" 
+            <a href="{{ route('students.evaluations.index') }}" 
                class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 hover:scale-[0.98] group relative overflow-hidden
                {{ request()->routeIs('students.evaluation.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FF92C2]/30 text-[#595758] shadow-lg border border-[#FF92C2]/20' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-gradient-to-r hover:from-[#FFEEF2] hover:to-[#FFF0F5]' }}">
                 <i class="fas fa-clipboard-check w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>

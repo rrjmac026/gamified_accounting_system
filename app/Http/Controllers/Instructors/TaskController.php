@@ -147,7 +147,8 @@ class TaskController extends Controller
     {
         $instructor = Auth::user()->instructor;
         $subjects = $instructor->subjects;
-        return view('instructors.tasks.edit', compact('task', 'subjects'));
+        $sections = $instructor->sections;
+        return view('instructors.tasks.edit', compact('task', 'subjects','sections'));
     }
 
     public function update(Request $request, Task $task)

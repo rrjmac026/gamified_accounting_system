@@ -56,7 +56,24 @@
                         <p class="text-gray-900 dark:text-gray-100 font-medium capitalize">{{ $feedback->feedback_type }}</p>
                     </div>
 
-                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg md:col-span-2">
+                    <!-- Add Rating Display -->
+                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                        <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">Rating</h3>
+                        @if($feedback->rating)
+                            <div class="flex items-center space-x-2">
+                                <div class="flex">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="fas fa-star {{ $i <= $feedback->rating ? 'text-yellow-400' : 'text-gray-300' }}"></i>
+                                    @endfor
+                                </div>
+                                <span class="text-gray-900 dark:text-gray-100 font-medium">{{ $feedback->rating }}/5</span>
+                            </div>
+                        @else
+                            <p class="text-gray-500 dark:text-gray-400">No rating provided</p>
+                        @endif
+                    </div>
+
+                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                         <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">Generated At</h3>
                         <p class="text-gray-900 dark:text-gray-100 font-medium">{{ $feedback->generated_at->format('F j, Y g:i A') }}</p>
                     </div>

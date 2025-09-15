@@ -32,10 +32,10 @@
                                         <td class="py-4 px-6 text-sm capitalize">{{ $feedback->feedback_type }}</td>
                                         <td class="py-4 px-6 text-sm">{{ $feedback->created_at->format('Y-m-d H:i') }}</td>
                                         <td class="py-4 px-6 text-sm space-x-2">
-                                            <a href="{{ route('feedback-records.show', $feedback) }}" class="text-[#FF92C2] hover:text-[#ff6fb5]">
+                                            <a href="{{ route('admin.feedback-records.show', $feedback) }}" class="text-[#FF92C2] hover:text-[#ff6fb5]">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('feedback-records.edit', $feedback) }}" class="text-[#FF92C2] hover:text-[#ff6fb5]">
+                                            <a href="{{ route('admin.feedback-records.edit', $feedback) }}" class="text-[#FF92C2] hover:text-[#ff6fb5]">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         </td>

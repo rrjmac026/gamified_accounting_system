@@ -12,17 +12,31 @@ return new class extends Migration
             $table->id();
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
             $table->foreignId('task_id')->nullable()->constrained()->onDelete('set null');
-            $table->text('feedback');
-            $table->integer('rating')->nullable();
-            $table->string('type')->default('task'); // task, general, etc.
-            $table->enum('sentiment', ['positive', 'neutral', 'negative'])->nullable();
+            
+            // Main feedback fields
+            $table->enum('feedback_type', ['general', 'improvement', 'question'])->default('general');
+            $table->text('feedback_text');
+            $table->json('recommendations')->nullable(); // Store as JSON array
+            $table->integer('rating')->nullable(); // 1-5 stars
+            
+            // Metadata fields
+            $table->timestamp('generated_at')->nullable();
+            $table->boolean('is_read')->default(false);
             $table->boolean('is_anonymous')->default(false);
-            $table->timestamp('feedback_date');
+            
+            // Legacy fields (if you want to keep them for compatibility)
+            $table->text('feedback')->nullable(); // pwede ra e remove
+            $table->string('type')->default('task'); // pwede ra e remove
+            $table->enum('sentiment', ['positive', 'neutral', 'negative'])->nullable();
+            $table->timestamp('feedback_date')->nullable();
+            
             $table->timestamps();
             
             // Indexes
             $table->index(['student_id', 'task_id']);
-            $table->index('feedback_date');
+            $table->index('generated_at');
+            $table->index('feedback_type');
+            $table->index('is_read');
         });
     }
 

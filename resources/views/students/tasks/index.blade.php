@@ -26,9 +26,9 @@
                             <tbody class="bg-[#FFF6FD] divide-y divide-[#FFC8FB]">
                                 @foreach($tasks as $task)
                                     <tr class="hover:bg-[#FFD9FF] transition-colors duration-150">
-                                        <td class="px-6 py-4 text-gray-900 dark:text-[#FFC8FB]">{{ $task->title }}</td>
-                                        <td class="px-6 py-4 text-gray-900 dark:text-[#FFC8FB]">{{ $task->subject->subject_name }}</td>
-                                        <td class="px-6 py-4 text-gray-900 dark:text-[#FFC8FB]">
+                                        <td class="px-6 py-4 text-gray-900 dark:text-[black]">{{ $task->title }}</td>
+                                        <td class="px-6 py-4 text-gray-900 dark:text-[black]">{{ $task->subject->subject_name }}</td>
+                                        <td class="px-6 py-4 text-gray-900 dark:text-[black]">
                                             {{ $task->due_date->format('M d, Y g:i A') }}
                                         </td>
                                         <td class="px-6 py-4">
@@ -48,7 +48,7 @@
                                             </span>
 
                                         </td>
-                                        <td class="px-6 py-4 text-gray-900 dark:text-[#FFC8FB]">
+                                        <td class="px-6 py-4 text-gray-900 dark:text-[black]">
                                             {{ $submission && $submission->score !== null ? $submission->score : 'Not graded' }}
                                         </td>
                                         <td class="px-6 py-4">

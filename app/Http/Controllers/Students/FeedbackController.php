@@ -19,7 +19,7 @@ class FeedbackController extends Controller
     {
         try {
             $feedbacks = FeedbackRecord::with(['task'])
-                ->where('student_id', Auth::id()) // only this student's feedback
+                ->where('student_id', Auth::user()->student->id) // Fixed: Use student->id instead of Auth::id()
                 ->latest()
                 ->paginate(10);
 
@@ -80,12 +80,20 @@ class FeedbackController extends Controller
                     ->with('error', 'You have already submitted feedback for this task.');
             }
 
+            // Convert recommendations string to array
+            $recommendations = array_filter(
+                explode("\n", str_replace("\r", "", $request->recommendations))
+            );
+
             FeedbackRecord::create([
-                'student_id' => Auth::user()->student->id, 
-                'task_id'    => $request->task_id,
-                'content'    => $request->content,
-                'rating'     => $request->rating ?? null,
-                'feedback_type' => $request->feedback_type ?? 'general',
+                'student_id' => Auth::user()->student->id,
+                'task_id' => $request->task_id,
+                'feedback_type' => $request->feedback_type,
+                'feedback_text' => $request->feedback_text,
+                'recommendations' => $recommendations, // Will be automatically json encoded
+                'rating' => $request->rating,
+                'generated_at' => now(),
+                'is_read' => false,
                 'is_anonymous' => $request->boolean('is_anonymous', false)
             ]);
 
@@ -93,11 +101,7 @@ class FeedbackController extends Controller
                 ->with('success', 'Your feedback has been submitted successfully.');
 
         } catch (Exception $e) {
-            Log::error('Error storing feedback: ' . $e->getMessage(), [
-                'student_id' => Auth::id(),
-                'task_id' => $request->task_id ?? null
-            ]);
-
+            Log::error('Error storing feedback: ' . $e->getMessage());
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Unable to submit feedback. Please try again later.');

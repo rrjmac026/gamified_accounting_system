@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Evaluation;
+use App\Models\Student;
+use App\Models\Instructor;
+use App\Models\Course;
 use App\Http\Requests\EvaluationRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,8 +38,35 @@ class EvaluationController extends Controller
      */
     public function create()
     {
-        return view('evaluations.create'); // separate student view
+        $student = Auth::user()->student;
+        
+        // Get all instructors (or filter by student's enrolled courses)
+        $instructors = Instructor::with('user')->get();
+        
+        // Get all courses the student is enrolled in
+        // Assuming you have a many-to-many relationship between students and courses
+        $courses = $student->courses ?? collect();
+        
+        // If no courses found, get all available courses
+        if ($courses->isEmpty()) {
+            $courses = \App\Models\Course::all();
+        }
+        
+        // Example criteria (you can fetch from DB instead)
+        $criteria = [
+            'teaching_effectiveness' => 'How effective was the instructor\'s teaching?',
+            'subject_knowledge' => 'How knowledgeable was the instructor about the subject?',
+            'communication_clarity' => 'How clear was the instructor\'s communication?',
+            'student_engagement' => 'How well did the instructor engage students?',
+            'grading_fairness' => 'How fair was the instructor\'s grading?',
+            'learning_materials' => 'How effective were the learning materials used?',
+            'availability_support' => 'How available was the instructor for support?',
+            'overall_satisfaction' => 'Overall satisfaction with the course'
+        ];
+
+        return view('students.evaluations.create', compact('instructors', 'courses', 'criteria'));
     }
+
 
     /**
      * Store a new evaluation (Student only)
@@ -52,7 +82,7 @@ class EvaluationController extends Controller
             'submitted_at'  => now(),
         ]);
 
-        return redirect()->route('students.my-evaluations')
+        return redirect()->route('students.evaluations.index')
             ->with('success', 'Your evaluation has been submitted.');
     }
 

@@ -29,14 +29,14 @@
                                     <tr class="hover:bg-[#FFD9FF] dark:hover:bg-[#6a6869] transition-colors duration-150">
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $evaluation->student->user->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $evaluation->instructor->user->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $evaluation->course->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">{{ $evaluation->course->course_name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $evaluation->submitted_at->format('M d, Y H:i') }}</td>
                                         <td class="py-4 px-6 text-sm space-x-2">
                                             <a href="{{ route('evaluations.show', $evaluation) }}" class="text-[#FF92C2] hover:text-[#ff6fb5]">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             @if(auth()->user()->role === 'admin')
-                                                <form class="inline" action="{{ route('evaluations.destroy', $evaluation) }}" method="POST" onsubmit="return confirm('Are you sure?');">
+                                                <form class="inline" action="{{ route('admin.evaluations.destroy', $evaluation) }}" method="POST" onsubmit="return confirm('Are you sure?');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="text-red-600 hover:text-red-800">

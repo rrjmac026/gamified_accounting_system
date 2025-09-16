@@ -140,11 +140,120 @@
                             
                             @if($task->type !== 'quiz')
                                 <div>
-                                    <label class="block text-sm font-semibold text-pink-600 mb-1">
+                                    <label class="block text-sm font-semibold text-pink-600 mb-2">
                                         Upload File (if required)
                                     </label>
-                                    <input type="file" name="file" 
-                                           class="w-full text-gray-700 border border-gray-300 rounded-md p-2">
+                                    
+                                    <!-- Enhanced Drag & Drop Area -->
+                                    <div 
+                                        x-data="{ 
+                                            isDragging: false,
+                                            fileName: '',
+                                            fileSize: '',
+                                            handleDrop(e) {
+                                                this.isDragging = false;
+                                                const files = e.dataTransfer.files;
+                                                if (files.length > 0) {
+                                                    this.$refs.fileInput.files = files;
+                                                    this.fileName = files[0].name;
+                                                    this.fileSize = this.formatFileSize(files[0].size);
+                                                    // Trigger change event
+                                                    this.$refs.fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+                                                }
+                                            },
+                                            handleFileSelect(e) {
+                                                const files = e.target.files;
+                                                if (files.length > 0) {
+                                                    this.fileName = files[0].name;
+                                                    this.fileSize = this.formatFileSize(files[0].size);
+                                                } else {
+                                                    this.fileName = '';
+                                                    this.fileSize = '';
+                                                }
+                                            },
+                                            removeFile() {
+                                                this.$refs.fileInput.value = '';
+                                                this.fileName = '';
+                                                this.fileSize = '';
+                                            },
+                                            formatFileSize(bytes) {
+                                                if (bytes === 0) return '0 Bytes';
+                                                const k = 1024;
+                                                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                                                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                                                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                                            }
+                                        }"
+                                        class="relative"
+                                    >
+                                        <!-- File Drop Zone -->
+                                        <div 
+                                            x-on:dragenter.prevent="isDragging = true"
+                                            x-on:dragover.prevent="isDragging = true"
+                                            x-on:dragleave.prevent="isDragging = false"
+                                            x-on:drop.prevent="handleDrop($event)"
+                                            x-on:click="$refs.fileInput.click()"
+                                            class="w-full p-8 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200"
+                                            :class="{ 
+                                                'bg-pink-100 border-pink-400 border-solid': isDragging,
+                                                'border-pink-300 bg-white hover:border-pink-400 hover:bg-pink-50': !isDragging && !fileName,
+                                                'bg-green-50 border-green-300': fileName && !isDragging
+                                            }"
+                                        >
+                                            <div class="text-center">
+                                                <!-- Upload Icon -->
+                                                <div x-show="!fileName" class="mx-auto w-16 h-16 mb-4">
+                                                    <svg class="w-full h-full text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                                    </svg>
+                                                </div>
+
+                                                <!-- Success Icon when file selected -->
+                                                <div x-show="fileName" class="mx-auto w-16 h-16 mb-4">
+                                                    <svg class="w-full h-full text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                </div>
+                                                
+                                                <!-- Upload Text -->
+                                                <div x-show="!fileName">
+                                                    <p class="text-lg font-semibold text-pink-600 mb-2">
+                                                        Click to upload or drag & drop
+                                                    </p>
+                                                    <p class="text-sm text-gray-500">
+                                                        PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, PNG up to 10MB
+                                                    </p>
+                                                </div>
+
+                                                <!-- File Selected Text -->
+                                                <div x-show="fileName" class="space-y-2">
+                                                    <p class="text-lg font-semibold text-green-600">File Selected!</p>
+                                                    <p class="text-sm text-gray-700" x-text="fileName"></p>
+                                                    <p class="text-xs text-gray-500" x-text="fileSize"></p>
+                                                    <button 
+                                                        type="button"
+                                                        x-on:click.stop="removeFile()"
+                                                        class="mt-3 inline-flex items-center px-3 py-1 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                                                    >
+                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
+                                                        Remove File
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Hidden File Input -->
+                                        <input 
+                                            type="file" 
+                                            name="file" 
+                                            x-ref="fileInput"
+                                            x-on:change="handleFileSelect($event)"
+                                            class="hidden" 
+                                            accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
+                                        >
+                                    </div>
                                 </div>
                             @endif
 
@@ -180,7 +289,6 @@
                                 </p>
                             @endif
 
-
                                 @if($studentTask->pivot->status === 'graded')
                                     <p class="text-gray-700">
                                         <span class="font-medium">Score:</span> {{ $studentTask->pivot->score }} / {{ $task->max_score }}
@@ -191,7 +299,6 @@
                                 @endif
                             </div>
                         </div>
-
                     @endif
 
                     <div class="mt-6 bg-gray-50 p-6 rounded-lg shadow border border-gray-200">
@@ -219,4 +326,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-app-layout>git

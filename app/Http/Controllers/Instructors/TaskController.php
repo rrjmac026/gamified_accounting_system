@@ -64,7 +64,7 @@ class TaskController extends Controller
         $instructor = Auth::user()->instructor;
         
         // Get only the subjects assigned to this instructor
-        $subjects = $instructor->subjects()->with('section')->get();
+        $subjects = $instructor->subjects()->with('sections')->get();
         
         // Get sections where this instructor is assigned
         $sections = $instructor->sections;

@@ -29,6 +29,8 @@ use App\Http\Controllers\Instructors\TaskQuestionController;
 use App\Http\Controllers\Instructors\TaskController;
 use App\Http\Controllers\Instructors\StudentTaskController;
 use App\Http\Controllers\Instructors\TaskSubmissionController;
+use App\Http\Controllers\Instructors\InstructorSectionController;
+use App\Http\Controllers\Instructors\InstructorSubjectController;
 use App\Http\Controllers\QuizController;
 
 //Student Controllers
@@ -132,6 +134,14 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
         Route::post('/quizzes/{taskId}/import', [QuizController::class, 'import'])->name('quizzes.import');
         Route::resource('/quizzes', QuizController::class);
         Route::resource('tasks', TaskController::class);
+
+        Route::get('/sections', [InstructorSectionController::class, 'index'])
+            ->name('sections.index');
+        Route::get('/sections/{section}', [InstructorSectionController::class, 'show'])
+            ->name('sections.show');
+        
+        Route::get('subjects', [InstructorSubjectController::class, 'index'])->name('subjects.index');
+        Route::get('subjects/{subject}', [InstructorSubjectController::class, 'show'])->name('subjects.show');
 
           
        

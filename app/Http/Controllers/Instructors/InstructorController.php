@@ -7,6 +7,7 @@ use App\Models\Instructor;
 use App\Models\Subject;
 use App\Models\Task;
 use App\Models\Student;
+use App\Models\Section;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,17 +22,9 @@ class InstructorController extends Controller
     public function index(Request $request)
     {
         $query = Instructor::with('user');
+        $sections = $instructor->sections()->with('students', 'subjects.tasks')->get();
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('first_name', 'like', "%$search%")
-                  ->orWhere('last_name', 'like', "%$search%")
-                  ->orWhere('email', 'like', "%$search%");
-            });
-        }
 
-        $instructors = $query->paginate(10);
         return view('instructors.index', compact('instructors'));
     }
 
@@ -57,51 +50,65 @@ class InstructorController extends Controller
      */
     public function dashboard()
     {
-        $instructor = Instructor::where('user_id', Auth::id())
-            ->with('subjects.tasks', 'subjects.students')
-            ->firstOrFail();
+        $instructor = auth()->user()->instructor;
+        
+        // Load relationships
+        $instructor->load([
+            'sections.students',
+            'subjects.tasks',
+            'subjects.sections'
+        ]);
 
-        $totalSubjects = $instructor->subjects->count();
-        $totalTasks = $instructor->subjects->flatMap->tasks->count();
-        $totalStudents = $instructor->subjects->flatMap->students->unique('id')->count();
+        // Calculate statistics
+        $stats = [
+            'total_subjects' => $instructor->subjects->count(),
+            'total_students' => $instructor->sections->flatMap->students->unique('id')->count(),
+            'active_tasks' => $instructor->subjects->flatMap->tasks->where('is_active', true)->count(),
+            'submissions_pending' => $instructor->subjects->flatMap->tasks->flatMap->submissions->where('status', 'pending')->count(),
+        ];
+
+        // Get recent submissions
+        $recentSubmissions = Task::whereHas('subject.instructors', function($q) use ($instructor) {
+            $q->where('instructor_id', $instructor->id);
+        })
+        ->with(['student.user', 'subject'])
+        ->whereHas('submissions', function($q) {
+            $q->where('status', 'pending');
+        })
+        ->latest()
+        ->take(5)
+        ->get();
+
+        // Get upcoming tasks
+        $upcomingTasks = $instructor->subjects
+            ->flatMap->tasks
+            ->where('due_date', '>', now())
+            ->where('is_active', true)
+            ->sortBy('due_date')
+            ->take(5);
+
+        // Performance overview
+        $performanceData = $instructor->sections->map(function($section) {
+            return [
+                'section_name' => $section->name,
+                'avg_score' => $section->students->avg(function($student) {
+                    return $student->tasks->avg('pivot.score');
+                }),
+                'submission_rate' => $section->students->avg(function($student) {
+                    $total = $student->tasks->count();
+                    $submitted = $student->tasks->where('pivot.status', 'submitted')->count();
+                    return $total ? ($submitted / $total * 100) : 0;
+                })
+            ];
+        });
 
         return view('instructors.dashboard', compact(
             'instructor',
-            'totalSubjects',
-            'totalTasks',
-            'totalStudents'
+            'stats',
+            'recentSubmissions',
+            'upcomingTasks',
+            'performanceData'
         ));
     }
 
-    /**
-     * Show monthly activity statistics.
-     */
-    public function statistics()
-    {
-        $instructor = Instructor::where('user_id', Auth::id())->firstOrFail();
-        $logs = ActivityLog::where('user_id', $instructor->user_id)
-            ->whereMonth('created_at', Carbon::now()->month)
-            ->get();
-
-        $dailyCounts = $logs->groupBy(function ($log) {
-            return Carbon::parse($log->created_at)->format('Y-m-d');
-        })->map->count();
-
-        return view('instructors.statistics', compact('dailyCounts'));
-    }
-
-    /**
-     * Search instructors by name/email.
-     */
-    public function search(Request $request)
-    {
-        $search = $request->input('query');
-        $instructors = Instructor::whereHas('user', function ($q) use ($search) {
-            $q->where('first_name', 'like', "%$search%")
-              ->orWhere('last_name', 'like', "%$search%")
-              ->orWhere('email', 'like', "%$search%");
-        })->get();
-
-        return response()->json($instructors);
-    }
 }

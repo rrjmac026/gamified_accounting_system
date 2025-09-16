@@ -61,17 +61,21 @@ class StudentProgressController extends Controller
 
         // Build badges with progress metadata
         $badges = Badge::where('is_active', true)->get()->map(function ($badge) use ($student, $totalXp) {
-            $earnedBadge = $student->badges()->where('badges.id', $badge->id)->first();
-            $badge->earned = (bool) $earnedBadge;
-            $badge->earned_at = $earnedBadge ? $earnedBadge->pivot->earned_at : null;
+        $earnedBadge = $student->badges()->where('badges.id', $badge->id)->first();
+        
+        // Either already earned OR totalXp >= badge threshold
+        $badge->earned = (bool) $earnedBadge || $totalXp >= $badge->xp_threshold;
 
-            if (!$badge->earned) {
-                $badge->progress = $totalXp;
-                $badge->remaining = max(0, $badge->xp_threshold - $totalXp);
-            }
+        $badge->earned_at = $earnedBadge ? $earnedBadge->pivot->earned_at : null;
 
-            return $badge;
-        });
+        if (!$badge->earned) {
+            $badge->progress = $totalXp;
+            $badge->remaining = max(0, $badge->xp_threshold - $totalXp);
+        }
+
+        return $badge;
+    });
+
 
         return view('students.achievements.index', [
             'student' => $student,

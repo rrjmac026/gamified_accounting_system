@@ -27,6 +27,7 @@ class Section extends Model
     {
         return $this->belongsToMany(Student::class, 'section_student');
     }
+    
 
     public function subjects()
     {

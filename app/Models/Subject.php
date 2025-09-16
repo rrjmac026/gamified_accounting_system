@@ -46,9 +46,10 @@ class Subject extends Model
         return $this->hasMany(PerformanceLog::class);
     }
     
-    public function section()
+    public function sections()
     {
-        return $this->belongsTo(Section::class);
+        return $this->belongsToMany(Section::class, 'section_subject', 'subject_id', 'section_id')
+                    ->withTimestamps();
     }
 
 }

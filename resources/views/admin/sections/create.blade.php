@@ -40,49 +40,111 @@
                                    class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
                         </div>
 
-                        <div>
+                        <div class="sm:col-span-2">
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Assign Instructors</label>
-                            <div class="space-y-2 max-h-64 overflow-y-auto border border-[#FFC8FB] rounded-lg p-4">
-                                @foreach($instructors as $instructor)
-                                    <div class="p-3 bg-white rounded-lg mb-2 hover:bg-pink-50 transition-colors">
-                                        <label class="flex items-center gap-2">
-                                            <input type="checkbox" name="instructors[]" value="{{ $instructor->id }}"
-                                                   class="rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
-                                            <span class="font-medium">{{ $instructor->user->name }}</span>
-                                        </label>
-                                        @if($instructor->subjects->count() > 0)
-                                            <div class="ml-6 mt-2">
-                                                <p class="text-sm text-gray-500 mb-1">Subjects:</p>
-                                                <ul class="list-disc list-inside space-y-1">
-                                                    @foreach($instructor->subjects as $subject)
-                                                        <li class="text-sm text-gray-600">{{ $subject->subject_name }}</li>
-                                                    @endforeach
-                                                </ul>
-                                            </div>
-                                        @else
-                                            <p class="ml-6 mt-1 text-sm text-gray-500">No subjects assigned</p>
-                                        @endif
+                            <div class="bg-white rounded-lg border border-[#FFC8FB] overflow-hidden">
+                                <!-- Search Bar -->
+                                <div class="p-4 border-b border-[#FFC8FB]">
+                                    <div class="relative">
+                                        <input type="text" id="instructor-search" 
+                                               placeholder="Search instructors..." 
+                                               class="w-full pl-10 pr-4 py-2 rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-search text-gray-400"></i>
+                                        </div>
                                     </div>
-                                @endforeach
+                                </div>
+
+                                <!-- Selection Controls -->
+                                <div class="px-4 py-2 bg-gray-50 border-b border-[#FFC8FB] flex justify-between items-center">
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" id="select-all-instructors" 
+                                                class="text-sm text-[#FF92C2] hover:text-[#ff6fb5] flex items-center gap-1">
+                                            Select All
+                                        </button>
+                                        <button type="button" id="deselect-all-instructors" 
+                                                class="text-sm text-[#FF92C2] hover:text-[#ff6fb5] flex items-center gap-1">
+                                            Deselect All
+                                        </button>
+                                    </div>
+                                    <span class="text-xs text-gray-500" id="instructor-counter">
+                                        0 selected
+                                    </span>
+                                </div>
+
+                                <!-- Instructors List -->
+                                <div class="max-h-64 overflow-y-auto p-2" id="instructors-container">
+                                    @foreach($instructors as $instructor)
+                                        <div class="instructor-item p-3 hover:bg-pink-50 rounded-lg transition-colors mb-2">
+                                            <label class="flex items-center justify-between gap-4">
+                                                <div class="flex items-center gap-3">
+                                                    <input type="checkbox" name="instructors[]" value="{{ $instructor->id }}"
+                                                           class="instructor-checkbox rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
+                                                    <div>
+                                                        <span class="font-medium block">{{ $instructor->user->name }}</span>
+                                                        <span class="text-sm text-gray-500">{{ $instructor->department }}</span>
+                                                    </div>
+                                                </div>
+                                                <button type="button" 
+                                                        class="view-subjects text-sm text-[#FF92C2] hover:text-[#ff6fb5]"
+                                                        data-subjects='@json($instructor->subjects)'>
+                                                    <i class="fas fa-book"></i> View Subjects
+                                                </button>
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
 
-                        <div>
+                        <div class="sm:col-span-2">
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Assign Students</label>
-                            <div class="space-y-2 max-h-48 overflow-y-auto border border-[#FFC8FB] rounded-lg p-2">
-                                <div class="flex justify-between mb-1">
-                                    <button type="button" id="select-all" class="text-sm text-[#FF92C2] hover:underline">Select All</button>
-                                    <button type="button" id="deselect-all" class="text-sm text-[#FF92C2] hover:underline">Deselect All</button>
+                            <div class="bg-white rounded-lg border border-[#FFC8FB] overflow-hidden">
+                                <!-- Search Bar -->
+                                <div class="p-4 border-b border-[#FFC8FB]">
+                                    <div class="relative">
+                                        <input type="text" id="student-search" 
+                                               placeholder="Search students by name or email..." 
+                                               class="w-full pl-10 pr-4 py-2 rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-search text-gray-400"></i>
+                                        </div>
+                                    </div>
                                 </div>
-                                @foreach($students as $student)
-                                    <label class="flex items-center gap-2">
-                                        <input type="checkbox" name="students[]" value="{{ $student->id }}"
-                                               class="student-checkbox rounded border-[#FFC8FB]">
-                                        <span>{{ $student->user->name }} ({{ $student->user->email }})</span>
-                                    </label>
-                                @endforeach
+
+                                <!-- Selection Controls -->
+                                <div class="px-4 py-2 bg-gray-50 border-b border-[#FFC8FB] flex justify-between items-center">
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" id="select-all-students" 
+                                                class="text-sm text-[#FF92C2] hover:text-[#ff6fb5] flex items-center gap-1"> Select All
+                                        </button>
+                                        <button type="button" id="deselect-all-students" 
+                                                class="text-sm text-[#FF92C2] hover:text-[#ff6fb5] flex items-center gap-1">Deselect All
+                                        </button>
+                                    </div>
+                                    <span class="text-xs text-gray-500" id="student-counter">
+                                        0 selected
+                                    </span>
+                                </div>
+
+                                <!-- Students List -->
+                                <div class="max-h-64 overflow-y-auto p-2" id="students-container">
+                                    @foreach($students as $student)
+                                        <div class="student-item p-3 hover:bg-pink-50 rounded-lg transition-colors mb-2">
+                                            <label class="flex items-center gap-3">
+                                                <input type="checkbox" name="students[]" value="{{ $student->id }}"
+                                                       class="student-checkbox rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
+                                                <div>
+                                                    <span class="font-medium block">{{ $student->user->name }}</span>
+                                                    <span class="text-sm text-gray-500">{{ $student->user->email }}</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
+                        
 
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Course</label>
@@ -124,13 +186,98 @@
     </div>
 
     <script>
-        document.getElementById('select-all').addEventListener('click', function() {
-            document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = true);
+        // Search functionality for instructors
+        document.getElementById('instructor-search').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const instructors = document.querySelectorAll('.instructor-item');
+            
+            instructors.forEach(item => {
+                const name = item.querySelector('.font-medium').textContent.toLowerCase();
+                const department = item.querySelector('.text-gray-500').textContent.toLowerCase();
+                item.style.display = name.includes(searchTerm) || department.includes(searchTerm) ? '' : 'none';
+            });
         });
 
-        document.getElementById('deselect-all').addEventListener('click', function() {
-            document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = false);
+        // Search functionality for students
+        document.getElementById('student-search').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const students = document.querySelectorAll('.student-item');
+            
+            students.forEach(item => {
+                const name = item.querySelector('.font-medium').textContent.toLowerCase();
+                const email = item.querySelector('.text-gray-500').textContent.toLowerCase();
+                item.style.display = name.includes(searchTerm) || email.includes(searchTerm) ? '' : 'none';
+            });
         });
+
+        // Selection counters update
+        function updateCounters() {
+            document.getElementById('instructor-counter').textContent = 
+                document.querySelectorAll('.instructor-checkbox:checked').length + ' selected';
+            document.getElementById('student-counter').textContent = 
+                document.querySelectorAll('.student-checkbox:checked').length + ' selected';
+        }
+
+        // Add event listeners for checkboxes
+        document.querySelectorAll('.instructor-checkbox, .student-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', updateCounters);
+        });
+
+        // Select/Deselect all functionality
+        document.getElementById('select-all-instructors').addEventListener('click', () => {
+            document.querySelectorAll('.instructor-checkbox:not(:disabled)').forEach(cb => cb.checked = true);
+            updateCounters();
+        });
+
+        document.getElementById('deselect-all-instructors').addEventListener('click', () => {
+            document.querySelectorAll('.instructor-checkbox:not(:disabled)').forEach(cb => cb.checked = false);
+            updateCounters();
+        });
+
+        document.getElementById('select-all-students').addEventListener('click', () => {
+            document.querySelectorAll('.student-checkbox:not(:disabled)').forEach(cb => cb.checked = true);
+            updateCounters();
+        });
+
+        document.getElementById('deselect-all-students').addEventListener('click', () => {
+            document.querySelectorAll('.student-checkbox:not(:disabled)').forEach(cb => cb.checked = false);
+            updateCounters();
+        });
+
+
+        // View subjects modal functionality
+        document.querySelectorAll('.view-subjects').forEach(button => {
+            button.addEventListener('click', function() {
+                const subjects = JSON.parse(this.dataset.subjects);
+                let subjectsList = subjects.map(s => `<li class="py-1">${s.subject_name}</li>`).join('');
+                
+                // Create modal
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center';
+                modal.innerHTML = `
+                    <div class="bg-white p-4 rounded-lg shadow-xl max-w-md w-full mx-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-[#FF92C2]">Assigned Subjects</h3>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <ul class="list-disc list-inside text-gray-600">
+                            ${subjects.length ? subjectsList : '<li class="py-1">No subjects assigned</li>'}
+                        </ul>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                modal.querySelector('button').onclick = () => modal.remove();
+                modal.onclick = e => {
+                    if (e.target === modal) modal.remove();
+                };
+            });
+        });
+
+        // Initialize counters
+        updateCounters();
     </script>
 </x-app-layout>
 

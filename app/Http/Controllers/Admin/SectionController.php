@@ -15,9 +15,7 @@ class SectionController extends Controller
     // Display a list of sections
     public function index()
     {
-        // Optionally eager load students and subjects
-        $sections = Section::with(['students.user', 'subjects.instructor'])->get();
-
+        $sections = Section::with(['course', 'subjects'])->get();
         return view('admin.sections.index', compact('sections'));
     }
 
@@ -119,5 +117,29 @@ class SectionController extends Controller
 
         return redirect()->route('admin.sections.index')
                          ->with('success', 'Section deleted successfully.');
+    }
+
+
+    // Show form to manage subjects for a section
+    public function manageSubjects(Section $section)
+    {
+        $subjects = Subject::where('is_active', true)->get();
+        $section->load('subjects');
+
+        return view('admin.sections.manage-subjects', compact('section', 'subjects'));
+    }
+
+    // Save subjects for a section
+    public function updateSubjects(Request $request, Section $section)
+    {
+        $request->validate([
+            'subjects' => 'array|nullable',
+            'subjects.*' => 'exists:subjects,id',
+        ]);
+
+        $section->subjects()->sync($request->subjects ?? []);
+
+        return redirect()->route('admin.sections.index')
+                        ->with('success', 'Subjects updated for this section.');
     }
 }

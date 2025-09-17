@@ -19,9 +19,20 @@ class InstructorManagementController extends Controller
     /**
      * Store a new instructor.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $instructors = Instructor::with('user')->paginate(10);
+        $query = Instructor::with('user');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%");
+            })->orWhere('department', 'LIKE', "%{$search}%")
+              ->orWhere('employee_id', 'LIKE', "%{$search}%");
+        }
+
+        $instructors = $query->paginate(10)->withQueryString();
         return view('admin.instructors.index', compact('instructors'));
     }
 

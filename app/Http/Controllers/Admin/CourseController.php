@@ -14,12 +14,24 @@ class CourseController extends Controller
     /**
      * Display a listing of courses.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $courses = Course::with('students')->paginate(15);
-        
+        $query = Course::with('students'); // move `with` here so it works with search too
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('course_code', 'like', "%{$search}%")
+                ->orWhere('course_name', 'like', "%{$search}%")
+                ->orWhere('department', 'like', "%{$search}%");
+            });
+        }
+
+        $courses = $query->paginate(15);
+
         return view('admin.courses.index', compact('courses'));
     }
+
 
     /**
      * Show the form for creating a new course.

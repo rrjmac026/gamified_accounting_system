@@ -19,9 +19,21 @@ class StudentManagementController extends Controller
 {
     use Loggable;
 
-    public function index()
+    public function index(Request $request)
     {
-        $students = Student::with(['user', 'subjects'])->paginate(10);
+        $query = Student::with('user', 'course');
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('student_number', 'like', "%{$search}%");
+            });
+        }
+
+        $students = $query->paginate(10);
+
         return view('admin.student.index', compact('students'));
     }
 

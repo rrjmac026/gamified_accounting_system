@@ -125,6 +125,21 @@
                                 </tbody>
                             </table>
                         </div>
+                        <!-- Subjects List -->
+                        <div class="mt-8">
+                            <h3 class="text-lg font-semibold text-[#595758] mb-4">Subjects in this Section</h3>
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                @if($section->subjects->count() > 0)
+                                    <ul class="list-disc list-inside text-gray-500">
+                                        @foreach($section->subjects as $subject)
+                                            <li>{{ $subject->subject_name }}</li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <span class="text-gray-500">No subjects assigned to this section</span>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

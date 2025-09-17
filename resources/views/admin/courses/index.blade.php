@@ -11,12 +11,43 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-[#FFF0FA] overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 rounded-lg sm:rounded-2xl">
                 <div class="p-4 sm:p-6 text-gray-700">
+
+                    {{-- ✅ Success message --}}
                     @if (session('success'))
                         <div class="mb-4 px-4 py-2 bg-green-100 border border-green-200 text-green-700 rounded-md">
                             {{ session('success') }}
                         </div>
                     @endif
 
+                    {{-- ✅ Search Bar --}}
+                    <div class="mb-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <form action="{{ route('admin.courses.index') }}" method="GET" class="flex w-full sm:w-1/2">
+                            <div class="relative flex-grow">
+                                <input type="text" 
+                                       name="search" 
+                                       value="{{ request('search') }}" 
+                                       placeholder="Search courses by code, name, or department..."
+                                       class="w-full pl-10 pr-4 py-2 border border-[#FFC8FB] rounded-l-lg focus:ring-2 focus:ring-[#FF92C2] focus:border-[#FF92C2] text-sm sm:text-base">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                            </div>
+                            <button type="submit" 
+                                    class="px-4 py-2 bg-[#FF92C2] text-white rounded-r-lg hover:bg-[#ff6fb5] focus:outline-none focus:ring-2 focus:ring-[#FF92C2]">
+                                Search
+                            </button>
+                        </form>
+
+                        {{-- ✅ Clear Filter --}}
+                        @if(request('search'))
+                            <a href="{{ route('admin.courses.index') }}" 
+                               class="text-sm text-[#FF92C2] hover:text-[#ff6fb5]">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
+                        @endif
+                    </div>
+
+                    {{-- ✅ Table --}}
                     <div class="overflow-x-auto">
                         <table class="min-w-full table-auto">
                             <thead class="bg-[#FFC8FB]">
@@ -85,4 +116,3 @@
         }
     </script>
 </x-app-layout>
-

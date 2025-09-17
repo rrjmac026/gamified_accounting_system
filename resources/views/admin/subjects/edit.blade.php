@@ -42,13 +42,14 @@
                         {{-- Instructor --}}
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Instructor</label>
-                            <select name="instructor_id"
+                            <select name="instructor_ids[]"
                                     class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
                                            border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
                                            text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
                                     required>
                                 @foreach($instructors as $instructor)
-                                    <option value="{{ $instructor->id }}" {{ $instructor->id == $subject->instructor_id ? 'selected' : '' }}>
+                                    <option value="{{ $instructor->id }}" 
+                                        {{ in_array($instructor->id, old('instructor_ids', $subject->instructors->pluck('id')->toArray())) ? 'selected' : '' }}>
                                         {{ $instructor->user->name ?? 'Unnamed' }}
                                     </option>
                                 @endforeach

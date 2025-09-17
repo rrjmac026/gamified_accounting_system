@@ -93,15 +93,24 @@
 
                     {{-- Subjects Selection --}}
                     <div>
-                        <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Assign Subjects</label>
-                        <div class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
-                                          border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                          text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200">
+                        <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Assign Subjects</label>
+
+                        {{-- Search Input --}}
+                        <div class="mb-2">
+                            <input type="text" id="subject-search" placeholder="Search subjects..."
+                                class="w-full rounded-lg border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                        text-gray-800 px-3 py-2 text-sm transition-all duration-200" />
+                        </div>
+
+                        {{-- Subjects List --}}
+                        <div id="subject-list"
+                            class="w-full rounded-lg shadow-sm bg-white border border-[#FFC8FB] 
+                                    text-gray-800 px-4 py-2 transition-all duration-200 max-h-48 overflow-y-auto">
                             @foreach($subjects as $subject)
-                                <label class="flex items-center space-x-3 py-2 hover:bg-[#FFC8FB]/20 rounded cursor-pointer">
+                                <label class="flex items-center space-x-3 py-2 hover:bg-[#FFC8FB]/20 rounded cursor-pointer subject-item">
                                     <input type="checkbox" name="subjects[]" value="{{ $subject->id }}" 
-                                           {{ (is_array(old('subjects', $student->subjects->pluck('id')->toArray())) && in_array($subject->id, old('subjects', $student->subjects->pluck('id')->toArray()))) ? 'checked' : '' }}
-                                           class="text-[#FF92C2] border-[#FFC8FB] rounded focus:ring-[#FF92C2] focus:ring-2">
+                                        {{ (is_array(old('subjects', $student->subjects->pluck('id')->toArray())) && in_array($subject->id, old('subjects', $student->subjects->pluck('id')->toArray()))) ? 'checked' : '' }}
+                                        class="text-[#FF92C2] border-[#FFC8FB] rounded focus:ring-[#FF92C2] focus:ring-2">
                                     <span class="text-gray-800">{{ $subject->subject_name }}</span>
                                 </label>
                             @endforeach
@@ -127,4 +136,14 @@
             </div>
         </div>
     </div>
+
+<script>
+    document.getElementById('subject-search').addEventListener('keyup', function () {
+        let query = this.value.toLowerCase();
+        document.querySelectorAll('#subject-list .subject-item').forEach(function (item) {
+            let text = item.innerText.toLowerCase();
+            item.style.display = text.includes(query) ? '' : 'none';
+        });
+    });
+</script>
 </x-app-layout>

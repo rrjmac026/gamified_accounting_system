@@ -9,12 +9,24 @@ use Illuminate\Http\Request;
 class InstructorSubjectController extends Controller
 {
     // List all subjects assigned to this instructor
-    public function index()
+    public function index(Request $request)
     {
         $instructor = auth()->user()->instructor;
 
-        // Get subjects assigned to this instructor
-        $subjects = $instructor->subjects()->with('tasks', 'sections')->get();
+        // Get subjects query
+        $subjectsQuery = $instructor->subjects();
+
+        // Apply search if provided
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $subjectsQuery->where(function($query) use ($search) {
+                $query->where('subject_code', 'LIKE', "%{$search}%")
+                      ->orWhere('subject_name', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Get the subjects with tasks and sections
+        $subjects = $subjectsQuery->with('tasks', 'sections')->paginate(9);
 
         return view('instructors.subjects.index', compact('subjects'));
     }

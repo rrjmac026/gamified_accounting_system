@@ -29,84 +29,132 @@
                     @endif
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- Section Code -->
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Section Code</label>
                             <input type="text" name="section_code" value="{{ old('section_code', $section->section_code) }}" required
                                    class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
                         </div>
 
+                        <!-- Section Name -->
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Section Name</label>
                             <input type="text" name="name" value="{{ old('name', $section->name) }}" required
                                    class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
                         </div>
 
-                        <div>
+                        <!-- Instructors -->
+                        <div class="sm:col-span-2">
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Assign Instructors</label>
-                            <div class="space-y-2 max-h-64 overflow-y-auto border border-[#FFC8FB] rounded-lg p-4">
-                                @foreach($instructors as $instructor)
-                                    <div class="p-3 bg-white rounded-lg mb-2 hover:bg-pink-50 transition-colors">
-                                        <label class="flex items-center gap-2">
-                                            <input type="checkbox" name="instructors[]" value="{{ $instructor->id }}"
-                                                   {{ in_array($instructor->id, old('instructors', $section->instructors->pluck('id')->toArray())) ? 'checked' : '' }}
-                                                   class="rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
-                                            <span class="font-medium">{{ $instructor->user->name }}</span>
-                                        </label>
-                                        @if($instructor->subjects->count() > 0)
-                                            <div class="ml-6 mt-2">
-                                                <p class="text-sm text-gray-500 mb-1">Subjects:</p>
-                                                <ul class="list-disc list-inside space-y-1">
-                                                    @foreach($instructor->subjects as $subject)
-                                                        <li class="text-sm text-gray-600">{{ $subject->subject_name }}</li>
-                                                    @endforeach
-                                                </ul>
-                                            </div>
-                                        @else
-                                            <p class="ml-6 mt-1 text-sm text-gray-500">No subjects assigned</p>
-                                        @endif
+                            <div class="bg-white rounded-lg border border-[#FFC8FB] overflow-hidden">
+                                <!-- Search -->
+                                <div class="p-4 border-b border-[#FFC8FB]">
+                                    <div class="relative">
+                                        <input type="text" id="instructor-search"
+                                               placeholder="Search instructors..."
+                                               class="w-full pl-10 pr-4 py-2 rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-search text-gray-400"></i>
+                                        </div>
                                     </div>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Assign Students</label>
-                            <div class="space-y-2 max-h-48 overflow-y-auto border border-[#FFC8FB] rounded-lg p-2">
-                                <div class="flex justify-between mb-1">
-                                    <button type="button" id="select-all" class="text-sm text-[#FF92C2] hover:underline">Select All</button>
-                                    <button type="button" id="deselect-all" class="text-sm text-[#FF92C2] hover:underline">Deselect All</button>
                                 </div>
-                                @foreach($students as $student)
-                                    <label class="flex items-center gap-2">
-                                        <input type="checkbox" name="students[]" value="{{ $student->id }}"
-                                               {{ in_array($student->id, old('students', $section->students->pluck('id')->toArray())) ? 'checked' : '' }}
-                                               class="student-checkbox rounded border-[#FFC8FB]">
-                                        <span>{{ $student->user->name }} ({{ $student->user->email }})</span>
-                                    </label>
-                                @endforeach
+
+                                <!-- Controls -->
+                                <div class="px-4 py-2 bg-gray-50 border-b border-[#FFC8FB] flex justify-between items-center">
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" id="select-all-instructors" class="text-sm text-[#FF92C2] hover:text-[#ff6fb5]">Select All</button>
+                                        <button type="button" id="deselect-all-instructors" class="text-sm text-[#FF92C2] hover:text-[#ff6fb5]">Deselect All</button>
+                                    </div>
+                                    <span class="text-xs text-gray-500" id="instructor-counter">0 selected</span>
+                                </div>
+
+                                <!-- List -->
+                                <div class="max-h-64 overflow-y-auto p-2" id="instructors-container">
+                                    @foreach($instructors as $instructor)
+                                        <div class="instructor-item p-3 hover:bg-pink-50 rounded-lg transition-colors mb-2">
+                                            <label class="flex items-center gap-3">
+                                                <input type="checkbox" name="instructors[]" value="{{ $instructor->id }}"
+                                                       {{ in_array($instructor->id, old('instructors', $section->instructors->pluck('id')->toArray())) ? 'checked' : '' }}
+                                                       class="instructor-checkbox rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
+                                                <div>
+                                                    <span class="font-medium block">{{ $instructor->user->name }}</span>
+                                                    <span class="text-sm text-gray-500">
+                                                        {{ $instructor->subjects->count() ? $instructor->subjects->pluck('subject_name')->join(', ') : 'No subjects' }}
+                                                    </span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
 
+                        <!-- Students -->
+                        <div class="sm:col-span-2">
+                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Assign Students</label>
+                            <div class="bg-white rounded-lg border border-[#FFC8FB] overflow-hidden">
+                                <!-- Search -->
+                                <div class="p-4 border-b border-[#FFC8FB]">
+                                    <div class="relative">
+                                        <input type="text" id="student-search"
+                                               placeholder="Search students by name or email..."
+                                               class="w-full pl-10 pr-4 py-2 rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-search text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Controls -->
+                                <div class="px-4 py-2 bg-gray-50 border-b border-[#FFC8FB] flex justify-between items-center">
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" id="select-all-students" class="text-sm text-[#FF92C2] hover:text-[#ff6fb5]">Select All</button>
+                                        <button type="button" id="deselect-all-students" class="text-sm text-[#FF92C2] hover:text-[#ff6fb5]">Deselect All</button>
+                                    </div>
+                                    <span class="text-xs text-gray-500" id="student-counter">0 selected</span>
+                                </div>
+
+                                <!-- List -->
+                                <div class="max-h-64 overflow-y-auto p-2" id="students-container">
+                                    @foreach($students as $student)
+                                        <div class="student-item p-3 hover:bg-pink-50 rounded-lg transition-colors mb-2">
+                                            <label class="flex items-center gap-3">
+                                                <input type="checkbox" name="students[]" value="{{ $student->id }}"
+                                                       {{ in_array($student->id, old('students', $section->students->pluck('id')->toArray())) ? 'checked' : '' }}
+                                                       class="student-checkbox rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
+                                                <div>
+                                                    <span class="font-medium block">{{ $student->user->name }}</span>
+                                                    <span class="text-sm text-gray-500">{{ $student->user->email }}</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Course -->
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Course</label>
                             <select name="course_id" required
                                     class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
                                 <option value="">Select Course</option>
                                 @foreach($courses as $course)
-                                    <option value="{{ $course->id }}" 
-                                            {{ old('course_id', $section->course_id) == $course->id ? 'selected' : '' }}>
+                                    <option value="{{ $course->id }}" {{ old('course_id', $section->course_id) == $course->id ? 'selected' : '' }}>
                                         {{ $course->course_name }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
 
+                        <!-- Capacity -->
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Capacity (Optional)</label>
                             <input type="number" name="capacity" min="1" value="{{ old('capacity', $section->capacity) }}"
                                    class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
                         </div>
 
+                        <!-- Notes -->
                         <div class="sm:col-span-2">
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Notes (Optional)</label>
                             <textarea name="notes" rows="3"
@@ -114,28 +162,85 @@
                         </div>
                     </div>
 
-                    <div class="flex justify-end gap-4">
+                    <!-- Actions -->
+                    <div class="flex flex-wrap justify-end gap-4 mt-4">
+                        <!-- Cancel -->
                         <a href="{{ route('admin.sections.index') }}" 
-                           class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                        class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
                             Cancel
                         </a>
+
+                        <!-- Manage Subjects -->
+                        <a href="{{ route('admin.sections.subjects', $section->id) }}" 
+                        class="px-6 py-2 bg-[#FF92C2] text-white rounded-lg hover:bg-[#ff6fb5]">
+                            Manage Subjects
+                        </a>
+
+                        <!-- Update Section -->
                         <button type="submit" 
                                 class="px-6 py-2 bg-[#FF92C2] text-white rounded-lg hover:bg-[#ff6fb5]">
                             Update Section
                         </button>
                     </div>
+
                 </form>
             </div>
         </div>
     </div>
 
     <script>
-        document.getElementById('select-all').addEventListener('click', function() {
-            document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = true);
+        function updateCounters() {
+            document.getElementById('instructor-counter').textContent =
+                document.querySelectorAll('.instructor-checkbox:checked').length + ' selected';
+            document.getElementById('student-counter').textContent =
+                document.querySelectorAll('.student-checkbox:checked').length + ' selected';
+        }
+
+        // Checkbox events
+        document.querySelectorAll('.instructor-checkbox, .student-checkbox').forEach(cb => {
+            cb.addEventListener('change', updateCounters);
         });
 
-        document.getElementById('deselect-all').addEventListener('click', function() {
-            document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = false);
+        // Select/Deselect all
+        document.getElementById('select-all-instructors').addEventListener('click', () => {
+            document.querySelectorAll('.instructor-checkbox').forEach(cb => cb.checked = true);
+            updateCounters();
         });
+        document.getElementById('deselect-all-instructors').addEventListener('click', () => {
+            document.querySelectorAll('.instructor-checkbox').forEach(cb => cb.checked = false);
+            updateCounters();
+        });
+
+        document.getElementById('select-all-students').addEventListener('click', () => {
+            document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = true);
+            updateCounters();
+        });
+        document.getElementById('deselect-all-students').addEventListener('click', () => {
+            document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = false);
+            updateCounters();
+        });
+
+        // Search instructors
+        document.getElementById('instructor-search').addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('.instructor-item').forEach(item => {
+                const name = item.querySelector('.font-medium').textContent.toLowerCase();
+                const info = item.querySelector('.text-gray-500').textContent.toLowerCase();
+                item.style.display = name.includes(term) || info.includes(term) ? '' : 'none';
+            });
+        });
+
+        // Search students
+        document.getElementById('student-search').addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('.student-item').forEach(item => {
+                const name = item.querySelector('.font-medium').textContent.toLowerCase();
+                const email = item.querySelector('.text-gray-500').textContent.toLowerCase();
+                item.style.display = name.includes(term) || email.includes(term) ? '' : 'none';
+            });
+        });
+
+        // Init counters
+        updateCounters();
     </script>
 </x-app-layout>

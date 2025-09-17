@@ -13,6 +13,7 @@
                     </a>
                 </div>
             </div>
+            
 
             <div class="bg-[#FFF0FA] overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 sm:rounded-lg">
                 <div class="p-6 text-gray-700">
@@ -86,6 +87,33 @@
                                 Accepted formats: CSV, XLSX, XLS. Expected columns: name, email, course, year_level, section, password
                             </p>
                         </form>
+                    </div>
+                    {{-- Search Bar --}}
+                    <div class="mb-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <form action="{{ route('admin.student.index') }}" method="GET" class="flex w-full sm:w-1/2">
+                            <div class="relative flex-grow">
+                                <input type="text" 
+                                    name="search" 
+                                    value="{{ request('search') }}" 
+                                    placeholder="Search students by name, email, or student ID..."
+                                    class="w-full pl-10 pr-4 py-2 border border-[#FFC8FB] rounded-l-lg focus:ring-2 focus:ring-[#FF92C2] focus:border-[#FF92C2] text-sm sm:text-base">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                            </div>
+                            <button type="submit" 
+                                    class="px-4 py-2 bg-[#FF92C2] text-white rounded-r-lg hover:bg-[#ff6fb5] focus:outline-none focus:ring-2 focus:ring-[#FF92C2]">
+                                Search
+                            </button>
+                        </form>
+
+                        {{-- Optional: Reset button --}}
+                        @if(request('search'))
+                            <a href="{{ route('admin.student.index') }}" 
+                            class="text-sm text-[#FF92C2] hover:text-[#ff6fb5]">
+                                <i class="fas fa-times"></i> Clear
+                            </a>
+                        @endif
                     </div>
 
                     {{-- Students Table --}}

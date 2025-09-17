@@ -92,21 +92,33 @@
                             </div>
                         </div>
 
-                        {{-- Assign Subjects - Updated with consistent styling --}}
+                        {{-- Subjects Selection --}}
                         <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Assign Subjects</label>
-                            <div class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
-                                        border border-[#FFC8FB] focus-within:border-pink-400 focus-within:ring focus-within:ring-pink-200 dark:focus-within:ring-pink-500
-                                        px-4 py-2 transition-all duration-200 max-h-48 overflow-y-auto">
+                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Assign Subjects</label>
+
+                            {{-- Search Input --}}
+                            <div class="mb-2">
+                                <input type="text" id="subject-search" placeholder="Search subjects..."
+                                    class="w-full rounded-lg border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                            text-gray-800 px-3 py-2 text-sm transition-all duration-200" />
+                            </div>
+
+                            {{-- Subjects List --}}
+                            <div id="subject-list"
+                                class="w-full rounded-lg shadow-sm bg-white border border-[#FFC8FB] 
+                                        text-gray-800 px-4 py-2 transition-all duration-200 max-h-48 overflow-y-auto">
                                 @foreach($subjects as $subject)
-                                    <label class="flex items-center space-x-3 py-2 hover:bg-[#FFC8FB]/20 dark:hover:bg-[#FFC8FB]/10 rounded cursor-pointer">
-                                        <input type="checkbox" name="subjects[]" value="{{ $subject->id }}" 
-                                               class="text-[#FF92C2] border-[#FFC8FB] rounded focus:ring-[#FF92C2] focus:ring-2">
-                                        <span class="text-gray-800 dark:text-black-200">{{ $subject->subject_name }}</span>
+                                    <label class="flex items-center space-x-3 py-2 hover:bg-[#FFC8FB]/20 rounded cursor-pointer subject-item">
+                                        <input type="checkbox" name="subjects[]" value="{{ $subject->id }}"
+                                            {{ (is_array(old('subjects')) && in_array($subject->id, old('subjects'))) ? 'checked' : '' }}
+                                            class="text-[#FF92C2] border-[#FFC8FB] rounded focus:ring-[#FF92C2] focus:ring-2">
+                                        <span class="text-gray-800">{{ $subject->subject_name }}</span>
                                     </label>
                                 @endforeach
                             </div>
-                            <small class="text-gray-600 dark:text-gray-400 block mt-1">Select one or more subjects.</small>
+                            @error('subjects')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         {{-- Section & Password --}}
@@ -142,4 +154,13 @@
             </div>
         </div>
     </div>
+<script>
+    document.getElementById('subject-search').addEventListener('keyup', function () {
+        let query = this.value.toLowerCase();
+        document.querySelectorAll('#subject-list .subject-item').forEach(function (item) {
+            let text = item.innerText.toLowerCase();
+            item.style.display = text.includes(query) ? '' : 'none';
+        });
+    });
+</script>
 </x-app-layout>

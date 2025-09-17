@@ -68,8 +68,9 @@
                     @if ($task->attachment)
                         <div class="mt-6">
                             <h3 class="text-lg font-semibold text-pink-600 mb-2">
-                                Attachment
+                                Task File Attachment (Download this file)
                             </h3>
+                            
                             <div class="flex items-center justify-between bg-pink-50 border border-pink-200 rounded-lg p-4 shadow-sm">
                                 <div class="flex items-center gap-3">
                                     <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-pink-100">

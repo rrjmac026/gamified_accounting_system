@@ -37,4 +37,9 @@ class PerformanceLog extends Model
     {
         return $this->belongsTo(Task::class);
     }
+
+    public function getStudentNameAttribute()
+    {
+        return $this->student->user->full_name ?? 'N/A';
+    }
 }

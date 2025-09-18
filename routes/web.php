@@ -59,6 +59,12 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'show'])->name('login');
     Route::post('login', [LoginController::class, 'authenticate']);
+    
+    // Update route name to match view
+    Route::get('/two-factor-challenge', [LoginController::class, 'showTwoFactorForm'])
+        ->name('two-factor.challenge');
+    Route::post('/two-factor-challenge', [LoginController::class, 'twoFactorChallenge'])
+        ->name('two-factor.login');
 });
 
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
@@ -70,6 +76,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Add 2FA routes
+    Route::get('/two-factor', [ProfileController::class, 'showTwoFactorForm'])
+        ->name('two-factor.login');
+    Route::post('/two-factor', [ProfileController::class, 'verifyTwoFactor'])
+        ->name('two-factor.verify');
+    Route::post('/profile/two-factor-authentication', [ProfileController::class, 'enableTwoFactor'])
+        ->name('profile.enableTwoFactor');
+    Route::delete('/profile/two-factor-authentication', [ProfileController::class, 'disableTwoFactor'])
+        ->name('profile.disableTwoFactor');
+    Route::get('/profile/two-factor', [ProfileController::class, 'showTwoFactorForm'])
+     ->name('profile.twoFactorForm');
 });
 
 // ============================================================================
@@ -121,12 +139,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Gamification & Progress
     Route::resource('badges', BadgeController::class);
     Route::resource('/xp-transactions', XpTransactionController::class);
-    Route::resource('performance-logs', PerformanceLogController::class);
-    Route::get('performance-logs/student/{student}', [PerformanceLogController::class, 'getStudentPerformance'])
-        ->name('performance-logs.student');
-    Route::get('performance-logs/subject/{subject}', [PerformanceLogController::class, 'getSubjectStatistics'])
-        ->name('performance-logs.subject');
     
+    // Performance Logs Routes
+    Route::get('/performance-logs', [PerformanceLogController::class, 'index'])
+        ->name('performance-logs.index');
+    Route::get('/performance-logs/{performanceLog}', [PerformanceLogController::class, 'show'])
+        ->name('performance-logs.show');
+    Route::delete('/performance-logs/{performanceLog}', [PerformanceLogController::class, 'destroy'])
+        ->name('performance-logs.destroy');
+    Route::get('/performance-logs/student/{student}', [PerformanceLogController::class, 'getStudentPerformance'])
+        ->name('performance-logs.student');
+    Route::get('/performance-logs/subject/{subject}', [PerformanceLogController::class, 'getSubjectStatistics'])
+        ->name('performance-logs.subject');
+
     // Leaderboards
     Route::get('/leaderboards', [LeaderboardController::class, 'index'])->name('leaderboards.index');
     Route::get('/leaderboards/{leaderboard}', [LeaderboardController::class, 'show'])->name('leaderboards.show');
@@ -221,7 +246,7 @@ Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.
     // Todo Management
     Route::prefix('todo')->group(function () {
         Route::get('/{status?}', [TodoController::class, 'index'])
-            ->where('status', 'missing|assigned|in_progress|late|submitted|graded')
+            ->where('status', 'missing|assigned|late|submitted|graded')
             ->name('todo.index');
     });
     

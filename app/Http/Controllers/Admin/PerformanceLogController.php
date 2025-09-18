@@ -9,6 +9,9 @@ use Carbon\Carbon;
 
 class PerformanceLogController extends Controller
 {
+    /**
+     * Display a paginated list of performance logs with optional filters.
+     */
     public function index(Request $request)
     {
         $query = PerformanceLog::with(['student', 'subject', 'task']);
@@ -35,51 +38,18 @@ class PerformanceLogController extends Controller
         return view('admin.performance_logs.index', compact('logs'));
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'subject_id' => 'required|exists:subjects,id',
-            'task_id' => 'required|exists:tasks,id',
-            'performance_metric' => 'required|string',
-            'value' => 'required|numeric|min:0',
-            'recorded_at' => 'required|date'
-        ]);
-
-        PerformanceLog::create($validated);
-
-        return redirect()->route('admin.performance_logs.index')
-            ->with('success', 'Performance log created successfully');
-    }
-
+    /**
+     * Show a single performance log in detail.
+     */
     public function show(PerformanceLog $performanceLog)
     {
         $performanceLog->load(['student', 'subject', 'task']);
         return view('admin.performance_logs.show', compact('performanceLog'));
     }
 
-    public function update(Request $request, PerformanceLog $performanceLog)
-    {
-        $validated = $request->validate([
-            'performance_metric' => 'sometimes|string',
-            'value' => 'sometimes|numeric|min:0',
-            'recorded_at' => 'sometimes|date'
-        ]);
-
-        $performanceLog->update($validated);
-
-        return redirect()->route('admin.performance_logs.show', $performanceLog->id)
-            ->with('success', 'Performance log updated successfully');
-    }
-
-    public function destroy(PerformanceLog $performanceLog)
-    {
-        $performanceLog->delete();
-
-        return redirect()->route('admin.performance_logs.index')
-            ->with('success', 'Performance log deleted successfully');
-    }
-
+    /**
+     * Get performance summary for a specific student.
+     */
     public function getStudentPerformance($studentId)
     {
         $logs = PerformanceLog::where('student_id', $studentId)
@@ -101,6 +71,9 @@ class PerformanceLogController extends Controller
         return view('admin.performance_logs.student_performance', compact('performance', 'logs'));
     }
 
+    /**
+     * Get performance statistics for a specific subject.
+     */
     public function getSubjectStatistics($subjectId)
     {
         $logs = PerformanceLog::where('subject_id', $subjectId)
@@ -120,5 +93,16 @@ class PerformanceLogController extends Controller
         ];
 
         return view('admin.performance_logs.subject_statistics', compact('statistics', 'logs'));
+    }
+
+    /**
+     * Optionally allow deletion if necessary.
+     */
+    public function destroy(PerformanceLog $performanceLog)
+    {
+        $performanceLog->delete();
+
+        return redirect()->route('admin.performance_logs.index')
+            ->with('success', 'Performance log deleted successfully');
     }
 }

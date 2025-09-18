@@ -73,13 +73,6 @@
                         <span>Assigned</span>
                         <div class="absolute left-0 top-0 h-full w-1 bg-blue-400 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-200 rounded-r"></div>
                     </a>
-                    <a href="{{ route('students.todo.index', ['status' => 'in_progress']) }}"
-                        class="flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 hover:bg-white/60 hover:shadow-sm hover:translate-x-1 relative group
-                        {{ request('status')=='in_progress' ? 'font-semibold text-[#FF92C2] bg-white/40 border-l-2 border-yellow-400' : 'text-[#595758] hover:text-[#FF92C2]' }}">
-                        <span class="w-2 h-2 bg-yellow-500 rounded-full mr-3 {{ request('status')=='in_progress' ? 'animate-pulse' : '' }}"></span>
-                        <span>In Progress</span>
-                        <div class="absolute left-0 top-0 h-full w-1 bg-yellow-400 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-200 rounded-r"></div>
-                    </a>
                     <a href="{{ route('students.todo.index', ['status' => 'late']) }}"
                         class="flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 hover:bg-white/60 hover:shadow-sm hover:translate-x-1 relative group
                         {{ request('status')=='late' ? 'font-semibold text-[#FF92C2] bg-white/40 border-l-2 border-red-600' : 'text-[#595758] hover:text-[#FF92C2]' }}">

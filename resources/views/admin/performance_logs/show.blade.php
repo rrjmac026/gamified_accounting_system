@@ -21,7 +21,7 @@
                                 </div>
                                 <div class="flex justify-between">
                                     <dt class="text-gray-500">Subject:</dt>
-                                    <dd class="text-gray-900">{{ $performanceLog->subject->name }}</dd>
+                                    <dd class="text-gray-900">{{ $performanceLog->subject->subject_name }}</dd>
                                 </div>
                                 <div class="flex justify-between">
                                     <dt class="text-gray-500">Task:</dt>
@@ -50,7 +50,7 @@
                     </div>
 
                     <div class="mt-6 flex flex-col sm:flex-row justify-end gap-3">
-                        <a href="{{ route('admin.performance_logs.index') }}" 
+                        <a href="{{ route('admin.performance-logs.index') }}" 
                            class="w-full sm:w-auto px-4 sm:px-6 py-2 text-center bg-gray-500 text-white rounded-lg hover:bg-gray-600">
                             Back
                         </a>

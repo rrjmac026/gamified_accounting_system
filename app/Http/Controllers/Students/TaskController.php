@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Models\Badge;
 use App\Models\TaskSubmission;
+use App\Models\PerformanceLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+
 
 class TaskController extends Controller
 {
@@ -119,6 +121,15 @@ class TaskController extends Controller
             'submitted_at' => now(),
             'was_late' => $isLate,
             'penalty' => $penaltyApplied ? $task->late_penalty : null,
+        ]);
+
+        PerformanceLog::create([
+            'student_id' => $student->id,
+            'subject_id' => $task->subject_id,
+            'task_id' => $task->id,
+            'performance_metric' => 'score', // or 'completion' if not graded
+            'value' => $submission->score ?? 0, // or whatever metric you calculate
+            'recorded_at' => now(),
         ]);
         
         $this->checkAndAssignBadges($student);

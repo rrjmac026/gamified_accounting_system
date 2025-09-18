@@ -29,7 +29,19 @@ class LoginController extends Controller
         // Get authenticated user
         $user = Auth::user();
 
-        // Update last login timestamp
+        // Check if 2FA is enabled for the user
+        if ($user->two_factor_secret && 
+            !session('auth.two_factor.authenticated')) {
+            Auth::logout(); // Logout the user temporarily
+            
+            // Store user ID in session for 2FA verification
+            session(['auth.two_factor.user_id' => $user->id]);
+            session(['auth.two_factor.remember' => $request->remember]);
+            
+            return redirect()->route('two-factor.challenge');
+        }
+
+        // Only proceed with login if 2FA is not enabled or already verified
         $user->update([
             'last_login_at' => now()
         ]);
@@ -100,5 +112,51 @@ class LoginController extends Controller
             'user_agent' => $request->userAgent(),
             'performed_at' => now(),
         ]);
+    }
+
+    /**
+     * Show 2FA challenge form
+     */
+    public function showTwoFactorForm()
+    {
+        if(!session('auth.two_factor.user_id')) {
+            return redirect()->route('login');
+        }
+        
+        return view('auth.two-factor-challenge');
+    }
+
+    /**
+     * Verify 2FA code
+     */
+    public function twoFactorChallenge(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string|size:6',
+        ]);
+
+        $user = \App\Models\User::find(session('auth.two_factor.user_id'));
+
+        if (!$user || !$user->verifyTwoFactorCode($request->code)) {
+            return back()->withErrors([
+                'code' => 'The provided two-factor authentication code was invalid.',
+            ]);
+        }
+
+        Auth::login($user, session('auth.two_factor.remember', false));
+        
+        session()->forget([
+            'auth.two_factor.user_id',
+            'auth.two_factor.remember',
+        ]);
+        
+        session(['auth.two_factor.authenticated' => true]);
+
+        return redirect()->intended(match($user->role) {
+            'admin' => 'admin/dashboard',
+            'instructor' => 'instructor/dashboard',
+            'student' => 'students/dashboard',
+            default => 'dashboard',
+        });
     }
 }

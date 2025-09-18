@@ -26,10 +26,6 @@
                                     <dd class="text-gray-900">{{ $user->email }}</dd>
                                 </div>
                                 <div class="flex justify-between">
-                                    <dt class="text-gray-500">ID Number:</dt>
-                                    <dd class="text-gray-900">{{ $user->id_number }}</dd>
-                                </div>
-                                <div class="flex justify-between">
                                     <dt class="text-gray-500">Role:</dt>
                                     <dd class="text-gray-900 capitalize">{{ $user->role }}</dd>
                                 </div>
@@ -54,6 +50,10 @@
                             <div class="bg-white p-6 rounded-lg shadow">
                                 <h3 class="text-lg font-semibold text-[#FF92C2] mb-4">Student Information</h3>
                                 <dl class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <dt class="text-gray-500">Student Number:</dt>
+                                        <dd class="text-gray-900">{{ $user->student->student_number ?? 'N/A' }}</dd>
+                                    </div>
                                     <div class="flex justify-between">
                                         <dt class="text-gray-500">Course:</dt>
                                         <dd class="text-gray-900">{{ $user->student->course->course_name ?? 'N/A' }}</dd>

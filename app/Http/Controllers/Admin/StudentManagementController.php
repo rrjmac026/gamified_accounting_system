@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 
+
 class StudentManagementController extends Controller
 {
     use Loggable;

@@ -86,9 +86,10 @@ class SubjectController extends Controller
 
     public function show(Subject $subject)
     {
-        $subject->load(['instructors.user']);
-        // $instructors = Instructor::with('user')->get(); // 👈 fetch all instructors
-        return view('admin.subjects.show', compact('subject'));
+        $subject->load(['instructors.user', 'students.user', 'students.course']);
+        $allInstructors = Instructor::with('user')->get();
+        
+        return view('admin.subjects.show', compact('subject', 'allInstructors'));
     }
 
     public function edit(Subject $subject)
@@ -169,5 +170,34 @@ class SubjectController extends Controller
 
         return redirect()->route('admin.subjects.index')
             ->with('success', 'Subject deleted successfully');
+    }
+
+    public function showAssignInstructorsForm(Subject $subject)
+    {
+        $allInstructors = Instructor::with(['user'])->get();
+        return view('admin.subjects.assign-instructors', compact('subject', 'allInstructors'));
+    }
+
+    public function assignInstructors(Request $request, Subject $subject)
+    {
+        $request->validate([
+            'instructors' => 'required|array',
+            'instructors.*' => 'exists:instructors,id'
+        ]);
+
+        $subject->instructors()->sync($request->instructors);
+        
+        $this->logActivity(
+            "Assigned Instructors to Subject",
+            "Subject",
+            $subject->id,
+            [
+                'subject_code' => $subject->subject_code,
+                'instructor_ids' => $request->instructors
+            ]
+        );
+
+        return redirect()->route('admin.subjects.show', $subject)
+            ->with('success', 'Instructors assigned successfully.');
     }
 }

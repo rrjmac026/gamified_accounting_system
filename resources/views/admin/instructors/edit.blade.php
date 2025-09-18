@@ -11,8 +11,17 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         {{-- Name --}}
                         <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Full Name</label>
-                            <input type="text" name="name" value="{{ $instructor->name }}"
+                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">First Name</label>
+                            <input type="text" name="first_name" value="{{ $instructor->user->first_name }}"
+                                   class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
+                                          border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                          text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
+                                   required>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Last Name</label>
+                            <input type="text" name="last_name" value="{{ $instructor->user->last_name }}"
                                    class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
                                           border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
                                           text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"

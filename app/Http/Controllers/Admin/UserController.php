@@ -9,6 +9,9 @@ use App\Models\User;
 use App\Models\Student;
 use App\Models\Instructor;
 use App\Models\ActivityLog;
+use App\Models\Course;
+use App\Models\Section;
+use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -70,8 +73,11 @@ class UserController extends Controller
     public function create()
     {
         $roles = ['student', 'instructor', 'admin'];
+        $courses = Course::all();
+        $sections = Section::all();
+        $subjects = Subject::all();
         
-        return view('admin.users.create', compact('roles'));
+        return view('admin.users.create', compact('roles', 'courses', 'sections', 'subjects'));
     }
 
     /**
@@ -81,7 +87,6 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id_number' => 'required|string|max:20|unique:users,id_number',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
@@ -222,12 +227,14 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified user
      */
-    public function edit($id)
+    public function edit(User $user)
     {
-        $user = User::with(['student', 'instructor'])->findOrFail($id);
-        $roles = ['student', 'instructor', 'admin'];
+        $user->load(['student.subjects']); // Eager load the relationships
+        $courses = Course::all();
+        $sections = Section::all();
+        $subjects = Subject::all();
         
-        return view('admin.users.edit', compact('user', 'roles'));
+        return view('admin.users.edit', compact('user', 'courses', 'sections', 'subjects'));
     }
 
     /**
@@ -238,7 +245,6 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
-            'id_number' => ['required', 'string', 'max:20', Rule::unique('users')->ignore($user->id)],
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
@@ -281,7 +287,6 @@ class UserController extends Controller
 
             // Update user data
             $userData = [
-                'id_number' => $request->id_number,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'email' => $request->email,
@@ -701,8 +706,7 @@ class UserController extends Controller
                 $search = $request->query;
                 $q->where('first_name', 'LIKE', "%{$search}%")
                   ->orWhere('last_name', 'LIKE', "%{$search}%")
-                  ->orWhere('email', 'LIKE', "%{$search}%")
-                  ->orWhere('id_number', 'LIKE', "%{$search}%");
+                  ->orWhere('email', 'LIKE', "%{$search}%");
             });
 
         if ($request->filled('role')) {

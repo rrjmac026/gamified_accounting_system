@@ -109,7 +109,7 @@ Route::middleware(['auth', 'role:admin,instructor'])->group(function () {
 // ============================================================================
 // ADMIN ROUTES
 // ============================================================================
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     
     // Dashboard
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -178,6 +178,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     
     // Settings
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+    
+    // Subject instructor assignment routes
+    Route::post('/subjects/{subject}/assign-instructors', [SubjectController::class, 'assignInstructors'])
+        ->name('subjects.assignInstructors');
+    Route::get('/subjects/{subject}/assign-instructors', [SubjectController::class, 'showAssignInstructorsForm'])
+        ->name('subjects.showAssignInstructorsForm');
 });
 
 // ============================================================================

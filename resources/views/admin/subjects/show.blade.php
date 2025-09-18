@@ -6,13 +6,13 @@
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-[#FF92C2]">Subject Details</h2>
                         <div class="space-x-4">
+                            <a href="{{ route('admin.subjects.showAssignInstructorsForm', $subject) }}" 
+                               class="inline-flex items-center px-4 py-2 bg-[#FF92C2] text-white rounded-lg hover:bg-[#ff6fb5]">
+                                <i class="fas fa-user-plus mr-2"></i>Manage Instructors
+                            </a>
                             <a href="{{ route('admin.subjects.edit', $subject) }}" 
                                class="inline-flex items-center px-4 py-2 bg-[#FF92C2] text-white rounded-lg hover:bg-[#ff6fb5]">
                                 <i class="fas fa-edit mr-2"></i>Edit Subject
-                            </a>
-                            <a href="{{ route('admin.subjects.index') }}" 
-                               class="text-[#FF92C2] hover:text-[#ff6fb5]">
-                                Back to List
                             </a>
                         </div>
                     </div>

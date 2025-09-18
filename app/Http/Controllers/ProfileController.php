@@ -121,3 +121,10 @@ class ProfileController extends Controller
     }
 
 }
+
+
+//code ni para reset sa code if ever na delete
+// $user = \App\Models\User::where('email', 'admin@admin.com')->first();
+// $user->two_factor_secret = null;
+// $user->two_factor_confirmed_at = null;
+// $user->save();

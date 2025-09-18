@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Badge;
-use App\Http\Requests\BadgeRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use App\Traits\Loggable;
 
 class BadgeController extends Controller
@@ -34,9 +34,21 @@ class BadgeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(BadgeRequest $request)
+    public function store(Request $request)
     {
-        $validated = $request->validated();
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'icon' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
+            'xp_threshold' => 'required|integer|min:0',
+            'criteria' => 'required|in:achievement,skill,participation,milestone',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $validated = $validator->validated();
         
         if ($request->hasFile('icon')) {
             $path = $request->file('icon')->store('badges', 'public');
@@ -80,9 +92,21 @@ class BadgeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(BadgeRequest $request, Badge $badge)
+    public function update(Request $request, Badge $badge)
     {
-        $validated = $request->validated();
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'icon' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
+            'xp_threshold' => 'required|integer|min:0',
+            'criteria' => 'required|in:achievement,skill,participation,milestone',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $validated = $validator->validated();
         $originalData = $badge->toArray();
         
         if ($request->hasFile('icon')) {

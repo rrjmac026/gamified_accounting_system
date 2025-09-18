@@ -20,7 +20,8 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
         'role',
@@ -94,5 +95,10 @@ class User extends Authenticatable
             decrypt($this->two_factor_secret),
             $code
         );
+    }
+    
+    public function getNameAttribute(): string
+    {
+        return "{$this->first_name} {$this->last_name}";
     }
 }

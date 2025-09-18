@@ -81,23 +81,34 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'id_number' => 'required|string|max:20|unique:users',
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'id_number' => 'required|string|max:20|unique:users,id_number',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|in:student,instructor,admin',
             'permissions' => 'nullable|array',
+            'permissions.*' => 'string|max:100',
             'is_active' => 'boolean',
             
             // Student specific fields
             'course' => 'nullable|required_if:role,student|string|max:100',
             'year_level' => 'nullable|required_if:role,student|integer|min:1|max:5',
-            'section' => 'nullable|string|max:50',
+            'section' => 'nullable|string|max:50|regex:/^[a-zA-Z0-9\-]+$/',
             
             // Instructor specific fields
-            'employee_id' => 'nullable|required_if:role,instructor|string|max:20|unique:instructors',
+            'employee_id' => 'nullable|required_if:role,instructor|string|max:20|unique:instructors,employee_id',
             'department' => 'nullable|string|max:100',
             'specialization' => 'nullable|string|max:255',
+        ], [
+            'first_name.required' => 'The first name field is required.',
+            'last_name.required' => 'The last name field is required.',
+            'email.unique' => 'This email address is already in use.',
+            'password.regex' => 'The password must contain at least one uppercase letter, one lowercase letter, and one number.',
+            'section.regex' => 'The section may only contain letters, numbers, and hyphens.',
+            'course.required_if' => 'The course field is required when role is student.',
+            'year_level.required_if' => 'The year level field is required when role is student.',
+            'employee_id.required_if' => 'The employee ID field is required when role is instructor.',
         ]);
 
         if ($validator->fails()) {
@@ -108,14 +119,18 @@ class UserController extends Controller
                     'errors' => $validator->errors()
                 ], 422);
             }
-            return redirect()->back()->withErrors($validator)->withInput();
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
         try {
-            // Create the user
+            DB::beginTransaction();
+
+            // Create user
             $user = User::create([
-                'id_number' => $request->id_number,
-                'name' => $request->name,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => $request->role,
@@ -150,11 +165,14 @@ class UserController extends Controller
                 "User",
                 $user->id,
                 [
-                    'name' => $user->name,
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
                     'email' => $user->email,
                     'role' => $user->role
                 ]
             );
+
+            DB::commit();
 
             if ($request->expectsJson()) {
                 return response()->json([
@@ -168,15 +186,9 @@ class UserController extends Controller
                            ->with('success', 'User created successfully');
 
         } catch (\Exception $e) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to create user: ' . $e->getMessage()
-                ], 500);
-            }
-            return redirect()->back()
-                           ->with('error', 'Failed to create user: ' . $e->getMessage())
-                           ->withInput();
+            DB::rollback();
+            return back()->withInput()
+                ->with('error', 'Failed to create user: ' . $e->getMessage());
         }
     }
 
@@ -227,7 +239,8 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'id_number' => ['required', 'string', 'max:20', Rule::unique('users')->ignore($user->id)],
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8|confirmed',
             'role' => 'required|in:student,instructor,admin',
@@ -269,7 +282,8 @@ class UserController extends Controller
             // Update user data
             $userData = [
                 'id_number' => $request->id_number,
-                'name' => $request->name,
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
                 'email' => $request->email,
                 'role' => $request->role,
                 'permissions' => $request->permissions ?? [],
@@ -685,7 +699,8 @@ class UserController extends Controller
         $query = User::query()
             ->where(function (Builder $q) use ($request) {
                 $search = $request->query;
-                $q->where('name', 'LIKE', "%{$search}%")
+                $q->where('first_name', 'LIKE', "%{$search}%")
+                  ->orWhere('last_name', 'LIKE', "%{$search}%")
                   ->orWhere('email', 'LIKE', "%{$search}%")
                   ->orWhere('id_number', 'LIKE', "%{$search}%");
             });

@@ -9,11 +9,13 @@ use App\Models\User;
 use App\Models\Subject;
 use App\Models\ActivityLog;
 use App\Models\Course;
+use App\Models\Section;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
 
 class StudentManagementController extends Controller
 {
@@ -26,10 +28,11 @@ class StudentManagementController extends Controller
         if ($request->has('search')) {
             $search = $request->search;
             $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%")
-                ->orWhere('student_number', 'like', "%{$search}%");
-            });
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            })
+            ->orWhere('student_number', 'like', "%{$search}%");
         }
 
         $students = $query->paginate(10);
@@ -42,50 +45,59 @@ class StudentManagementController extends Controller
         
         $subjects = Subject::all();
         $courses = Course::all();
-        return view('admin.student.create', compact('subjects', 'courses'));
+        $sections = Section::all();
+        return view('admin.student.create', compact('subjects', 'courses', 'sections'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'student_number' => 'required|string|unique:students,student_number',
             'course_id' => 'required|exists:courses,id',
             'year_level' => 'required|integer|min:1|max:5',
             'section' => 'required|string|max:50',
-            'password' => 'required|string|min:6',
-            'subjects' => 'array',
+            'password' => 'required|string|min:8',  // Added password validation
+            'subjects' => 'nullable|array',
             'subjects.*' => 'exists:subjects,id'
         ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
         try {
             DB::beginTransaction();
 
-            // Create user without id_number
+            // Create user with default password
             $user = User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password), // Use input password instead of default
                 'role' => 'student',
                 'is_active' => true
             ]);
 
-            // Create student with student_number
+            // Create student
             $student = Student::create([
                 'user_id' => $user->id,
-                'student_number' => $validated['student_number'],
-                'course_id' => $validated['course_id'],
-                'year_level' => $validated['year_level'],
-                'section' => $validated['section'],
+                'student_number' => $request->student_number,
+                'course_id' => $request->course_id,
+                'year_level' => $request->year_level,
+                'section' => $request->section,
                 'total_xp' => 0,
                 'current_level' => 1,
                 'performance_rating' => 0.00
             ]);
 
             // Attach subjects if provided
-            if (isset($validated['subjects'])) {
-                $student->subjects()->attach($validated['subjects']);
+            if ($request->has('subjects')) {
+                $student->subjects()->attach($request->subjects);
             }
 
             DB::commit();
@@ -95,10 +107,10 @@ class StudentManagementController extends Controller
                 "Student",
                 $student->id,
                 [
-                    'name' => $user->name,
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
                     'email' => $user->email,
-                    'student_number' => $student->student_number,
-                    'course' => $validated['course_id']
+                    'student_number' => $student->student_number
                 ]
             );
 
@@ -107,7 +119,6 @@ class StudentManagementController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            Log::error('Error creating student: ' . $e->getMessage());
             return back()->withInput()
                 ->with('error', 'Error creating student: ' . $e->getMessage());
         }
@@ -238,20 +249,22 @@ class StudentManagementController extends Controller
                 }
 
                 // Extract data with better error handling - matching your CSV column order
-                // CSV columns: name, email, course, year_level, section, password, id_number
-                $name       = isset($row[0]) ? trim($row[0]) : null;
-                $email      = isset($row[1]) ? trim($row[1]) : null;
-                $course     = isset($row[2]) ? trim($row[2]) : '';
-                $year_level = isset($row[3]) ? (int)$row[3] : 1;
-                $section    = isset($row[4]) ? trim($row[4]) : '';
-                $password   = isset($row[5]) ? trim($row[5]) : 'password123';
-                $id_number  = isset($row[6]) ? trim($row[6]) : null;
+                // CSV columns: first_name, last_name, email, course, year_level, section, password, id_number
+                $first_name = isset($row[0]) ? trim($row[0]) : null;
+                $last_name = isset($row[1]) ? trim($row[1]) : null;
+                $email = isset($row[2]) ? trim($row[2]) : null;
+                $course = isset($row[3]) ? trim($row[3]) : '';
+                $year_level = isset($row[4]) ? (int)$row[4] : 1;
+                $section = isset($row[5]) ? trim($row[5]) : '';
+                $password = isset($row[6]) ? trim($row[6]) : 'password123';
+                $id_number = isset($row[7]) ? trim($row[7]) : null;
 
                 // Validate required fields
-                if (empty($name) || empty($email)) {
-                    $errors[] = "Row {$index}: Missing required fields (name or email)";
+                if (empty($first_name) || empty($last_name) || empty($email)) {
+                    $errors[] = "Row {$index}: Missing required fields (first name, last name, or email)";
                     Log::warning("Row {$index}: Missing required fields", [
-                        'name' => $name,
+                        'first_name' => $first_name,
+                        'last_name' => $last_name,
                         'email' => $email
                     ]);
                     $skippedCount++;
@@ -277,7 +290,8 @@ class StudentManagementController extends Controller
                         ['email' => $email],
                         [
                             'id_number' => $id_number,
-                            'name' => $name,
+                            'first_name' => $first_name,
+                            'last_name' => $last_name,
                             'password' => Hash::make($password),
                             'role' => 'student',
                             'is_active' => true
@@ -287,7 +301,8 @@ class StudentManagementController extends Controller
                     Log::info("User created/updated:", [
                         'id' => $user->id,
                         'email' => $user->email,
-                        'name' => $user->name
+                        'first_name' => $user->first_name,
+                        'last_name' => $user->last_name
                     ]);
 
                     // Create or update student
@@ -314,7 +329,7 @@ class StudentManagementController extends Controller
                     $errors[] = "Row {$index}: Database error - " . $e->getMessage();
                     Log::error("Error processing row {$index}:", [
                         'error' => $e->getMessage(),
-                        'data' => compact('name', 'email', 'course', 'year_level', 'section')
+                        'data' => compact('first_name', 'last_name', 'email', 'course', 'year_level', 'section')
                     ]);
                     $skippedCount++;
                 }
@@ -355,39 +370,58 @@ class StudentManagementController extends Controller
     {
         $subjects = Subject::all();
         $courses = Course::all();
-        return view('admin.student.edit', compact('student', 'subjects', 'courses'));
+        $sections = Section::all();
+        return view('admin.student.edit', compact('student', 'subjects', 'courses', 'sections'));
     }
 
     public function update(Request $request, Student $student)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
+        $validator = Validator::make($request->all(), [
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($student->user_id)],
             'student_number' => ['required', 'string', Rule::unique('students')->ignore($student->id)],
             'course_id' => 'required|exists:courses,id',
             'year_level' => 'required|integer|min:1|max:5',
-            'section' => 'required|string|max:50',
-            'subjects' => 'array',
-            'subjects.*' => 'exists:subjects,id'
+            'section' => 'nullable|string|max:50',
+            'subjects' => 'nullable|array',
+            'subjects.*' => 'exists:subjects,id',
+            'password' => 'nullable|min:8|confirmed'
         ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error', 'Please check the form for errors.');
+        }
 
         try {
             DB::beginTransaction();
 
-            $student->user->update([
-                'name' => $validated['name'],
-                'email' => $validated['email']
-            ]);
+            // Update user details
+            $userData = [
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+            ];
 
+            if ($request->filled('password')) {
+                $userData['password'] = Hash::make($request->password);
+            }
+
+            $student->user->update($userData);
+
+            // Update student
             $student->update([
-                'student_number' => $validated['student_number'],
-                'course_id' => $validated['course_id'],
-                'year_level' => $validated['year_level'],
-                'section' => $validated['section']
+                'student_number' => $request->student_number,
+                'course_id' => $request->course_id,
+                'year_level' => $request->year_level,
+                'section' => $request->section
             ]);
 
-            if (isset($validated['subjects'])) {
-                $student->subjects()->sync($validated['subjects']);
+            if ($request->has('subjects')) {
+                $student->subjects()->sync($request->subjects);
             }
 
             DB::commit();
@@ -398,7 +432,10 @@ class StudentManagementController extends Controller
                 $student->id,
                 [
                     'student_id' => $student->id,
-                    'changes' => $student->getChanges()
+                    'changes' => array_merge(
+                        $student->getChanges(),
+                        $student->user->getChanges()
+                    )
                 ]
             );
 
@@ -407,9 +444,21 @@ class StudentManagementController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Student update failed: ' . $e->getMessage());
             return back()->withInput()
                 ->with('error', 'Error updating student: ' . $e->getMessage());
         }
+    }
+
+    private function extractNameFromEmail($email)
+    {
+        // Extract name from email (e.g., john.doe@example.com -> John Doe)
+        $localPart = explode('@', $email)[0];
+        $nameParts = explode('.', $localPart);
+        return [
+            'first_name' => ucwords($nameParts[0] ?? ''),
+            'last_name' => ucwords($nameParts[1] ?? '')
+        ];
     }
 
     private function autoCreateStudent($email, $rowNumber, &$warnings, &$createdStudents)
@@ -421,8 +470,10 @@ class StudentManagementController extends Controller
         try {
             DB::beginTransaction();
 
+            $names = $this->extractNameFromEmail($email);
             $user = User::create([
-                'name' => $this->extractNameFromEmail($email),
+                'first_name' => $names['first_name'],
+                'last_name' => $names['last_name'],
                 'email' => $email,
                 'password' => bcrypt($this->generateTemporaryPassword()),
                 'role' => 'student',

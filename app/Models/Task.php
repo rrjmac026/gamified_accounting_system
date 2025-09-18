@@ -95,7 +95,6 @@ class Task extends Model
         return $query->where('is_active', true);
     }
 
-    // Helper methods
     public function isQuestion()
     {
         return $this->type === 'question';

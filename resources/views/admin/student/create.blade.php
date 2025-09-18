@@ -9,50 +9,77 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                         {{-- Basic Info Fields --}}
                         <div class="sm:col-span-2">
-                            {{-- Name --}}
-                            <div>
-                                <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Full Name</label>
-                                <input type="text" name="name" 
-                                       value="{{ old('name') }}"
-                                       class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
-                                              border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                              text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200
-                                              @error('name') border-red-500 @enderror"
-                                       required>
-                                @error('name')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                                {{-- First Name --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-[#FF92C2] mb-1">First Name</label>
+                                    <input type="text" name="first_name" 
+                                        value="{{ old('first_name') }}"
+                                        class="w-full rounded-lg shadow-sm bg-white 
+                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                                text-gray-800 px-4 py-2 transition-all duration-200
+                                                @error('first_name') border-red-500 @enderror"
+                                        required>
+                                    @error('first_name')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                {{-- Last Name --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Last Name</label>
+                                    <input type="text" name="last_name" 
+                                        value="{{ old('last_name') }}"
+                                        class="w-full rounded-lg shadow-sm bg-white 
+                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                                text-gray-800 px-4 py-2 transition-all duration-200
+                                                @error('last_name') border-red-500 @enderror"
+                                        required>
+                                    @error('last_name')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
+
                         </div>
                         
-                        <div class="sm:col-span-2">
-                            {{-- Email --}}
-                            <div>
-                                <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Email Address</label>
-                                <input type="email" name="email" 
-                                       value="{{ old('email') }}"
-                                       class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
-                                              border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                              text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200
-                                              @error('email') border-red-500 @enderror"
-                                       required>
-                                @error('email')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        {{-- Student ID --}}
+                        {{-- Student Number --}}
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Student ID</label>
                             <input type="text" name="student_number" 
                                    value="{{ old('student_number') }}"
-                                   class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
-                                          border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                          text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200
-                                          @error('student_number') border-red-500 @enderror"
+                                   class="w-full rounded-lg shadow-sm bg-white 
+                                           border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                           text-gray-800 px-4 py-2 transition-all duration-200"
                                    required>
                             @error('student_number')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Email --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Email</label>
+                            <input type="email" name="email" 
+                                   value="{{ old('email') }}"
+                                   class="w-full rounded-lg shadow-sm bg-white 
+                                           border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                           text-gray-800 px-4 py-2 transition-all duration-200"
+                                   required>
+                            @error('email')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Password Field --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Password</label>
+                            <input type="password" name="password" 
+                                class="w-full rounded-lg shadow-sm bg-white 
+                                        border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                        text-gray-800 px-4 py-2 transition-all duration-200"
+                                required>
+                            @error('password')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
@@ -122,23 +149,36 @@
                         </div>
 
                         {{-- Section & Password --}}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Section</label>
-                                <input type="text" name="section" 
-                                       class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
-                                              border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                              text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
-                                       required>
+                        <div>
+                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Section</label>
+                            
+                            {{-- Search Input --}}
+                            <div class="mb-2">
+                                <input type="text" id="section-search" placeholder="Search sections..."
+                                    class="w-full rounded-lg border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                            text-gray-800 px-3 py-2 text-sm transition-all duration-200" />
                             </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Password</label>
-                                <input type="password" name="password" 
-                                       class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
-                                              border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                              text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
-                                       required>
+
+                            {{-- Hidden input to store the selected value --}}
+                            <input type="hidden" name="section" id="selected-section" value="{{ old('section') }}">
+
+                            {{-- Sections List --}}
+                            <div id="section-list"
+                                class="w-full rounded-lg shadow-sm bg-white border border-[#FFC8FB] 
+                                        text-gray-800 px-4 py-2 transition-all duration-200 max-h-48 overflow-y-auto">
+                                @foreach($sections as $section)
+                                    <label class="flex items-center space-x-3 py-2 hover:bg-[#FFC8FB]/20 rounded cursor-pointer section-item">
+                                        <input type="radio" name="section_radio" value="{{ $section->name }}" 
+                                            {{ old('section') == $section->name ? 'checked' : '' }}
+                                            class="text-[#FF92C2] border-[#FFC8FB] focus:ring-[#FF92C2] focus:ring-2"
+                                            onchange="updateSelectedSection(this.value)">
+                                        <span class="text-gray-800">{{ $section->name }}</span>
+                                    </label>
+                                @endforeach
                             </div>
+                            @error('section')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         {{-- Submit Button --}}
@@ -155,6 +195,21 @@
         </div>
     </div>
 <script>
+    // Section search functionality
+    document.getElementById('section-search').addEventListener('keyup', function () {
+        let query = this.value.toLowerCase();
+        document.querySelectorAll('#section-list .section-item').forEach(function (item) {
+            let text = item.innerText.toLowerCase();
+            item.style.display = text.includes(query) ? '' : 'none';
+        });
+    });
+
+    // Update hidden input when section is selected
+    function updateSelectedSection(value) {
+        document.getElementById('selected-section').value = value;
+    }
+
+    // Subject search functionality (keep existing)
     document.getElementById('subject-search').addEventListener('keyup', function () {
         let query = this.value.toLowerCase();
         document.querySelectorAll('#subject-list .subject-item').forEach(function (item) {

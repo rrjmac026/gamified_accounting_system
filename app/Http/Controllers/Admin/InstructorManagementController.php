@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class InstructorManagementController extends Controller
 {
@@ -26,7 +27,8 @@ class InstructorManagementController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('user', function($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%")
+                $q->where('first_name', 'LIKE', "%{$search}%")
+                  ->orWhere('last_name', 'LIKE', "%{$search}%")
                   ->orWhere('email', 'LIKE', "%{$search}%");
             })->orWhere('department', 'LIKE', "%{$search}%")
               ->orWhere('employee_id', 'LIKE', "%{$search}%");
@@ -42,46 +44,60 @@ class InstructorManagementController extends Controller
     }
     public function store(Request $request)
     {
-        //  dd($request->all());
         $validator = Validator::make($request->all(), [
-            'name'        => 'required|string|max:255',
-            'email'       => 'required|email|unique:users,email',
-            'employee_id' => 'required|string|max:50',
-            'department'  => 'required|string|max:255',
+            'first_name'     => 'required|string|max:255',
+            'last_name'      => 'required|string|max:255',
+            'email'          => 'required|email|unique:users,email',
+            'employee_id'    => 'required|string|max:50|unique:instructors',
+            'department'     => 'required|string|max:255',
             'specialization' => 'required|string|max:255',
-            'password'    => 'required|string|min:8',
+            'password'       => 'required|string|min:8',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
-        $user = User::create([
-            'name' => $request->name,
-            'email'      => $request->email,
-            'password'   => Hash::make($request->password),
-            'role'       => 'instructor'
-        ]);
+        try {
+            DB::beginTransaction();
 
-        $instructor = Instructor::create([
-            'user_id'        => $user->id,
-            'employee_id'    => $request->employee_id,
-            'department'     => $request->department,
-            'specialization' => $request->specialization,
-        ]);
+            $user = User::create([
+                'first_name' => $request->first_name,
+                'last_name'  => $request->last_name,
+                'email'      => $request->email,
+                'password'   => Hash::make($request->password),
+                'role'       => 'instructor'
+            ]);
 
-        $this->logActivity(
-            "Created Instructor",
-            "Instructor",
-            $instructor->id,
-            [
-                'name' => $user->name,
-                'email' => $user->email,
-                'department' => $instructor->department
-            ]
-        );
+            $instructor = Instructor::create([
+                'user_id'        => $user->id,
+                'employee_id'    => $request->employee_id,
+                'department'     => $request->department,
+                'specialization' => $request->specialization,
+            ]);
 
-        return redirect()->route('admin.instructors.index')->with('success', 'Instructor created successfully.');
+            DB::commit();
+
+            $this->logActivity(
+                "Created Instructor",
+                "Instructor",
+                $instructor->id,
+                [
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                    'email' => $user->email,
+                    'department' => $instructor->department
+                ]
+            );
+
+            return redirect()->route('admin.instructors.index')
+                ->with('success', 'Instructor created successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->withInput()
+                ->with('error', 'Failed to create instructor: ' . $e->getMessage());
+        }
     }
 
     public function edit(Instructor $instructor)
@@ -95,12 +111,10 @@ class InstructorManagementController extends Controller
     public function update(Request $request, Instructor $instructor)
     {
         $validator = Validator::make($request->all(), [
-            'name'           => 'required|string|max:255',
-            'email'          => [
-                'required', 'email',
-                Rule::unique('users', 'email')->ignore($instructor->user_id)
-            ],
-            'employee_id'    => 'required|string|max:50',
+            'first_name'     => 'required|string|max:255',
+            'last_name'      => 'required|string|max:255',
+            'email'          => ['required', 'email', Rule::unique('users', 'email')->ignore($instructor->user_id)],
+            'employee_id'    => ['required', 'string', 'max:50', Rule::unique('instructors')->ignore($instructor->id)],
             'department'     => 'required|string|max:255',
             'specialization' => 'required|string|max:255',
             'password'       => 'nullable|string|min:8',
@@ -109,35 +123,48 @@ class InstructorManagementController extends Controller
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
-        $originalData = $instructor->toArray();
-        
-        // update User
-        $instructor->user->update([
-            'name'  => $request->name,
-            'email' => $request->email,
-            // update password only if provided
-            'password' => $request->filled('password') ? Hash::make($request->password) : $instructor->user->password,
-        ]);
 
-        // update Instructor
-        $instructor->update([
-            'employee_id'    => $request->employee_id,
-            'department'     => $request->department,
-            'specialization' => $request->specialization,
-        ]);
+        try {
+            DB::beginTransaction();
+            $originalData = $instructor->toArray();
 
-        $this->logActivity(
-            "Updated Instructor",
-            "Instructor",
-            $instructor->id,
-            [
-                'original' => $originalData,
-                'changes' => $instructor->getChanges()
-            ]
-        );
+            // Update User
+            $instructor->user->update([
+                'first_name' => $request->first_name,
+                'last_name'  => $request->last_name,
+                'email'      => $request->email,
+                'password'   => $request->filled('password') ? 
+                    Hash::make($request->password) : 
+                    $instructor->user->password,
+            ]);
 
-        return redirect()->route('admin.instructors.show', $instructor)
-            ->with('success', 'Instructor updated successfully.');
+            // Update Instructor
+            $instructor->update([
+                'employee_id'    => $request->employee_id,
+                'department'     => $request->department,
+                'specialization' => $request->specialization,
+            ]);
+
+            DB::commit();
+
+            $this->logActivity(
+                "Updated Instructor",
+                "Instructor",
+                $instructor->id,
+                [
+                    'original' => $originalData,
+                    'changes' => $instructor->getChanges()
+                ]
+            );
+
+            return redirect()->route('admin.instructors.show', $instructor)
+                ->with('success', 'Instructor updated successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->withInput()
+                ->with('error', 'Failed to update instructor: ' . $e->getMessage());
+        }
     }
 
 

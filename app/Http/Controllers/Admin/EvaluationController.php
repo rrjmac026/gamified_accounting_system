@@ -7,8 +7,9 @@ use App\Models\Evaluation;
 use App\Models\Student;
 use App\Models\Instructor;
 use App\Models\Course;
-use App\Http\Requests\EvaluationRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class EvaluationController extends Controller
 {
@@ -71,8 +72,36 @@ class EvaluationController extends Controller
     /**
      * Store a new evaluation (Student only)
      */
-    public function store(EvaluationRequest $request)
+    public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'instructor_id' => 'required|exists:instructors,id',
+            'course_id' => 'required|exists:courses,id',
+            'responses' => 'required|array',
+            'responses.*' => 'required|integer|min:1|max:5',
+            'comments' => 'required|string|min:10|max:1000',
+        ], [
+            'instructor_id.required' => 'Please select an instructor.',
+            'instructor_id.exists' => 'The selected instructor is invalid.',
+            'course_id.required' => 'Please select a course.',
+            'course_id.exists' => 'The selected course is invalid.',
+            'responses.required' => 'Please provide ratings for all criteria.',
+            'responses.array' => 'Invalid response format.',
+            'responses.*.required' => 'Please rate all criteria.',
+            'responses.*.integer' => 'Ratings must be numbers.',
+            'responses.*.min' => 'Ratings must be between 1 and 5.',
+            'responses.*.max' => 'Ratings must be between 1 and 5.',
+            'comments.required' => 'Please provide your comments.',
+            'comments.min' => 'Comments must be at least 10 characters.',
+            'comments.max' => 'Comments cannot exceed 1000 characters.',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
         Evaluation::create([
             'student_id'    => Auth::user()->student->id,
             'instructor_id' => $request->instructor_id,

@@ -7,6 +7,9 @@ use App\Models\Subject;
 use App\Models\Instructor;
 use App\Traits\Loggable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class SubjectController extends Controller
 {
@@ -26,7 +29,7 @@ class SubjectController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'subject_code'   => 'required|string|unique:subjects,subject_code',
             'subject_name'   => 'required|string|max:255',
             'description'    => 'required|string',
@@ -38,30 +41,47 @@ class SubjectController extends Controller
             'is_active'      => 'required|boolean'
         ]);
 
-        $subject = Subject::create([
-            'subject_code' => $validated['subject_code'],
-            'subject_name' => $validated['subject_name'],
-            'description' => $validated['description'],
-            'semester' => $validated['semester'],
-            'academic_year' => $validated['academic_year'],
-            'units' => $validated['units'],
-            'is_active' => $validated['is_active']
-        ]);
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
-        $subject->instructors()->attach($validated['instructor_ids']);
+        try {
+            DB::beginTransaction();
 
-        $this->logActivity(
-            "Created Subject",
-            "Subject",
-            $subject->id,
-            [
-                'subject_code' => $subject->subject_code,
-                'subject_name' => $subject->subject_name
-            ]
-        );
+            $subject = Subject::create([
+                'subject_code' => $request->subject_code,
+                'subject_name' => $request->subject_name,
+                'description' => $request->description,
+                'semester' => $request->semester,
+                'academic_year' => $request->academic_year,
+                'units' => $request->units,
+                'is_active' => $request->is_active
+            ]);
 
-        return redirect()->route('admin.subjects.index')
-            ->with('success', 'Subject created successfully');
+            $subject->instructors()->attach($request->instructor_ids);
+
+            DB::commit();
+
+            $this->logActivity(
+                "Created Subject",
+                "Subject",
+                $subject->id,
+                [
+                    'subject_code' => $subject->subject_code,
+                    'subject_name' => $subject->subject_name
+                ]
+            );
+
+            return redirect()->route('admin.subjects.index')
+                ->with('success', 'Subject created successfully');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->withInput()
+                ->with('error', 'Failed to create subject: ' . $e->getMessage());
+        }
     }
 
     public function show(Subject $subject)
@@ -79,8 +99,8 @@ class SubjectController extends Controller
 
     public function update(Request $request, Subject $subject)
     {
-        $validated = $request->validate([
-            'subject_code'   => 'required|string|unique:subjects,subject_code,' . $subject->id,
+        $validator = Validator::make($request->all(), [
+            'subject_code'   => ['required', 'string', Rule::unique('subjects')->ignore($subject->id)],
             'subject_name'   => 'required|string|max:255',
             'description'    => 'required|string',
             'instructor_ids' => 'required|array',
@@ -91,32 +111,48 @@ class SubjectController extends Controller
             'is_active'      => 'required|boolean'
         ]);
 
-        $originalData = $subject->toArray();
-        
-        $subject->update([
-            'subject_code' => $validated['subject_code'],
-            'subject_name' => $validated['subject_name'],
-            'description' => $validated['description'],
-            'semester' => $validated['semester'],
-            'academic_year' => $validated['academic_year'],
-            'units' => $validated['units'],
-            'is_active' => $validated['is_active']
-        ]);
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
-        $subject->instructors()->sync($validated['instructor_ids']);
+        try {
+            DB::beginTransaction();
+            $originalData = $subject->toArray();
 
-        $this->logActivity(
-            "Updated Subject",
-            "Subject",
-            $subject->id,
-            [
-                'original' => $originalData,
-                'changes' => $subject->getChanges()
-            ]
-        );
+            $subject->update([
+                'subject_code' => $request->subject_code,
+                'subject_name' => $request->subject_name,
+                'description' => $request->description,
+                'semester' => $request->semester,
+                'academic_year' => $request->academic_year,
+                'units' => $request->units,
+                'is_active' => $request->is_active
+            ]);
 
-        return redirect()->route('admin.subjects.index')
-            ->with('success', 'Subject updated successfully');
+            $subject->instructors()->sync($request->instructor_ids);
+
+            DB::commit();
+
+            $this->logActivity(
+                "Updated Subject",
+                "Subject",
+                $subject->id,
+                [
+                    'original' => $originalData,
+                    'changes' => $subject->getChanges()
+                ]
+            );
+
+            return redirect()->route('admin.subjects.index')
+                ->with('success', 'Subject updated successfully');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->withInput()
+                ->with('error', 'Failed to update subject: ' . $e->getMessage());
+        }
     }
 
     public function destroy(Subject $subject)

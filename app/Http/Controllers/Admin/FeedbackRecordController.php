@@ -6,8 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\FeedbackRecord;
 use App\Models\Student;
 use App\Models\Task;
-use App\Http\Requests\FeedbackRecordRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Exception;
 
 class FeedbackRecordController extends Controller
@@ -25,10 +26,25 @@ class FeedbackRecordController extends Controller
         }
     }
 
-    public function store(FeedbackRecordRequest $request)
+    public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:students,id',
+            'task_id' => 'required|exists:tasks,id',
+            'feedback_type' => 'required|in:general,improvement,question',
+            'feedback_text' => 'required|string|min:10',
+            'recommendations' => 'required|string',
+            'generated_at' => 'required|date',
+            'is_read' => 'required|boolean',
+            'rating' => 'required|integer|min:1|max:5'
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
         try {
-            FeedbackRecord::create($request->validated());
+            FeedbackRecord::create($validator->validated());
             return redirect()->route('feedback-records.index')
                 ->with('success', 'Feedback created successfully.');
         } catch (Exception $e) {
@@ -52,10 +68,25 @@ class FeedbackRecordController extends Controller
         }
     }
 
-    public function update(FeedbackRecordRequest $request, FeedbackRecord $feedbackRecord)
+    public function update(Request $request, FeedbackRecord $feedbackRecord)
     {
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:students,id',
+            'task_id' => 'required|exists:tasks,id',
+            'feedback_type' => 'required|in:general,improvement,question',
+            'feedback_text' => 'required|string|min:10',
+            'recommendations' => 'required|string',
+            'generated_at' => 'required|date',
+            'is_read' => 'required|boolean',
+            'rating' => 'required|integer|min:1|max:5'
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
         try {
-            $feedbackRecord->update($request->validated());
+            $feedbackRecord->update($validator->validated());
             return redirect()->route('feedback-records.index')
                 ->with('success', 'Feedback updated successfully.');
         } catch (Exception $e) {

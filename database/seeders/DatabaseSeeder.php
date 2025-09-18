@@ -16,11 +16,20 @@ class DatabaseSeeder extends Seeder
     {
 
         User::factory()->create([
-            'name' => 'Administrator',
+            'first_name' => 'System',
+            'last_name'  => 'Administrator',
             'email' => 'admin@admin.com',
             'password' => bcrypt('password'),
             'role' => 'admin',
+
+            'two_factor_secret' => null,
+            'two_factor_confirmed_at' => null,
+            'two_factor_recovery_codes' => encrypt(json_encode([
+                'abcd-efgh-1234',
+                'ijkl-mnop-5678',
+            ])),
         ]);
+
 
         \App\Models\Student::factory(20)->create();
         \App\Models\Course::factory(5)->create();

@@ -116,8 +116,9 @@
                                         </tbody>
                                     </table>
                                 </div>
-                            @endif
+                            @else
                                 <p class="text-gray-500">No subjects enrolled.</p>
+                            @endif       
                         </div>
                     </div>
                 </div>

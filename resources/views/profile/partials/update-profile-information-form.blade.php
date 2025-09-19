@@ -12,18 +12,28 @@
         @csrf
         @method('patch')
 
-        <div>
-            <x-input-label for="name" value="Name" class="text-[#FF92C2]" />
-            <x-text-input id="name" name="name" type="text" 
-                class="mt-1 block w-full rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200" 
-                :value="old('name', $user->name)" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <x-input-label for="first_name" value="First Name" class="text-[#FF92C2]" />
+                <x-text-input id="first_name" name="first_name" type="text"
+                    class="mt-1 block w-full rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200"
+                    :value="old('first_name', $user->first_name)" required autofocus autocomplete="given-name" />
+                <x-input-error class="mt-2" :messages="$errors->get('first_name')" />
+            </div>
+
+            <div>
+                <x-input-label for="last_name" value="Last Name" class="text-[#FF92C2]" />
+                <x-text-input id="last_name" name="last_name" type="text"
+                    class="mt-1 block w-full rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200"
+                    :value="old('last_name', $user->last_name)" required autocomplete="family-name" />
+                <x-input-error class="mt-2" :messages="$errors->get('last_name')" />
+            </div>
         </div>
 
         <div>
             <x-input-label for="email" value="Email" class="text-[#FF92C2]" />
-            <x-text-input id="email" name="email" type="email" 
-                class="mt-1 block w-full rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200" 
+            <x-text-input id="email" name="email" type="email"
+                class="mt-1 block w-full rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200"
                 :value="old('email', $user->email)" required autocomplete="username" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
         </div>

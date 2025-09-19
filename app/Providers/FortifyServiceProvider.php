@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Features;
+use Laravel\Fortify\Contracts\ResetsUserPasswords;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -22,7 +23,9 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Fix singleton binding
+        $this->app->singleton(ResetsUserPasswords::class, ResetUserPassword::class);
+
     }
 
     /**
@@ -43,6 +46,15 @@ class FortifyServiceProvider extends ServiceProvider
         // Enable required features
         Fortify::confirmPasswordView(function () {
             return view('auth.confirm-password');
+        });
+
+        // Add password reset views
+        Fortify::resetPasswordView(function($request) {
+            return view('auth.reset-password', ['request' => $request]);
+        });
+
+        Fortify::requestPasswordResetLinkView(function() {
+            return view('auth.forgot-password');
         });
 
         // Enable these specific features

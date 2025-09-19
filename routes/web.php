@@ -45,6 +45,10 @@ use App\Http\Controllers\Students\StudentProgressController;
 use App\Http\Controllers\Students\FeedbackController;
 
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
+use Laravel\Fortify\Http\Controllers\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetController;
+
 
 // ============================================================================
 // PUBLIC ROUTES
@@ -59,6 +63,20 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'show'])->name('login');
     Route::post('login', [LoginController::class, 'authenticate']);
+    
+    // Password Reset Routes
+    Route::get('forgot-password', function () {
+        return view('auth.forgot-password');
+    })->name('password.request');
+    
+    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->name('password.email');
+        
+    Route::get('reset-password/{token}', [PasswordResetController::class, 'show'])
+        ->name('password.reset');
+    
+    Route::post('reset-password', [NewPasswordController::class, 'store'])
+        ->name('password.update');
     
     // Update route name to match view
     Route::get('/two-factor-challenge', [LoginController::class, 'showTwoFactorForm'])

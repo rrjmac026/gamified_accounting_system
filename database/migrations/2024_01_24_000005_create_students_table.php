@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('student_number')->unique();
             $table->foreignId('course_id')->constrained()->onDelete('restrict');
             $table->string('year_level'); // e.g. "1st Year", "2nd Year"
-            $table->string('section')->nullable();
+            $table->string('section_id')->nullable();
             $table->unsignedInteger('total_xp')->default(0);
             $table->unsignedInteger('current_level')->default(1);
             $table->decimal('performance_rating', 5, 2)->default(0.00);

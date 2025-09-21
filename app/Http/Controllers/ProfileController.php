@@ -6,6 +6,7 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use Laravel\Fortify\TwoFactorAuthenticationProvider;
@@ -18,8 +19,42 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+        
+        // Only fetch badges data if user is a student
+        if ($user->role === 'student') {
+            $student = $user->student;
+            $totalXp = (int) $student->xpTransactions()->sum('amount');
+            
+            // Get all badges and mark which ones are earned
+            $badges = \App\Models\Badge::where('is_active', true)
+                ->get()
+                ->map(function ($badge) use ($student, $totalXp) {
+                    $earnedBadge = $student->badges()
+                        ->where('badges.id', $badge->id)
+                        ->first();
+                    
+                    // Check if badge is earned
+                    $badge->earned = (bool) $earnedBadge || $totalXp >= $badge->xp_threshold;
+                    $badge->earned_at = $earnedBadge ? $earnedBadge->pivot->earned_at : null;
+                    
+                    // Add progress data for XP-based badges
+                    if (!$badge->earned) {
+                        $badge->progress = $totalXp;
+                        $badge->remaining = max(0, $badge->xp_threshold - $totalXp);
+                    }
+                    
+                    return $badge;
+                });
+        } else {
+            $totalXp = 0;
+            $badges = collect();
+        }
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
+            'totalXp' => $totalXp,
+            'badges' => $badges,
         ]);
     }
 
@@ -120,6 +155,19 @@ class ProfileController extends Controller
         return back()->withErrors(['code' => 'Invalid two-factor authentication code.']);
     }
 
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $validated = $request->validateWithBag('updatePassword', [
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'min:8', 'confirmed'],
+        ]);
+
+        $request->user()->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        return back()->with('status', 'password-updated');
+    }
 }
 
 

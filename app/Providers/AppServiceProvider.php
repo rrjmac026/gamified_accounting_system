@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Fortify\Contracts\ResetsUserPasswords;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Models\TaskSubmission;
+use App\Observers\TaskSubmissionObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +24,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        TaskSubmission::observe(TaskSubmissionObserver::class);
     }
 }

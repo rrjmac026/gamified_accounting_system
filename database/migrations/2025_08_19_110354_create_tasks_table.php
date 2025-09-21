@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreignId('parent_task_id')->nullable()->constrained('tasks')->onDelete('cascade');
             $table->integer('max_score');
             $table->integer('xp_reward');
-            $table->timestamp('due_date'); // or ->nullable()
+            $table->timestamp('due_date')->nullable();
             $table->unsignedInteger('retry_limit')->default(1);
             $table->unsignedInteger('late_penalty')->nullable();
             $table->text('instructions');
@@ -30,6 +30,7 @@ return new class extends Migration
             $table->boolean('auto_grade')->default(false);
             $table->string('attachment')->nullable();
             $table->boolean('allow_late_submission')->default(false);
+            $table->dateTime('late_until')->nullable();
 
             // Question-specific fields
             $table->enum('question_type', ['multiple_choice', 'true_false', 'essay', 'calculation'])->nullable();

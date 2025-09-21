@@ -4,179 +4,205 @@
             <div class="bg-[#FFF0FA] backdrop-blur-sm overflow-hidden shadow-lg rounded-lg p-8 border border-[#FFC8FB]/50">
                 <h2 class="text-2xl font-bold text-[#FF92C2] mb-6">Create New Section</h2>
 
-                <form action="{{ route('admin.sections.store') }}" method="POST" class="space-y-6">
+                <form action="{{ route('admin.sections.store') }}" method="POST" class="space-y-6"
+                      x-data="{ 
+                          showInstructorModal: false,
+                          showStudentModal: false,
+                          selectedInstructors: [],
+                          selectedStudents: [],
+                          updateCount() {
+                              this.selectedInstructors = Array.from(document.querySelectorAll('.instructor-checkbox:checked')).length;
+                              this.selectedStudents = Array.from(document.querySelectorAll('.student-checkbox:checked')).length;
+                          }
+                      }">
                     @csrf
 
-                    @if ($errors->any())
-                        <div class="bg-red-50 border border-red-200 rounded-md p-4">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <i class="fas fa-exclamation-circle text-red-400"></i>
-                                </div>
-                                <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
-                                    <div class="mt-2 text-sm text-red-700">
-                                        <ul class="list-disc list-inside space-y-1">
-                                            @foreach ($errors->all() as $error)
-                                                <li>{{ $error }}</li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                </div>
+                    <!-- Basic Information Card -->
+                    <div class="bg-white rounded-lg shadow p-6 border border-[#FFC8FB]/50">
+                        <h3 class="text-lg font-semibold text-[#FF92C2] mb-4">Basic Information</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="space-y-1">
+                                <label class="block text-sm font-semibold text-[#FF92C2]">Section Code <span class="text-red-500">*</span></label>
+                                <input type="text" name="section_code" value="{{ old('section_code') }}" required
+                                       class="w-full rounded-lg shadow-sm bg-white 
+                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                                text-gray-800 px-4 py-2 transition-all duration-200"
+                                       placeholder="Enter section code">
+                                <p class="text-xs text-gray-500">Must be unique identifier for this section</p>
                             </div>
-                        </div>
-                    @endif
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Section Code</label>
-                            <input type="text" name="section_code" value="{{ old('section_code') }}" required
-                                   class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
-                        </div>
+                            <div class="space-y-1">
+                                <label class="block text-sm font-semibold text-[#FF92C2]">Section Name <span class="text-red-500">*</span></label>
+                                <input type="text" name="name" value="{{ old('name') }}" required
+                                       class="w-full rounded-lg shadow-sm bg-white 
+                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                                text-gray-800 px-4 py-2 transition-all duration-200"
+                                       placeholder="Enter section name">
+                            </div>
 
-                        <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Section Name</label>
-                            <input type="text" name="name" value="{{ old('name') }}" required
-                                   class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
-                        </div>
-
-                        <div class="sm:col-span-2">
-                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Assign Instructors</label>
-                            <div class="bg-white rounded-lg border border-[#FFC8FB] overflow-hidden">
-                                <!-- Search Bar -->
-                                <div class="p-4 border-b border-[#FFC8FB]">
-                                    <div class="relative">
-                                        <input type="text" id="instructor-search" 
-                                               placeholder="Search instructors..." 
-                                               class="w-full pl-10 pr-4 py-2 rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
-                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <i class="fas fa-search text-gray-400"></i>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Selection Controls -->
-                                <div class="px-4 py-2 bg-gray-50 border-b border-[#FFC8FB] flex justify-between items-center">
-                                    <div class="flex items-center gap-2">
-                                        <button type="button" id="select-all-instructors" 
-                                                class="text-sm text-[#FF92C2] hover:text-[#ff6fb5] flex items-center gap-1">
-                                            Select All
-                                        </button>
-                                        <button type="button" id="deselect-all-instructors" 
-                                                class="text-sm text-[#FF92C2] hover:text-[#ff6fb5] flex items-center gap-1">
-                                            Deselect All
-                                        </button>
-                                    </div>
-                                    <span class="text-xs text-gray-500" id="instructor-counter">
-                                        0 selected
-                                    </span>
-                                </div>
-
-                                <!-- Instructors List -->
-                                <div class="max-h-64 overflow-y-auto p-2" id="instructors-container">
-                                    @foreach($instructors as $instructor)
-                                        <div class="instructor-item p-3 hover:bg-pink-50 rounded-lg transition-colors mb-2">
-                                            <label class="flex items-center justify-between gap-4">
-                                                <div class="flex items-center gap-3">
-                                                    <input type="checkbox" name="instructors[]" value="{{ $instructor->id }}"
-                                                           class="instructor-checkbox rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
-                                                    <div>
-                                                        <span class="font-medium block">{{ $instructor->user->name }}</span>
-                                                        <span class="text-sm text-gray-500">{{ $instructor->department }}</span>
-                                                    </div>
-                                                </div>
-                                                <button type="button" 
-                                                        class="view-subjects text-sm text-[#FF92C2] hover:text-[#ff6fb5]"
-                                                        data-subjects='@json($instructor->subjects)'>
-                                                    <i class="fas fa-book"></i> View Subjects
-                                                </button>
-                                            </label>
-                                        </div>
+                            <div class="space-y-1">
+                                <label class="block text-sm font-semibold text-[#FF92C2]">Course <span class="text-red-500">*</span></label>
+                                <select name="course_id" required
+                                        class="w-full rounded-lg shadow-sm bg-white 
+                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                                text-gray-800 px-4 py-2 transition-all duration-200">
+                                    <option value="">Select Course</option>
+                                    @foreach($courses as $course)
+                                        <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
+                                            {{ $course->course_name }} ({{ $course->course_code }})
+                                        </option>
                                     @endforeach
-                                </div>
+                                </select>
                             </div>
-                        </div>
 
-                        <div class="sm:col-span-2">
-                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Assign Students</label>
-                            <div class="bg-white rounded-lg border border-[#FFC8FB] overflow-hidden">
-                                <!-- Search Bar -->
-                                <div class="p-4 border-b border-[#FFC8FB]">
-                                    <div class="relative">
-                                        <input type="text" id="student-search" 
-                                               placeholder="Search students by name or email..." 
-                                               class="w-full pl-10 pr-4 py-2 rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
-                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <i class="fas fa-search text-gray-400"></i>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Selection Controls -->
-                                <div class="px-4 py-2 bg-gray-50 border-b border-[#FFC8FB] flex justify-between items-center">
-                                    <div class="flex items-center gap-2">
-                                        <button type="button" id="select-all-students" 
-                                                class="text-sm text-[#FF92C2] hover:text-[#ff6fb5] flex items-center gap-1"> Select All
-                                        </button>
-                                        <button type="button" id="deselect-all-students" 
-                                                class="text-sm text-[#FF92C2] hover:text-[#ff6fb5] flex items-center gap-1">Deselect All
-                                        </button>
-                                    </div>
-                                    <span class="text-xs text-gray-500" id="student-counter">
-                                        0 selected
-                                    </span>
-                                </div>
-
-                                <!-- Students List -->
-                                <div class="max-h-64 overflow-y-auto p-2" id="students-container">
-                                    @foreach($students as $student)
-                                        <div class="student-item p-3 hover:bg-pink-50 rounded-lg transition-colors mb-2">
-                                            <label class="flex items-center gap-3">
-                                                <input type="checkbox" name="students[]" value="{{ $student->id }}"
-                                                       class="student-checkbox rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
-                                                <div>
-                                                    <span class="font-medium block">{{ $student->user->name }}</span>
-                                                    <span class="text-sm text-gray-500">{{ $student->user->email }}</span>
-                                                </div>
-                                            </label>
-                                        </div>
-                                    @endforeach
-                                </div>
+                            <div class="space-y-1">
+                                <label class="block text-sm font-semibold text-[#FF92C2]">Capacity</label>
+                                <input type="number" name="capacity" min="1" value="{{ old('capacity') }}"
+                                       class="w-full rounded-lg shadow-sm bg-white 
+                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                                text-gray-800 px-4 py-2 transition-all duration-200"
+                                       placeholder="Maximum number of students">
+                                <p class="text-xs text-gray-500">Leave empty for unlimited capacity</p>
                             </div>
-                        </div>
-                        
-
-                        <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Course</label>
-                            <select name="course_id" required
-                                    class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
-                                <option value="">Select Course</option>
-                                @foreach($courses as $course)
-                                    <option value="{{ $course->id }}">{{ $course->course_name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Capacity (Optional)</label>
-                            <input type="number" name="capacity" min="1" value="{{ old('capacity') }}"
-                                   class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
-                        </div>
-
-                        <div class="sm:col-span-2">
-                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Notes (Optional)</label>
-                            <textarea name="notes" rows="3"
-                                      class="w-full rounded-lg bg-white border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">{{ old('notes') }}</textarea>
                         </div>
                     </div>
 
+                    <!-- Instructors Selection Card -->
+                    <div class="bg-white rounded-lg shadow p-6 border border-[#FFC8FB]/50">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-[#FF92C2]">Assigned Instructors</h3>
+                            <span class="text-sm bg-pink-100 text-[#FF92C2] px-2 py-1 rounded-full" x-text="`${selectedInstructors} selected`"></span>
+                        </div>
+
+                        <!-- Search Bar -->
+                        <div class="p-4 border-b border-[#FFC8FB]">
+                            <div class="relative">
+                                <input type="text" id="instructor-search" 
+                                       placeholder="Search instructors..." 
+                                       class="w-full rounded-lg shadow-sm bg-white 
+                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                                text-gray-800 px-4 py-2 transition-all duration-200">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Selection Controls -->
+                        <div class="px-4 py-2 bg-gray-50 border-b border-[#FFC8FB] flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <button type="button" id="select-all-instructors" 
+                                        class="text-sm text-[#FF92C2] hover:text-[#ff6fb5] flex items-center gap-1">
+                                    Select All
+                                </button>
+                                <button type="button" id="deselect-all-instructors" 
+                                        class="text-sm text-[#FF92C2] hover:text-[#ff6fb5] flex items-center gap-1">
+                                    Deselect All
+                                </button>
+                            </div>
+                            <span class="text-xs text-gray-500" id="instructor-counter">
+                                0 selected
+                            </span>
+                        </div>
+
+                        <!-- Instructors List -->
+                        <div class="max-h-64 overflow-y-auto p-2" id="instructors-container">
+                            @foreach($instructors as $instructor)
+                                <div class="instructor-item p-3 hover:bg-pink-50 rounded-lg transition-colors mb-2">
+                                    <label class="flex items-center justify-between gap-4">
+                                        <div class="flex items-center gap-3">
+                                            <input type="checkbox" name="instructors[]" value="{{ $instructor->id }}"
+                                                   class="instructor-checkbox rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
+                                            <div>
+                                                <span class="font-medium block">{{ $instructor->user->name }}</span>
+                                                <span class="text-sm text-gray-500">{{ $instructor->department }}</span>
+                                            </div>
+                                        </div>
+                                        <button type="button" 
+                                                class="view-subjects text-sm text-[#FF92C2] hover:text-[#ff6fb5]"
+                                                data-subjects='@json($instructor->subjects)'>
+                                            <i class="fas fa-book"></i> View Subjects
+                                        </button>
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- Students Selection Card -->
+                    <div class="bg-white rounded-lg shadow p-6 border border-[#FFC8FB]/50">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-[#FF92C2]">Enrolled Students</h3>
+                            <span class="text-sm bg-pink-100 text-[#FF92C2] px-2 py-1 rounded-full" x-text="`${selectedStudents} selected`"></span>
+                        </div>
+
+                        <!-- Search Bar -->
+                        <div class="p-4 border-b border-[#FFC8FB]">
+                            <div class="relative">
+                                <input type="text" id="student-search" 
+                                       placeholder="Search students by name or email..." 
+                                       class="w-full pl-10 pr-4 py-2 rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Selection Controls -->
+                        <div class="px-4 py-2 bg-gray-50 border-b border-[#FFC8FB] flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <button type="button" id="select-all-students" 
+                                        class="text-sm text-[#FF92C2] hover:text-[#ff6fb5] flex items-center gap-1"> Select All
+                                </button>
+                                <button type="button" id="deselect-all-students" 
+                                        class="text-sm text-[#FF92C2] hover:text-[#ff6fb5] flex items-center gap-1">Deselect All
+                                </button>
+                            </div>
+                            <span class="text-xs text-gray-500" id="student-counter">
+                                0 selected
+                            </span>
+                        </div>
+
+                        <!-- Students List -->
+                        <div class="max-h-64 overflow-y-auto p-2" id="students-container">
+                            @foreach($students as $student)
+                                <div class="student-item p-3 hover:bg-pink-50 rounded-lg transition-colors mb-2">
+                                    <label class="flex items-center gap-3">
+                                        <input type="checkbox" name="students[]" value="{{ $student->id }}"
+                                               class="student-checkbox rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
+                                        <div>
+                                            <span class="font-medium block">{{ $student->user->name }}</span>
+                                            <span class="text-sm text-gray-500">{{ $student->user->email }}</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    
+
+                    <!-- Notes Card -->
+                    <div class="bg-white rounded-lg shadow p-6 border border-[#FFC8FB]/50">
+                        <h3 class="text-lg font-semibold text-[#FF92C2] mb-4">Additional Information</h3>
+                        <div class="space-y-1">
+                            <label class="block text-sm font-semibold text-[#FF92C2]">Notes</label>
+                            <textarea name="notes" rows="3"
+                                      class="w-full rounded-lg shadow-sm bg-white 
+                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                                text-gray-800 px-4 py-2 transition-all duration-200"
+                                      placeholder="Add any additional notes about this section...">{{ old('notes') }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
                     <div class="flex justify-end gap-4">
                         <a href="{{ route('admin.sections.index') }}" 
-                           class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                           class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-200 flex items-center gap-2">
+                            <i class="fas fa-times"></i>
                             Cancel
                         </a>
                         <button type="submit" 
-                                class="px-6 py-2 bg-[#FF92C2] text-white rounded-lg hover:bg-[#ff6fb5]">
+                                class="px-6 py-2 bg-[#FF92C2] text-white rounded-lg hover:bg-[#ff6fb5] transition-all duration-200 flex items-center gap-2">
+                            <i class="fas fa-save"></i>
                             Create Section
                         </button>
                     </div>
@@ -279,6 +305,9 @@
         // Initialize counters
         updateCounters();
     </script>
+
+    <!-- Add AlpineJS for enhanced interactivity -->
+    <script src="//unpkg.com/alpinejs" defer></script>
 </x-app-layout>
 
 

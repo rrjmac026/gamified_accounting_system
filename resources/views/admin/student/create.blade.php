@@ -139,7 +139,9 @@
                                         <input type="checkbox" name="subjects[]" value="{{ $subject->id }}"
                                             {{ (is_array(old('subjects')) && in_array($subject->id, old('subjects'))) ? 'checked' : '' }}
                                             class="text-[#FF92C2] border-[#FFC8FB] rounded focus:ring-[#FF92C2] focus:ring-2">
-                                        <span class="text-gray-800">{{ $subject->subject_name }}</span>
+                                        <span class="text-gray-800">
+                                            {{ $subject->subject_code }} - {{ $subject->subject_name }}
+                                        </span>
                                     </label>
                                 @endforeach
                             </div>
@@ -160,7 +162,7 @@
                             </div>
 
                             {{-- Hidden input to store the selected value --}}
-                            <input type="hidden" name="section" id="selected-section" value="{{ old('section') }}">
+                            <input type="hidden" name="section_id" id="selected-section" value="{{ old('section') }}">
 
                             {{-- Sections List --}}
                             <div id="section-list"
@@ -168,18 +170,18 @@
                                         text-gray-800 px-4 py-2 transition-all duration-200 max-h-48 overflow-y-auto">
                                 @foreach($sections as $section)
                                     <label class="flex items-center space-x-3 py-2 hover:bg-[#FFC8FB]/20 rounded cursor-pointer section-item">
-                                        <input type="radio" name="section_radio" value="{{ $section->name }}" 
-                                            {{ old('section') == $section->name ? 'checked' : '' }}
+                                        <input type="radio" name="section_id" value="{{ $section->id }}" 
+                                            {{ old('section_id', $student->section_id ?? '') == $section->id ? 'checked' : '' }}
                                             class="text-[#FF92C2] border-[#FFC8FB] focus:ring-[#FF92C2] focus:ring-2"
                                             onchange="updateSelectedSection(this.value)">
                                         <span class="text-gray-800">{{ $section->name }}</span>
                                     </label>
                                 @endforeach
                             </div>
-                            @error('section')
+                            @error('section_id')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
-                        </div>
+
 
                         {{-- Submit Button --}}
                         <div class="sm:col-span-2 flex justify-end">

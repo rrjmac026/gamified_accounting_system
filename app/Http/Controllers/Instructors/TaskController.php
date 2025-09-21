@@ -51,7 +51,7 @@ class TaskController extends Controller
         $instructorId = Auth::user()->instructor->id;
         
         // Only fetch tasks belonging to the current instructor
-        $tasks = Task::with(['subject', 'instructor'])
+        $tasks = Task::with(['subject', 'instructor', 'section'])
             ->where('instructor_id', $instructorId)
             ->get();
 
@@ -72,7 +72,6 @@ class TaskController extends Controller
         return view('instructors.tasks.create', compact('subjects', 'sections'));
     }
 
-
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -85,17 +84,32 @@ class TaskController extends Controller
             'late_penalty' => 'nullable|integer|min:0',
             'max_score' => 'required|integer|min:0',
             'xp_reward' => 'required|integer|min:0',
-            'due_date' => 'required|date',
+            'due_date' => 'nullable|date', // Changed from 'required' to 'nullable'
             'instructions' => 'required|string',
             'is_active' => 'required|boolean',
             'auto_grade' => 'required|boolean',
             'attachment' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,png|max:10240',
             'allow_late_submission' => 'sometimes|boolean',
-
-            
+            'late_until' => 'nullable|date|after:due_date',
         ]);
-        $validated['allow_late_submission'] = $request->has('allow_late_submission');
 
+        // Custom validation: if allow_late_submission is true, due_date must be provided
+        if ($request->has('allow_late_submission') && $request->boolean('allow_late_submission')) {
+            if (empty($validated['due_date'])) {
+                return back()->withErrors([
+                    'due_date' => 'Due date is required when allowing late submissions.'
+                ])->withInput();
+            }
+        }
+
+        // Custom validation: late_until requires due_date
+        if (!empty($validated['late_until']) && empty($validated['due_date'])) {
+            return back()->withErrors([
+                'late_until' => 'Late submission deadline requires a due date to be set.'
+            ])->withInput();
+        }
+
+        $validated['allow_late_submission'] = $request->has('allow_late_submission');
         $validated['instructor_id'] = Auth::user()->instructor->id;
 
         // Handle file upload
@@ -110,17 +124,17 @@ class TaskController extends Controller
         // Auto-assign to section students
         $section = \App\Models\Section::with('students')->findOrFail($validated['section_id']);
         $attachData = [];
-        foreach ($section->students as $student) {
-            $attachData[$student->id] = [
-                'status' => 'assigned',
-                'due_date' => \Carbon\Carbon::parse($validated['due_date'])->format('Y-m-d H:i:s'),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
+        if ($section->students && $section->students->count() > 0) {
+            foreach ($section->students as $student) {
+                $attachData[$student->id] = [
+                    'status' => 'assigned',
+                    // Only set due_date if task has one
+                    'due_date' => $validated['due_date'] ? \Carbon\Carbon::parse($validated['due_date'])->format('Y-m-d H:i:s') : null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
 
-
-        if (!empty($attachData)) {
             $task->students()->attach($attachData);
         }
 
@@ -128,12 +142,11 @@ class TaskController extends Controller
             ->with('success', 'Task created (with attachment if uploaded) and assigned to students.');
     }
 
-
-
     public function show(Task $task)
     {
         $task->load([
             'subject',
+            'section',
             'instructor.user',
             'submissions',
             'questions',
@@ -163,16 +176,30 @@ class TaskController extends Controller
             'late_penalty' => 'nullable|integer|min:0',
             'max_score' => 'required|integer|min:0',
             'xp_reward' => 'required|integer|min:0',
-            'due_date' => 'required|date',
+            'due_date' => 'nullable|date', // Changed from 'required' to 'nullable'
             'instructions' => 'required|string',
             'is_active' => 'required|boolean',
             'auto_grade' => 'required|boolean',
             'attachment' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,png|max:10240',
             'allow_late_submission' => 'sometimes|boolean',
+            'late_until' => 'nullable|date|after:due_date',
         ]);
 
-        $validated['allow_late_submission'] = $request->boolean('allow_late_submission');
+        // Custom validation: if allow_late_submission is true, due_date must be provided
+        if ($request->boolean('allow_late_submission') && empty($validated['due_date'])) {
+            return back()->withErrors([
+                'due_date' => 'Due date is required when allowing late submissions.'
+            ])->withInput();
+        }
 
+        // Custom validation: late_until requires due_date
+        if (!empty($validated['late_until']) && empty($validated['due_date'])) {
+            return back()->withErrors([
+                'late_until' => 'Late submission deadline requires a due date to be set.'
+            ])->withInput();
+        }
+
+        $validated['allow_late_submission'] = $request->boolean('allow_late_submission');
 
         // Handle file upload
         if ($request->hasFile('attachment')) {
@@ -200,7 +227,6 @@ class TaskController extends Controller
             ->with('success', 'Task updated successfully');
     }
 
-
     public function destroy(Task $task)
     {
         $task->delete();
@@ -208,202 +234,126 @@ class TaskController extends Controller
             ->with('success', 'Task deleted successfully');
     }
 
-
     public function showAssignStudentsForm(Task $task)
     {
         $students = Student::all(); // Or filter by course/subject
         return view('instructors.tasks.assign-students', compact('task', 'students'));
     }
-       // === QUESTION MANAGEMENT METHODS ===
     
-    public function addQuestion(Request $request, Task $task)
+    public function syncStudentsToTask(Task $task)
     {
-        $validated = $request->validate([
-            'description' => 'required|string',
-            'question_type' => 'required|in:multiple_choice,true_false,essay,calculation',
-            'correct_answer' => 'required|string',
-            'points' => 'required|integer|min:1',
-            'order_index' => 'required|integer|min:0',
-            'options' => 'nullable|array',
-            'options.*' => 'nullable|string',
-        ]);
-
-        // Create a new task record that represents a question
-        $questionData = array_merge($validated, [
-            'title' => 'Question for: ' . $task->title,
-            'type' => 'question', // Add this type to your enum
-            'subject_id' => $task->subject_id,
-            'instructor_id' => $task->instructor_id,
-            'parent_task_id' => $task->id, // Add this field to track parent
-        ]);
-
-        Task::create($questionData);
-
-        return redirect()->route('instructors.tasks.show', $task)
-            ->with('success', 'Question added successfully');
-    }
-
-    public function editQuestion(Task $task, Task $question)
-    {
-        return view('instructors.tasks.edit-question', compact('task', 'question'));
-    }
-
-    public function updateQuestion(Request $request, Task $task, Task $question)
-    {
-        $validated = $request->validate([
-            'description' => 'required|string',
-            'question_type' => 'required|in:multiple_choice,true_false,essay,calculation',
-            'correct_answer' => 'required|string',
-            'points' => 'required|integer|min:1',
-            'order_index' => 'required|integer|min:0',
-            'options' => 'nullable|array',
-            'options.*' => 'nullable|string',
-        ]);
-
-        $question->update($validated);
+        // Get all students currently in the task's section
+        $sectionStudentIds = $task->section->students->pluck('id')->toArray();
         
-        return redirect()->route('instructors.tasks.show', $task)
-            ->with('success', 'Question updated successfully');
-    }
-
-    public function deleteQuestion(Task $task, Task $question)
-    {
-        $question->delete();
+        // Get students currently assigned to this task
+        $assignedStudentIds = $task->students()->pluck('student_id')->toArray();
         
-        return redirect()->route('instructors.tasks.show', $task)
-            ->with('success', 'Question deleted successfully');
-    }
-
-    // === STUDENT TASK ASSIGNMENT METHODS ===1
-    
-    public function assignToStudent(Request $request, Task $task)
-    {
-        $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'status' => 'required|in:assigned,in_progress,submitted,graded,overdue',
-            'due_date' => 'nullable|date',
-        ]);
-
+        // Find students who need to be assigned (in section but not assigned to task)
+        $studentsToAssign = array_diff($sectionStudentIds, $assignedStudentIds);
         
-        if ($task->students()->where('student_id', $validated['student_id'])->exists()) {
-            return back()->with('error', 'Task already assigned to this student');
-        }
-
-        $task->students()->attach($validated['student_id'], [
-            'status' => $validated['status'],
-            'due_date' => $validated['due_date'] ? 
-                \Carbon\Carbon::parse($validated['due_date'])->format('Y-m-d H:i:s') : 
-                \Carbon\Carbon::parse($task->due_date)->format('Y-m-d H:i:s'),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-
-        return redirect()->route('instructors.tasks.show', $task)
-            ->with('success', 'Task assigned to student successfully');
-    }
-
-    public function bulkAssign(Request $request)
-    {
-        $instructor = Auth::user()->instructor;
+        // Find students who need to be removed (assigned to task but not in section)
+        $studentsToRemove = array_diff($assignedStudentIds, $sectionStudentIds);
         
-        $validated = $request->validate([
-            'task_id' => 'required|exists:tasks,id',
-            'student_ids' => [
-                'required',
-                'array',
-                function($attribute, $value, $fail) use ($instructor) {
-                    // Verify all students belong to instructor's sections
-                    $validStudents = Student::whereIn('id', $value)
-                        ->whereHas('sections', function($query) use ($instructor) {
-                            $query->whereHas('instructors', function($q) use ($instructor) {
-                                $q->where('instructors.id', $instructor->id);
-                            });
-                        })->count();
-                        
-                    if(count($value) !== $validStudents) {
-                        $fail('Some selected students are not in your sections.');
-                    }
-                }
-            ],
-            'status' => 'required|in:assigned,in_progress,submitted,graded,overdue',
-        ]);
-
-        $task = Task::find($validated['task_id']);
-        $attachData = [];
-
-        foreach ($validated['student_ids'] as $studentId) {
-            if (!$task->students()->where('student_id', $studentId)->exists()) {
+        $changes = 0;
+        
+        // Assign new students
+        if (!empty($studentsToAssign)) {
+            $attachData = [];
+            foreach ($studentsToAssign as $studentId) {
                 $attachData[$studentId] = [
-                    'status' => $validated['status'],
+                    'status' => 'assigned',
+                    'due_date' => $task->due_date, // This will be null if task has no due date
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
             }
+            
+            $task->students()->attach($attachData);
+            $changes += count($studentsToAssign);
         }
-
-        $task->students()->attach($attachData);
-
-        $assignedCount = count($attachData);
-        return redirect()->route('instructors.tasks.show', $task)
-            ->with('success', "Task assigned to {$assignedCount} students successfully");
-    }
-
-    public function studentTasks()
-    {
-        // Show all task-student relationships
-        $tasks = Task::with(['subject', 'instructor'])
-                    ->whereHas('students')
-                    ->mainTasks() // Only main tasks, not questions
-                    ->paginate(10);
         
-        return view('instructors.tasks.student-tasks', compact('tasks'));
-    }
-
-    public function showStudentTask(Task $task, Student $student)
-    {
-        $task->load(['subject', 'instructor']);
-        $studentTaskData = $task->students()
-                               ->where('student_id', $student->id)
-                               ->first();
-        
-        if (!$studentTaskData) {
-            abort(404, 'Student task assignment not found');
+        // Remove students who are no longer in the section
+        if (!empty($studentsToRemove)) {
+            $task->students()->detach($studentsToRemove);
+            $changes += count($studentsToRemove);
         }
-
-        return view('instructors.tasks.show-student-task', compact('task', 'student', 'studentTaskData'));
-    }
-
-    public function gradeStudentForm(Task $task, Student $student)
-    {
-        $studentTaskData = $task->students()
-                               ->where('student_id', $student->id)
-                               ->first();
         
-        if (!$studentTaskData) {
-            abort(404, 'Student task assignment not found');
+        if ($changes > 0) {
+            $message = '';
+            if (!empty($studentsToAssign)) {
+                $message .= 'Assigned task to ' . count($studentsToAssign) . ' new students. ';
+            }
+            if (!empty($studentsToRemove)) {
+                $message .= 'Removed ' . count($studentsToRemove) . ' students who are no longer in this section.';
+            }
+            
+            return redirect()->back()->with('success', trim($message));
         }
-
-        return view('instructors.tasks.grade-student', compact('task', 'student', 'studentTaskData'));
+        
+        return redirect()->back()->with('info', 'All students are already properly assigned.');
     }
 
-    public function gradeStudent(Request $request, Task $task, Student $student)
+    public function syncAllStudentsToTasks()
     {
-        $validated = $request->validate([
-            'score' => 'required|numeric|min:0',
-            'xp_earned' => 'required|integer|min:0',
-        ]);
-
-        $task->students()->updateExistingPivot($student->id, [
-            'score' => $validated['score'],
-            'xp_earned' => $validated['xp_earned'],
-            'status' => 'graded',
-            'graded_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        return redirect()->route('instructors.tasks.show-student-task', [$task, $student])
-            ->with('success', 'Student graded successfully');
+        $instructorId = Auth::user()->instructor->id;
+        $tasks = Task::where('instructor_id', $instructorId)
+                    ->where('is_active', true)
+                    ->with('section.students', 'students')
+                    ->get();
+        
+        $totalAssigned = 0;
+        $totalRemoved = 0;
+        
+        foreach ($tasks as $task) {
+            // Get all students currently in the task's section
+            $sectionStudentIds = $task->section->students->pluck('id')->toArray();
+            
+            // Get students currently assigned to this task
+            $assignedStudentIds = $task->students()->pluck('student_id')->toArray();
+            
+            // Find students who need to be assigned
+            $studentsToAssign = array_diff($sectionStudentIds, $assignedStudentIds);
+            
+            // Find students who need to be removed
+            $studentsToRemove = array_diff($assignedStudentIds, $sectionStudentIds);
+            
+            // Assign new students
+            if (!empty($studentsToAssign)) {
+                $attachData = [];
+                foreach ($studentsToAssign as $studentId) {
+                    $attachData[$studentId] = [
+                        'status' => 'assigned',
+                        'due_date' => $task->due_date, // This will be null if task has no due date
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+                
+                $task->students()->attach($attachData);
+                $totalAssigned += count($studentsToAssign);
+            }
+            
+            // Remove students who are no longer in the section
+            if (!empty($studentsToRemove)) {
+                $task->students()->detach($studentsToRemove);
+                $totalRemoved += count($studentsToRemove);
+            }
+        }
+        
+        $message = '';
+        if ($totalAssigned > 0) {
+            $message .= "Assigned tasks to {$totalAssigned} students. ";
+        }
+        if ($totalRemoved > 0) {
+            $message .= "Removed {$totalRemoved} students from tasks they're no longer eligible for.";
+        }
+        
+        if ($totalAssigned > 0 || $totalRemoved > 0) {
+            return redirect()->route('instructors.tasks.index')
+                ->with('success', trim($message));
+        } else {
+            return redirect()->route('instructors.tasks.index')
+                ->with('info', 'All students are already properly assigned to their section tasks.');
+        }
     }
-
 }

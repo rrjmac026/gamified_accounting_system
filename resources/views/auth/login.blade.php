@@ -10,26 +10,16 @@
 <body class="bg-gradient-to-br from-[#FFE4F3] via-[#FFEEF2] to-[#FFF0F5] min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
     <div class="bg-white/90 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
         <div class="text-center mb-6 sm:mb-8">
-            <!-- Custom GAS Logo -->
-            <div class="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 relative">
-                <div class="w-full h-full bg-gradient-to-br from-[#FF92C2] to-[#FFC8FB] rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
-                    <div class="text-white font-bold text-2xl tracking-wider">
-                        <span class="block text-3xl">G</span>
-                        <div class="flex text-lg -mt-1">
-                            <span>A</span>
-                            <span class="ml-1">S</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-[#FFC8FB] to-[#FF92C2] rounded-full flex items-center justify-center shadow-md">
-                    <i class="fas fa-calculator text-white text-xs"></i>
-                </div>
+            <!-- App Logo -->
+            <div class="w-60 h-60 mx-auto mb-4">
+                <img src="{{ asset('assets/app_logo.PNG') }}" alt="GAS Logo" 
+                     class="w-full h-full object-contain transform hover:scale-105 transition-transform duration-300">
             </div>
             
             <h2 class="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#FF92C2] to-[#FFC8FB] bg-clip-text text-transparent mb-2">
                 Welcome Back!
             </h2>
-            <p class="text-sm sm:text-base text-gray-600">Please sign in to your GAS account</p>
+            <p class="text-sm sm:text-base text-gray-600">Please sign in to your account</p>
         </div>
 
         <!-- Status Message -->

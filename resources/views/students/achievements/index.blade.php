@@ -110,8 +110,8 @@
             <!-- Header Section -->
             <div class="text-center mb-12">
                 <div class="glass-panel p-8 mb-8">
-                    <h1 class="text-5xl font-bold header-gradient mb-4">
-                        <i class="fas fa-trophy mr-4"></i>My Achievements
+                    <h1 class="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                        <i class="fas fa-trophy mr-4 text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-2"></i>My Achievements
                     </h1>
                     <p class="text-gray-600 text-lg">Unlock your potential and showcase your accomplishments</p>
                     

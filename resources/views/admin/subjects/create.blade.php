@@ -62,7 +62,21 @@
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Academic Year</label>
-                            <input type="text" name="academic_year" class="w-full rounded-lg shadow-sm bg-white border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 text-gray-800 px-4 py-2 transition-all duration-200" required>
+                            <select name="academic_year" 
+                                    class="w-full rounded-lg shadow-sm bg-white border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 text-gray-800 px-4 py-2 transition-all duration-200" 
+                                    required>
+                                @php
+                                    $currentYear = now()->year;
+                                    for ($i = 0; $i < 6; $i++) {
+                                        $start = $currentYear + $i;
+                                        $end = $start + 1;
+                                        $value = $start . '-' . $end;
+                                @endphp
+                                    <option value="{{ $value }}" {{ old('academic_year') == $value ? 'selected' : '' }}>
+                                        {{ $value }}
+                                    </option>
+                                @php } @endphp
+                            </select>
                         </div>
                     </div>
 

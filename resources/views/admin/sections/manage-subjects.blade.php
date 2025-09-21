@@ -21,16 +21,29 @@
                     </div>
                 @endif
 
+                <div class="mb-6">
+                    <div class="relative">
+                        <input type="text" 
+                               id="subject-search" 
+                               placeholder="Search subjects by name or code..." 
+                               class="w-full pl-10 pr-4 py-2 rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
                 <form method="POST" action="{{ route('admin.sections.subjects.update', $section->id) }}">
                     @csrf
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="subjects-grid">
                         @foreach ($subjects as $subject)
                             <label class="flex items-center space-x-3 p-3 border border-[#FFC8FB]/50 rounded-lg hover:bg-[#FFD9FF] cursor-pointer transition-colors duration-150">
                                 <input type="checkbox" name="subjects[]" value="{{ $subject->id }}"
                                        class="form-checkbox h-5 w-5 text-[#FF92C2] border-gray-300 rounded"
                                        {{ $section->subjects->contains($subject->id) ? 'checked' : '' }}>
                                 <span class="text-gray-700 font-medium">{{ $subject->subject_name }}</span>
+                                <span class="text-gray-500 text-sm">{{ $subject->subject_code }}</span>
                             </label>
                         @endforeach
                     </div>
@@ -50,4 +63,23 @@
             </div>
         </div>
     </div>
+
+    <script>
+        const searchInput = document.getElementById('subject-search');
+        const subjectsGrid = document.getElementById('subjects-grid');
+        const subjectItems = subjectsGrid.getElementsByTagName('label');
+
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            Array.from(subjectItems).forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </x-app-layout>

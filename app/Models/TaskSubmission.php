@@ -15,7 +15,7 @@ class TaskSubmission extends Model
         'file_path',
         'score',
         'xp_earned',
-        'status', // pending, graded, late, incomplete
+        'status',
         'submitted_at',
         'graded_at',
         'feedback',

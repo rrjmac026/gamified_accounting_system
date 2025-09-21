@@ -60,39 +60,59 @@
                      x-transition:leave-end="opacity-0 transform -translate-y-4 scale-95"
                      class="ml-6 space-y-1 bg-gradient-to-br from-[#FFEEF2]/50 to-[#FFF0F5]/50 backdrop-blur-sm rounded-xl p-3 border border-[#FF92C2]/10 shadow-lg">
                     <a href="{{ route('students.todo.index', ['status' => 'missing']) }}"
-                        class="flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 hover:bg-white/60 hover:shadow-sm hover:translate-x-1 relative group
+                        class="flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200 hover:bg-white/60 hover:shadow-sm hover:translate-x-1 relative group
                         {{ request('status')=='missing' ? 'font-semibold text-[#FF92C2] bg-white/40 border-l-2 border-red-400' : 'text-[#595758] hover:text-[#FF92C2]' }}">
-                        <span class="w-2 h-2 bg-red-500 rounded-full mr-3 {{ request('status')=='missing' ? 'animate-pulse' : '' }}"></span>
-                        <span>Missing</span>
-                        <div class="absolute left-0 top-0 h-full w-1 bg-red-400 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-200 rounded-r"></div>
+                        <div class="flex items-center">
+                            <span class="w-2 h-2 bg-red-500 rounded-full mr-3 {{ request('status')=='missing' ? 'animate-pulse' : '' }}"></span>
+                            <span>Missing</span>
+                        </div>
+                        <span class="px-2 py-0.5 text-xs rounded-full {{ request('status')=='missing' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600' }}">
+                            {{ auth()->user()->student->tasks()->wherePivot('status', 'missing')->count() }}
+                        </span>
                     </a>
                     <a href="{{ route('students.todo.index', ['status' => 'assigned']) }}"
-                        class="flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 hover:bg-white/60 hover:shadow-sm hover:translate-x-1 relative group
+                        class="flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200 hover:bg-white/60 hover:shadow-sm hover:translate-x-1 relative group
                         {{ request('status')=='assigned' ? 'font-semibold text-[#FF92C2] bg-white/40 border-l-2 border-blue-400' : 'text-[#595758] hover:text-[#FF92C2]' }}">
-                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-3 {{ request('status')=='assigned' ? 'animate-pulse' : '' }}"></span>
-                        <span>Assigned</span>
-                        <div class="absolute left-0 top-0 h-full w-1 bg-blue-400 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-200 rounded-r"></div>
+                        <div class="flex items-center">
+                            <span class="w-2 h-2 bg-blue-500 rounded-full mr-3 {{ request('status')=='assigned' ? 'animate-pulse' : '' }}"></span>
+                            <span>Assigned</span>
+                        </div>
+                        <span class="px-2 py-0.5 text-xs rounded-full {{ request('status')=='assigned' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600' }}">
+                            {{ auth()->user()->student->tasks()->wherePivot('status', 'assigned')->count() }}
+                        </span>
                     </a>
                     <a href="{{ route('students.todo.index', ['status' => 'late']) }}"
-                        class="flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 hover:bg-white/60 hover:shadow-sm hover:translate-x-1 relative group
+                        class="flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200 hover:bg-white/60 hover:shadow-sm hover:translate-x-1 relative group
                         {{ request('status')=='late' ? 'font-semibold text-[#FF92C2] bg-white/40 border-l-2 border-red-600' : 'text-[#595758] hover:text-[#FF92C2]' }}">
-                        <span class="w-2 h-2 bg-red-600 rounded-full mr-3 {{ request('status')=='late' ? 'animate-pulse' : '' }}"></span>
-                        <span>Late</span>
-                        <div class="absolute left-0 top-0 h-full w-1 bg-red-600 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-200 rounded-r"></div>
+                        <div class="flex items-center">
+                            <span class="w-2 h-2 bg-red-600 rounded-full mr-3 {{ request('status')=='late' ? 'animate-pulse' : '' }}"></span>
+                            <span>Late</span>
+                        </div>
+                        <span class="px-2 py-0.5 text-xs rounded-full {{ request('status')=='late' ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600' }}">
+                            {{ auth()->user()->student->tasks()->wherePivot('status', 'late')->count() }}
+                        </span>
                     </a>
                     <a href="{{ route('students.todo.index', ['status' => 'submitted']) }}"
-                        class="flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 hover:bg-white/60 hover:shadow-sm hover:translate-x-1 relative group
+                        class="flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200 hover:bg-white/60 hover:shadow-sm hover:translate-x-1 relative group
                         {{ request('status')=='submitted' ? 'font-semibold text-[#FF92C2] bg-white/40 border-l-2 border-green-400' : 'text-[#595758] hover:text-[#FF92C2]' }}">
-                        <span class="w-2 h-2 bg-green-500 rounded-full mr-3 {{ request('status')=='submitted' ? 'animate-pulse' : '' }}"></span>
-                        <span>Submitted</span>
-                        <div class="absolute left-0 top-0 h-full w-1 bg-green-400 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-200 rounded-r"></div>
+                        <div class="flex items-center">
+                            <span class="w-2 h-2 bg-green-500 rounded-full mr-3 {{ request('status')=='submitted' ? 'animate-pulse' : '' }}"></span>
+                            <span>Submitted</span>
+                        </div>
+                        <span class="px-2 py-0.5 text-xs rounded-full {{ request('status')=='submitted' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600' }}">
+                            {{ auth()->user()->student->tasks()->wherePivot('status', 'submitted')->count() }}
+                        </span>
                     </a>
                     <a href="{{ route('students.todo.index', ['status' => 'graded']) }}"
-                        class="flex items-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200 hover:bg-white/60 hover:shadow-sm hover:translate-x-1 relative group
+                        class="flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200 hover:bg-white/60 hover:shadow-sm hover:translate-x-1 relative group
                         {{ request('status')=='graded' ? 'font-semibold text-[#FF92C2] bg-white/40 border-l-2 border-purple-400' : 'text-[#595758] hover:text-[#FF92C2]' }}">
-                        <span class="w-2 h-2 bg-purple-500 rounded-full mr-3 {{ request('status')=='graded' ? 'animate-pulse' : '' }}"></span>
-                        <span>Graded</span>
-                        <div class="absolute left-0 top-0 h-full w-1 bg-purple-400 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-200 rounded-r"></div>
+                        <div class="flex items-center">
+                            <span class="w-2 h-2 bg-purple-500 rounded-full mr-3 {{ request('status')=='graded' ? 'animate-pulse' : '' }}"></span>
+                            <span>Graded</span>
+                        </div>
+                        <span class="px-2 py-0.5 text-xs rounded-full {{ request('status')=='graded' ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-600' }}">
+                            {{ auth()->user()->student->tasks()->wherePivot('status', 'graded')->count() }}
+                        </span>
                     </a>
                 </div>
             </div>

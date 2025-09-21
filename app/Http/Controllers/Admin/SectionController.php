@@ -15,7 +15,7 @@ class SectionController extends Controller
     // Display a list of sections
     public function index()
     {
-        $sections = Section::with(['course', 'subjects'])->get();
+        $sections = Section::with(['course', 'subjects'])->paginate(10); 
         return view('admin.sections.index', compact('sections'));
     }
 

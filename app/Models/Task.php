@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Task extends Model
 {
     protected $fillable = [
-        // Core Task fields
         'title',
         'description',
         'type',
@@ -117,5 +116,10 @@ class Task extends Model
         }
         
         return $this->questions()->sum('points') ?: $this->max_score;
+    }
+
+    public function section()
+    {
+        return $this->belongsTo(Section::class);
     }
 }

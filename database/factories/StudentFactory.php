@@ -18,7 +18,7 @@ class StudentFactory extends Factory
             'student_number' => $this->faker->unique()->numerify('S########'),
             'course_id' => Course::factory(),
             'year_level' => $this->faker->numberBetween(1, 4),
-            'section' => strtoupper($this->faker->randomLetter()) . $this->faker->numberBetween(1, 5),
+            'section_id' => null,
             'total_xp' => $this->faker->numberBetween(0, 5000),
             'current_level' => $this->faker->numberBetween(1, 50),
             'performance_rating' => $this->faker->randomFloat(2, 0, 100),

@@ -27,18 +27,8 @@
                     <!-- Logo -->
                     <div class="flex items-center">
                         <div class="flex items-center gap-2 sm:gap-4">
-                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#FF92C2] to-[#FFC8FB] rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300 relative">
-                                <div class="text-white font-bold text-lg tracking-wide">
-                                    <span class="block text-xl leading-none">G</span>
-                                    <div class="flex text-xs -mt-0.5">
-                                        <span>A</span>
-                                        <span class="ml-0.5">S</span>
-                                    </div>
-                                </div>
-                                <div class="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-[#FFC8FB] to-[#FF92C2] rounded-full flex items-center justify-center shadow-md">
-                                    <i class="fas fa-calculator text-white text-xs"></i>
-                                </div>
-                            </div>
+                            <img src="{{ asset('assets/app_logo.PNG') }}" alt="GAS Logo" 
+                                 class="w-10 h-10 sm:w-12 sm:h-12 object-contain transform hover:scale-110 transition-transform duration-300">
                             <div>
                                 <span class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#FF92C2] to-[#FFC8FB] bg-clip-text text-transparent">GAS</span>
                                 <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 -mt-1">Gamified Accounting</div>

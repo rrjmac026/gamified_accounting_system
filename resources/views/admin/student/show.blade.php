@@ -37,7 +37,7 @@
                                 </div>
                                 <div class="flex justify-between">
                                     <dt class="text-gray-500">Section:</dt>
-                                    <dd class="text-gray-900">{{ $student->section }}</dd>
+                                    <dd class="text-gray-900">{{ $student->section->name ?? 'N/A' }}</dd>
                                 </div>
                                 <div class="flex justify-between">
                                     <dt class="text-gray-500">Status:</dt>

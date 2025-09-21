@@ -90,6 +90,13 @@
                             </table>
                         </div>
                     </div>
+                    
+                    {{-- Pagination --}}
+                    @if($subjects->hasPages())
+                        <div class="mt-6 p-4">
+                            {{ $subjects->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

@@ -23,10 +23,13 @@ class Section extends Model
         return $this->belongsTo(Course::class);
     }
 
+
     public function students()
     {
-        return $this->belongsToMany(Student::class, 'section_student')->withTimestamps();
+        return $this->belongsToMany(Student::class, 'section_student', 'section_id', 'student_id')
+                    ->withTimestamps();
     }
+
     
 
     public function subjects()

@@ -34,9 +34,12 @@
         <!-- Footer (not affected by scroll) -->
         <div class="p-3 sm:p-4 flex-shrink-0">
             <div class="p-3 sm:p-4 rounded-xl shadow-lg bg-[#FFEEF2]">
-                <div class="flex items-center justify-center gap-2 text-[#FF92C2]">
-                    <i class="fas fa-calculator text-sm"></i>
-                    <span class="text-xs sm:text-sm font-medium">GAS v1.0</span>
+                <div class="flex flex-col items-center justify-center gap-2">
+                    <div class="flex items-center gap-2 text-[#FF92C2]">
+                        <img src="{{ asset('assets/app_logo.PNG') }}" alt="GAS Logo" 
+                         class="w-8 h-8 object-contain">
+                        <span class="text-xs sm:text-sm font-medium">GAS v1.0</span>
+                    </div>
                 </div>
             </div>
         </div>

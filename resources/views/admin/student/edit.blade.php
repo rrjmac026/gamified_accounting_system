@@ -148,18 +148,18 @@
                                             text-gray-800 px-4 py-2 transition-all duration-200 max-h-48 overflow-y-auto">
                                     @foreach($sections as $section)
                                         <label class="flex items-center space-x-3 py-2 hover:bg-[#FFC8FB]/20 rounded cursor-pointer section-item">
-                                            <input type="radio" name="section_radio" value="{{ $section->name }}" 
-                                                {{ old('section', $student->section) == $section->name ? 'checked' : '' }}
+                                            <input type="radio" name="section_id" value="{{ $section->id }}" 
+                                                {{ old('section_id', $student->section_id ?? '') == $section->id ? 'checked' : '' }}
                                                 class="text-[#FF92C2] border-[#FFC8FB] focus:ring-[#FF92C2] focus:ring-2"
                                                 onchange="updateSelectedSection(this.value)">
                                             <span class="text-gray-800">{{ $section->name }}</span>
                                         </label>
                                     @endforeach
                                 </div>
-                                @error('section')
+                                @error('section_id')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
-                            </div>
+
 
                     {{-- Subjects Selection --}}
                     <div>

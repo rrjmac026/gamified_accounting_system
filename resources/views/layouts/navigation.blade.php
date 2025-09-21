@@ -12,9 +12,7 @@
 
                     <!-- Brand -->
                     <div class="flex items-center gap-3">
-                        <div class="p-2.5 rounded-xl text-[#FF92C2]">
-                            <i class="fas fa-calculator text-xl"></i>
-                        </div>
+                        <img src="{{ asset('assets/app_logo.PNG') }}" alt="GAS Logo" class="h-10 w-10 object-contain">
                         <span class="text-xl font-extrabold tracking-tight text-[#595758]">
                             GAS<span> System</span>
                         </span>

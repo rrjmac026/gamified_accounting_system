@@ -35,6 +35,11 @@
                         </div>
 
                         <div>
+                            <h3 class="text-sm font-semibold text-[#FF92C2] mb-1">Section</h3>
+                            <p class="text-gray-700">{{ $task->section->name }}</p>
+                        </div>
+
+                        <div>
                             <h3 class="text-sm font-semibold text-[#FF92C2] mb-1">Due Date</h3>
                             <p class="text-gray-700">{{ $task->due_date->format('F j, Y g:i A') }}</p>
                         </div>
@@ -81,10 +86,10 @@
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-bold text-[#FF92C2]">Assigned Students ({{ $task->students->count() }})</h3>
-                        <a href="{{ route('instructors.tasks.assign-students', $task) }}" 
+                        <!-- <a href="{{ route('instructors.tasks.assign-students', $task) }}" 
                         class="px-4 py-2 bg-[#FF92C2] text-white rounded-lg hover:bg-[#ff6fb5]">
                         Assign Students
-                        </a>
+                        </a> -->
                     </div>
 
                     @if($task->students->isEmpty())

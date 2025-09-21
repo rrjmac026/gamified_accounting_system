@@ -102,6 +102,13 @@
                             </tbody>
                         </table>
                     </div>
+                    
+                    {{-- Pagination --}}
+                    @if($courses->hasPages())
+                        <div class="mt-6 p-4">
+                            {{ $courses->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

@@ -95,6 +95,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
+    // Update password route
+    Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])
+        ->name('profile.password.update');
+    
     // Add 2FA routes
     Route::get('/two-factor', [ProfileController::class, 'showTwoFactorForm'])
         ->name('two-factor.login');
@@ -106,6 +110,9 @@ Route::middleware('auth')->group(function () {
         ->name('profile.disableTwoFactor');
     Route::get('/profile/two-factor', [ProfileController::class, 'showTwoFactorForm'])
      ->name('profile.twoFactorForm');
+
+    Route::get('/profile/badges', [\App\Http\Controllers\ProfileController::class, 'badges'])
+    ->name('profile.badges');
 });
 
 // ============================================================================
@@ -224,6 +231,10 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
     Route::resource('tasks', TaskController::class);
     Route::post('/tasks/{task}/assign-students', [TaskController::class, 'assignToStudent'])->name('tasks.assign-students');
     Route::get('/tasks/{task}/assign-students', [TaskController::class, 'showAssignStudentsForm'])->name('tasks.assign-students-form');
+    Route::post('/instructors/tasks/{task}/sync-students', [TaskController::class, 'syncStudentsToTask'])
+    ->name('tasks.sync-students');
+    Route::post('/instructors/tasks/sync-all', [TaskController::class, 'syncAllStudentsToTasks'])
+    ->name('tasks.sync-all');
     
     // Question Management for Tasks
     Route::post('tasks/{task}/add-question', [TaskController::class, 'addQuestion'])->name('tasks.add-question');

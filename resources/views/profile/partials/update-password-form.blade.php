@@ -8,9 +8,11 @@
         </p>
     </header>
 
-    <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-6">
+    
+
+    <form method="post" action="{{ route('profile.password.update') }}" class="mt-6 space-y-6">
         @csrf
-        @method('put')
+        @method('patch')
 
         <div>
             <x-input-label for="current_password" value="Current Password" class="text-[#FF92C2]" />
@@ -38,8 +40,9 @@
             </button>
 
             @if (session('status') === 'password-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-green-600">Saved.</p>
+                <script>
+                    alert("Your password has been changed successfully!");
+                </script>
             @endif
         </div>
     </form>

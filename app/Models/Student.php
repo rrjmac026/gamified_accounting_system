@@ -15,6 +15,7 @@ class Student extends Model
         'student_number',
         'course_id',
         'year_level',
+        'section_id',
         'total_xp',
         'current_level',
         'performance_rating'

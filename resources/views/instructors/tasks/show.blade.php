@@ -46,7 +46,7 @@
 
                         <div class="sm:col-span-2">
                             <h3 class="text-sm font-semibold text-[#FF92C2] mb-1">Description</h3>
-                            <p class="text-gray-700">{{ $task->description }}</p>
+                            <p class="text-gray-700">{!! $task->description !!}</p>
                         </div>
 
                         <div class="sm:col-span-2">

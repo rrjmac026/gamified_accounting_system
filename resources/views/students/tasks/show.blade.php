@@ -94,7 +94,7 @@
                         <div>
                             <h3 class="text-lg font-semibold text-pink-600 mb-2">Description</h3>
                             <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                <p class="text-gray-700">{{ $task->description }}</p>
+                                <p class="text-gray-700">{!! $task->description !!}</p>
                             </div>
                         </div>
 

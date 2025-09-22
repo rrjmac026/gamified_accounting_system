@@ -325,3 +325,8 @@ Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 // Route::post('/admin/backup-now', [DataBackupController::class, 'backupNow'])
 //     ->name('admin.backup.now')
 //     ->middleware(['auth', 'is_admin']);
+
+// Add this temporarily for testing
+// Route::get('/test-task-route', function() {
+//     dd('Route is accessible');
+// });

@@ -17,29 +17,30 @@
                             </tr>
                         </thead>
                         <tbody class="bg-[#FFF6FD] divide-y divide-[#FFC8FB]">
-                            @foreach($tasks as $task)
-                                <tr class="hover:bg-[#FFD9FF]">
-                                    <td class="px-6 py-4">
-                                        <a href="{{ route('students.tasks.show', $task) }}"
-                                           class="text-[#FF92C2] font-medium hover:underline">
-                                            {{ $task->title }}
-                                        </a>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        {{ $task->subject->subject_name ?? '—' }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        {{ $task->due_date ? $task->due_date->format('M d, Y g:i A') : 'No deadline' }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        @php $submission = $task->submissions->first(); @endphp
-                                        {{ $submission && $submission->score !== null 
-                                            ? $submission->score . ' / ' . $task->max_score 
-                                            : 'Not graded' }}
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
+                        @foreach($tasks as $task)
+                            <tr 
+                                onclick="window.location='{{ route('students.tasks.show', $task) }}'" 
+                                class="hover:bg-[#FFD9FF] transition-colors duration-150 cursor-pointer"
+                            >
+                                <td class="px-6 py-4 text-[#FF92C2] font-medium">
+                                    {{ $task->title }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{ $task->subject->subject_name ?? '—' }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    {{ $task->due_date ? $task->due_date->format('M d, Y g:i A') : 'No deadline' }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    @php $submission = $task->submissions->first(); @endphp
+                                    {{ $submission && $submission->score !== null 
+                                        ? $submission->score . ' / ' . $task->max_score 
+                                        : 'Not graded' }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+
                     </table>
                 </div>
             @else

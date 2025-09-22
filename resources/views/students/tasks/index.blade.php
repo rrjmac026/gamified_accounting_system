@@ -24,42 +24,39 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-[#FFF6FD] divide-y divide-[#FFC8FB]">
-                                @foreach($tasks as $task)
-                                    <tr class="hover:bg-[#FFD9FF] transition-colors duration-150">
-                                        <td class="px-6 py-4 text-gray-900 dark:text-[black]">{{ $task->title }}</td>
-                                        <td class="px-6 py-4 text-gray-900 dark:text-[black]">{{ $task->subject->subject_name }}</td>
-                                        <td class="px-6 py-4 text-gray-900 dark:text-[black]">
-                                            {{ $task->due_date->format('M d, Y g:i A') }}
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            @php
-                                                $submission = $task->submissions->first();
-                                            @endphp
+                            @foreach($tasks as $task)
+                                <tr 
+                                    class="hover:bg-[#FFD9FF] transition-colors duration-150 cursor-pointer"
+                                    onclick="window.location='{{ route('students.tasks.show', $task) }}'">
+                                    
+                                    <td class="px-6 py-4 text-gray-900">{{ $task->title }}</td>
+                                    <td class="px-6 py-4 text-gray-900">{{ $task->subject->subject_name }}</td>
+                                    <td class="px-6 py-4 text-gray-900">
+                                        {{ $task->due_date->format('M d, Y g:i A') }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @php $submission = $task->submissions->first(); @endphp
+                                        <span @class([
+                                            'px-2 py-1 text-xs rounded-full',
+                                            'bg-yellow-100 text-yellow-800' => $task->pivot->status === 'assigned',
+                                            'bg-blue-100 text-blue-800' => $task->pivot->status === 'in_progress',
+                                            'bg-green-100 text-green-800' => $task->pivot->status === 'submitted',
+                                            'bg-purple-100 text-purple-800' => $task->pivot->status === 'graded',
+                                            'bg-red-100 text-red-800' => in_array($task->pivot->status, ['late', 'missing', 'overdue'])
+                                        ])>
+                                            {{ ucfirst($task->pivot->status) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-900">
+                                        {{ $submission && $submission->score !== null ? $submission->score : 'Not graded' }}
+                                    </td>
+                                    <td class="px-6 py-4 text-[#FF92C2] hover:text-[#ff6fb5]">
+                                        View Details
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
 
-                                            <span @class([
-                                                'px-2 py-1 text-xs rounded-full',
-                                                'bg-yellow-100 text-yellow-800' => $task->pivot->status === 'assigned',
-                                                'bg-blue-100 text-blue-800' => $task->pivot->status === 'in_progress',
-                                                'bg-green-100 text-green-800' => $task->pivot->status === 'submitted',
-                                                'bg-purple-100 text-purple-800' => $task->pivot->status === 'graded',
-                                                'bg-red-100 text-red-800' => in_array($task->pivot->status, ['late', 'missing', 'overdue'])
-                                            ])>
-                                                {{ ucfirst($task->pivot->status) }}
-                                            </span>
-
-                                        </td>
-                                        <td class="px-6 py-4 text-gray-900 dark:text-[black]">
-                                            {{ $submission && $submission->score !== null ? $submission->score : 'Not graded' }}
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <a href="{{ route('students.tasks.show', $task) }}" 
-                                               class="text-[#FF92C2] hover:text-[#ff6fb5]">
-                                                View Details
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
                         </table>
                     </div>
                 </div>

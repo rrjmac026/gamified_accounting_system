@@ -33,7 +33,8 @@ use App\Http\Controllers\Instructors\StudentTaskController;
 use App\Http\Controllers\Instructors\TaskSubmissionController;
 use App\Http\Controllers\Instructors\InstructorSectionController;
 use App\Http\Controllers\Instructors\InstructorSubjectController;
-use App\Http\Controllers\QuizController;
+use App\Http\Controllers\Instructors\QuizController;
+use App\Http\Controllers\Instructors\StudentProgressesController;
 
 // ============================================================================
 // STUDENT CONTROLLERS
@@ -179,6 +180,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Leaderboards
     Route::get('/leaderboards', [LeaderboardController::class, 'index'])->name('leaderboards.index');
+    Route::get('/leaderboards/export', [LeaderboardController::class, 'export'])->name('leaderboards.export'); 
     Route::get('/leaderboards/{leaderboard}', [LeaderboardController::class, 'show'])->name('leaderboards.show');
     
     // Activity Logs
@@ -252,12 +254,25 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
     
     // Quiz Management
     Route::resource('/quizzes', QuizController::class);
+    Route::get('/quizzes/create/{taskId}', [QuizController::class, 'create'])->name('quizzes.create');
     Route::post('/quizzes/{taskId}/import', [QuizController::class, 'import'])->name('quizzes.import');
+    Route::get('/quizzes/{quiz}/template/download', [QuizController::class, 'downloadTemplate'])
+        ->name('quizzes.downloadTemplate');
+    Route::post('/quizzes/template/preview', [QuizController::class, 'previewTemplate'])
+        ->name('quizzes.previewTemplate');
     
     // Task Submissions
     Route::get('/task-submissions', [TaskSubmissionController::class, 'index'])->name('task-submissions.index');
     Route::get('/task-submissions/{taskSubmission}', [TaskSubmissionController::class, 'show'])->name('task-submissions.show');
     Route::post('/task-submissions/{taskSubmission}/grade', [TaskSubmissionController::class, 'grade'])->name('task-submissions.grade');
+});
+
+// Student Progress Routes (Instructor Side)
+Route::middleware(['auth', 'role:instructor'])->group(function () {
+    Route::get('/instructor/progress', [StudentProgressesController::class, 'index'])
+        ->name('instructors.progress.index');
+    Route::get('/instructor/progress/{student}', [StudentProgressesController::class, 'show'])
+        ->name('instructors.progress.show');
 });
 
 // ============================================================================
@@ -299,6 +314,11 @@ Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.
     Route::get('/evaluations/create', [EvaluationController::class, 'create'])->name('evaluations.create');
     Route::post('/evaluations', [EvaluationController::class, 'store'])->name('evaluations.store');
     Route::get('/my-evaluations', [EvaluationController::class, 'myEvaluations'])->name('evaluations.index');
+    
+    
+    //Hide the Leaderboard name
+    Route::patch('/profile/leaderboard-privacy', [ProfileController::class, 'updateLeaderboardPrivacy'])
+         ->name('updateLeaderboardPrivacy');
 });
 
 // ============================================================================

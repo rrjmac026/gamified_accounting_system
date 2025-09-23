@@ -18,13 +18,15 @@ class Student extends Model
         'section_id',
         'total_xp',
         'current_level',
-        'performance_rating'
+        'performance_rating',
+        'hide_from_leaderboard',
     ];
 
     protected $casts = [
         'total_xp' => 'integer',
         'current_level' => 'integer',
-        'performance_rating' => 'decimal:2'
+        'performance_rating' => 'decimal:2',
+        'hide_from_leaderboard' => 'boolean'
     ];
 
     // Relationships
@@ -153,4 +155,6 @@ class Student extends Model
         
         return collect($newlyAwarded);
     }
+
+    
 }

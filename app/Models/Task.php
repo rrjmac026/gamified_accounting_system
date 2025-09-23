@@ -24,7 +24,7 @@ class Task extends Model
         'auto_grade',
         'parent_task_id',
         'attachment',
-        'allow_late_submission',
+        'late_until',
     ];
 
     protected $casts = [
@@ -35,7 +35,6 @@ class Task extends Model
         'xp_reward' => 'integer',
         'retry_limit' => 'integer',
         'late_penalty' => 'integer',
-        'difficulty_level' => 'integer',
         'options' => 'array',
         'points' => 'integer',
         'order_index' => 'integer',
@@ -72,7 +71,6 @@ class Task extends Model
                     ->where('type', 'question');
     }
 
-    // Legacy relationship - you might want to keep this if you have other models referencing it
     public function submissions()
     {
         return $this->hasMany(TaskSubmission::class);

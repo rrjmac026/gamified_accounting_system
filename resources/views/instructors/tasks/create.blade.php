@@ -223,6 +223,7 @@
                                     class="rounded border-[#FFC8FB] text-[#FF92C2] focus:ring-pink-200">
                                 <span class="ml-2 text-sm text-gray-700">Auto Grade</span>
                             </label>
+                            
                         </div>
 
                         <div>

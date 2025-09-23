@@ -84,12 +84,11 @@ class TaskController extends Controller
             'late_penalty' => 'nullable|integer|min:0',
             'max_score' => 'required|integer|min:0',
             'xp_reward' => 'required|integer|min:0',
-            'due_date' => 'nullable|date', // Changed from 'required' to 'nullable'
+            'due_date' => 'nullable|date', 
             'instructions' => 'required|string',
             'is_active' => 'required|boolean',
             'auto_grade' => 'required|boolean',
             'attachment' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,png|max:10240',
-            'allow_late_submission' => 'sometimes|boolean',
             'late_until' => 'nullable|date|after:due_date',
         ]);
 
@@ -176,12 +175,11 @@ class TaskController extends Controller
             'late_penalty' => 'nullable|integer|min:0',
             'max_score' => 'required|integer|min:0',
             'xp_reward' => 'required|integer|min:0',
-            'due_date' => 'nullable|date', // Changed from 'required' to 'nullable'
+            'due_date' => 'nullable|date', 
             'instructions' => 'required|string',
             'is_active' => 'required|boolean',
             'auto_grade' => 'required|boolean',
             'attachment' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,png|max:10240',
-            'allow_late_submission' => 'sometimes|boolean',
             'late_until' => 'nullable|date|after:due_date',
         ]);
 

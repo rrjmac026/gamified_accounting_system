@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Instructor;
 use App\Models\Subject;
 use App\Models\Task;
+use App\Models\TaskSubmission;
 use App\Models\Student;
 use App\Models\Section;
 use App\Models\ActivityLog;
@@ -36,18 +37,6 @@ class InstructorController extends Controller
         return view('instructors.sections.index', compact('sections'));
     }
 
-    /**
-     * Show details of a specific instructor.
-     */
-    public function show(Instructor $instructor)
-    {
-        $instructor->load('user', 'subjects', 'subjects.tasks');
-        return view('instructors.show', compact('instructor'));
-    }
-
-    /**
-     * Instructor dashboard (overview of assigned subjects and stats).
-     */
     public function dashboard()
     {
         $instructor = auth()->user()->instructor;
@@ -59,25 +48,30 @@ class InstructorController extends Controller
             'subjects.sections'
         ]);
 
-        // Calculate statistics
+        // Get recent submissions with proper status check
+        $recentSubmissions = TaskSubmission::with(['student.user', 'task.subject'])
+            ->whereHas('task', function ($q) use ($instructor) {
+                $q->where('instructor_id', $instructor->id);
+            })
+            ->whereIn('status', ['submitted', 'late', 'pending']) // include the statuses you consider “recent”
+            ->latest('submitted_at')
+            ->take(5)
+            ->get();
+
+        // Calculate stats including proper submission count
         $stats = [
             'total_subjects' => $instructor->subjects->count(),
             'total_students' => $instructor->sections->flatMap->students->unique('id')->count(),
             'active_tasks' => $instructor->subjects->flatMap->tasks->where('is_active', true)->count(),
-            'submissions_pending' => $instructor->subjects->flatMap->tasks->flatMap->submissions->where('status', 'pending')->count(),
+            'submissions_pending' => \App\Models\TaskSubmission::whereHas('task.subject.instructors', function($q) use ($instructor) {
+                $q->where('instructors.id', $instructor->id);
+            })
+            ->where(function($query) {
+                $query->where('status', 'submitted')
+                      ->orWhere('status', 'late');
+            })
+            ->count()
         ];
-
-        // Get recent submissions
-        $recentSubmissions = Task::whereHas('subject.instructors', function($q) use ($instructor) {
-            $q->where('instructor_id', $instructor->id);
-        })
-        ->with(['student.user', 'subject'])
-        ->whereHas('submissions', function($q) {
-            $q->where('status', 'pending');
-        })
-        ->latest()
-        ->take(5)
-        ->get();
 
         // Get upcoming tasks
         $upcomingTasks = $instructor->subjects
@@ -87,20 +81,27 @@ class InstructorController extends Controller
             ->sortBy('due_date')
             ->take(5);
 
-        // Performance overview
-        $performanceData = $instructor->sections->map(function($section) {
+        // Calculate performance data more efficiently
+        $performanceData = $instructor->sections()
+        ->with(['students.taskSubmissions.task']) // load tasks for easier access
+        ->get()
+        ->map(function($section) {
+            $allSubmissions = $section->students->flatMap->taskSubmissions;
+
+            $totalTasks = $allSubmissions->count();
+            $submittedTasks = $allSubmissions->whereIn('status', ['submitted','late'])->count();
+
+            $avgScore = $allSubmissions->whereNotNull('score')->avg('score');
+
             return [
                 'section_name' => $section->name,
-                'avg_score' => $section->students->avg(function($student) {
-                    return $student->tasks->avg('pivot.score');
-                }),
-                'submission_rate' => $section->students->avg(function($student) {
-                    $total = $student->tasks->count();
-                    $submitted = $student->tasks->where('pivot.status', 'submitted')->count();
-                    return $total ? ($submitted / $total * 100) : 0;
-                })
+                'avg_score' => round($avgScore ?? 0, 1),
+                'submission_rate' => $totalTasks > 0 
+                    ? round(($submittedTasks / $totalTasks) * 100, 1) 
+                    : 0
             ];
         });
+
 
         return view('instructors.dashboard', compact(
             'instructor',

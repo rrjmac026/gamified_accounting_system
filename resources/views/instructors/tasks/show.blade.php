@@ -57,7 +57,6 @@
                         <div>
                             <h3 class="text-sm font-semibold text-[#FF92C2] mb-1">Settings</h3>
                             <div class="space-y-2">
-                                <p class="text-gray-700">Difficulty Level: {{ $task->difficulty_level }}</p>
                                 <p class="text-gray-700">Max Score: {{ $task->max_score }}</p>
                                 <p class="text-gray-700">XP Reward: {{ $task->xp_reward }}</p>
                                 <p class="text-gray-700">Retry Limit: {{ $task->retry_limit }}</p>

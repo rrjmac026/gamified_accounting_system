@@ -60,12 +60,22 @@ class StudentController extends Controller
             ->take(3)
             ->get();
 
+        $upcomingTasks = $student->tasks()
+            ->with('subject')
+            ->where('student_tasks.status', 'assigned') // only tasks that are active
+            ->whereNotNull('student_tasks.due_date')
+            ->where('student_tasks.due_date', '>', now())
+            ->orderBy('student_tasks.due_date')
+            ->take(5)
+            ->get();
+
         return view('students.dashboard', compact(
             'student',
             'stats',
             'upcomingDeadlines',
             'recentGrades',
-            'levelData'
+            'levelData',
+            'upcomingTasks'
         ));
     }
 

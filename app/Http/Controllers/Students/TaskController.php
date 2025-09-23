@@ -88,10 +88,14 @@ class TaskController extends Controller
             : null;
 
         // === Late handling ===
-        $isLate = now()->gt($task->due_date);
+        $isLate = $task->due_date && now()->gt($task->due_date);
 
-        if ($isLate && !$task->allow_late_submission) {
-            return back()->withErrors(['error' => 'Late submission is not allowed for this task.']);
+        // If submission is late
+        if ($isLate) {
+            // If no late_until set OR already past late_until → reject
+            if (!$task->late_until || now()->gt($task->late_until)) {
+                return back()->withErrors(['error' => 'Late submission is not allowed for this task.']);
+            }
         }
 
         // If late submission is allowed, apply penalty if set
@@ -103,24 +107,23 @@ class TaskController extends Controller
             ->max('attempt_number');
         $attemptNumber = $lastAttempt ? $lastAttempt + 1 : 1;
 
-        // Save submission
-        $submission = TaskSubmission::updateOrCreate(
-            ['task_id' => $task->id, 'student_id' => $student->id],
-            [
-                'submission_data' => $validated['answers'] ?? [],
-                'file_path' => $filePath,
-                'status' => $isLate ? 'late' : 'submitted',
-                'submitted_at' => now(),
-                'attempt_number' => $attemptNumber,
-            ]
-        );
+        // Create or update the task submission
+        $submission = TaskSubmission::create([
+            'task_id' => $task->id,
+            'student_id' => $student->id,
+            'submission_data' => $validated['answers'] ?? [],
+            'file_path' => $filePath,
+            'status' => $isLate ? 'late' : 'submitted',
+            'submitted_at' => now(),
+            'attempt_number' => $attemptNumber,
+        ]);
 
-        // Update pivot - Fixed the logic
+        // Update the pivot record in student_tasks
         $student->tasks()->updateExistingPivot($task->id, [
             'status' => 'submitted',
             'submitted_at' => now(),
             'was_late' => $isLate,
-            'penalty' => $penaltyApplied ? $task->late_penalty : null,
+            'penalty' => $penaltyApplied ? $task->late_penalty : null
         ]);
 
         PerformanceLog::create([

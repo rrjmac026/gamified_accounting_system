@@ -8,6 +8,7 @@ use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\XpEngine;
+use Carbon\Carbon;
 
 class TaskSubmissionController extends Controller
 {
@@ -58,48 +59,69 @@ class TaskSubmissionController extends Controller
             abort(403, 'Unauthorized to grade this submission.');
         }
 
-        // 1. Validate input first
+        // 1️⃣ Validate input
         $validated = $request->validate([
-            'score' => 'required|numeric|min:0',
-            'xp_earned' => 'required|integer|min:0',
-            'feedback' => 'required|string',
+            'score'     => 'required|numeric|min:0',
+            'xp_earned' => 'required|integer|min:0', // Base XP before deductions
+            'feedback'  => 'required|string',
         ]);
 
-        // 2. Apply late penalty if needed
+        $baseXp = $validated['xp_earned'];
         $finalScore = $validated['score'];
-        if (!empty($taskSubmission->task->late_penalty) && $taskSubmission->status === 'late') {
-            $finalScore = max(0, $finalScore - $taskSubmission->task->late_penalty);
+        $today = now();
+
+        // 2️⃣ Ensure deadlines are Carbon instances
+        $deadline = Carbon::parse($taskSubmission->task->deadline);
+        $allowedLate = Carbon::parse($taskSubmission->task->allowed_late_date);
+
+        // 3️⃣ Calculate XP after late deductions
+        if ($today->greaterThan($allowedLate)) {
+            // Past allowed late date → no XP
+            $xpToAward = 0;
+        } elseif ($today->greaterThan($deadline)) {
+            // Late submission → deduct 10 XP per day late
+            $daysLate = $today->diffInDays($deadline);
+            $xpToAward = max($baseXp - ($daysLate * 10), 0);
+            // Optional: reduce score proportionally
+            $finalScore = max(0, $finalScore - ($baseXp - $xpToAward));
+        } else {
+            // On time
+            $xpToAward = $baseXp;
         }
 
-        // 3. Update TaskSubmission
+        // 4️⃣ Update TaskSubmission
         $taskSubmission->update([
-            'score'       => $finalScore,
-            'xp_earned'   => $validated['xp_earned'],
-            'feedback'    => $validated['feedback'],
-            'status'      => 'graded',
-            'graded_at'   => now(),
+            'score'     => $finalScore,
+            'xp_earned' => $xpToAward,
+            'feedback'  => $validated['feedback'],
+            'status'    => 'graded',
+            'graded_at' => now(),
         ]);
 
-        // 4. Update pivot table
+        // 5️⃣ Update pivot table (if student-task relationship tracks status/score/XP)
         $taskSubmission->student->tasks()
             ->updateExistingPivot($taskSubmission->task_id, [
-                'status' => 'graded',
-                'score'  => $finalScore,
+                'status'    => 'graded',
+                'score'     => $finalScore,
+                'xp_earned' => $xpToAward,
             ]);
 
-        // 5. Award XP to student
+        // 6️⃣ Award XP via XpEngine
         $xpEngine->award(
             studentId: $taskSubmission->student_id,
-            amount: $validated['xp_earned'],
+            amount: $xpToAward,
             type: 'earned',
             source: 'task_completion',
             sourceId: $taskSubmission->task_id,
-            description: "Earned {$validated['xp_earned']} XP for completing '{$taskSubmission->task->title}'"
+            description: "Earned {$xpToAward} XP for completing '{$taskSubmission->task->title}'"
         );
 
+        // 7️⃣ Redirect back with success message
         return redirect()
             ->route('instructors.task-submissions.show', $taskSubmission)
             ->with('success', 'Submission graded and XP awarded successfully!');
     }
+
+
 
 }

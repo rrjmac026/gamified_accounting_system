@@ -88,12 +88,19 @@
                                 <div class="mb-4 p-4 bg-white rounded-lg border border-[#FFC8FB]/30 hover:bg-[#FFF6FD] transition-colors duration-200">
                                     <div class="flex justify-between items-start">
                                         <div>
+                                            <!-- Student Name -->
                                             <h3 class="font-medium text-gray-900">{{ $submission->student->user->name }}</h3>
-                                            <p class="text-sm text-gray-600">{{ $submission->subject->subject_name }}</p>
-                                            <p class="text-xs text-gray-500 mt-1">Submitted {{ $submission->created_at->diffForHumans() }}</p>
+                                            
+                                            <!-- Subject Name via Task -->
+                                            <p class="text-sm text-gray-600">{{ $submission->task->subject->subject_name }}</p>
+                                            
+                                            <!-- Submission Time -->
+                                            <p class="text-xs text-gray-500 mt-1">Submitted {{ $submission->submitted_at->diffForHumans() }}</p>
                                         </div>
-                                        <a href="{{ route('instructors.submissions.show', $submission) }}" 
-                                           class="px-3 py-1 bg-[#FF92C2] text-white text-sm rounded-lg hover:bg-[#ff6fb5]">
+
+                                        <!-- Review Button -->
+                                        <a href="{{ route('instructors.task-submissions.show', $submission) }}" 
+                                        class="px-3 py-1 bg-[#FF92C2] text-white text-sm rounded-lg hover:bg-[#ff6fb5]">
                                             Review
                                         </a>
                                     </div>
@@ -102,6 +109,7 @@
                                 <p class="text-gray-500 text-center py-4">No recent submissions</p>
                             @endforelse
                         </div>
+
                     </div>
 
                     <!-- Performance Overview -->
@@ -117,12 +125,12 @@
                                 <div class="mb-4 last:mb-0">
                                     <div class="flex justify-between mb-2">
                                         <span class="text-gray-700">{{ $data['section_name'] }}</span>
-                                        <span class="text-[#FF92C2] font-medium">{{ number_format($data['avg_score'], 1) }}%</span>
+                                        <span class="text-[#FF92C2] font-medium">{{ $data['avg_score'] }}%</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-2.5">
                                         <div class="bg-[#FF92C2] h-2.5 rounded-full" style="width: {{ $data['submission_rate'] }}%"></div>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-1">Submission Rate: {{ number_format($data['submission_rate'], 1) }}%</p>
+                                    <p class="text-xs text-gray-500 mt-1">Submission Rate: {{ $data['submission_rate'] }}%</p>
                                 </div>
                             @empty
                                 <p class="text-gray-500 text-center py-4">No performance data available</p>
@@ -155,29 +163,7 @@
                         </div>
                     </div>
 
-                    <!-- Upcoming Tasks -->
-                    <div class="bg-[#FFF0FA] rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
-                        <div class="border-b border-[#FFC8FB] p-6">
-                            <h2 class="text-xl font-semibold text-[#FF92C2] flex items-center">
-                                <i class="fas fa-calendar mr-2"></i>
-                                Upcoming Tasks
-                            </h2>
-                        </div>
-                        <div class="p-6">
-                            @forelse($upcomingTasks as $task)
-                                <div class="mb-4 last:mb-0 p-4 bg-white rounded-lg border border-[#FFC8FB]/30">
-                                    <h3 class="font-medium text-gray-900">{{ $task->title }}</h3>
-                                    <p class="text-sm text-gray-600">{{ $task->subject->subject_name }}</p>
-                                    <div class="flex items-center mt-2 text-xs text-gray-500">
-                                        <i class="fas fa-clock mr-1"></i>
-                                        Due {{ $task->due_date->format('M d, Y') }}
-                                    </div>
-                                </div>
-                            @empty
-                                <p class="text-gray-500 text-center py-4">No upcoming tasks</p>
-                            @endforelse
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
         </div>

@@ -250,6 +250,29 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Upcoming Tasks -->
+                    <div class="bg-[#FFF0FA] rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+                        <div class="border-b border-[#FFC8FB] p-6">
+                            <h2 class="text-xl font-semibold text-[#FF92C2] flex items-center">
+                                <i class="fas fa-calendar mr-2"></i>
+                                Upcoming Tasks
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            @forelse($upcomingTasks as $task)
+                                <div class="mb-4 last:mb-0 p-4 bg-white rounded-lg border border-[#FFC8FB]/30">
+                                    <h3 class="font-medium text-gray-900">{{ $task->title }}</h3>
+                                    <p class="text-sm text-gray-600">{{ $task->subject->subject_name }}</p>
+                                    <div class="flex items-center mt-2 text-xs text-gray-500">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        Due {{ $task->due_date->format('M d, Y') }}
+                                    </div>
+                                </div>
+                            @empty
+                                <p class="text-gray-500 text-center py-4">No upcoming tasks</p>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

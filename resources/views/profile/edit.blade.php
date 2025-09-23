@@ -13,7 +13,7 @@
             @if($user->role === 'student')
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <div class="max-w-7xl mx-auto">
-                        @include('profile.partials.badges')
+                        @include('profile.partials.badges', ['student' => $student])
                     </div>
                 </div>
             @endif

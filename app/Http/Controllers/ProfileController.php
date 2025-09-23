@@ -20,6 +20,9 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         $user = $request->user();
+        $student = null;
+        $totalXp = 0;
+        $badges = collect();
         
         // Only fetch badges data if user is a student
         if ($user->role === 'student') {
@@ -46,13 +49,11 @@ class ProfileController extends Controller
                     
                     return $badge;
                 });
-        } else {
-            $totalXp = 0;
-            $badges = collect();
         }
 
         return view('profile.edit', [
             'user' => $user,
+            'student' => $student,
             'totalXp' => $totalXp,
             'badges' => $badges,
         ]);
@@ -168,7 +169,45 @@ class ProfileController extends Controller
 
         return back()->with('status', 'password-updated');
     }
+
+    public function updateLeaderboardPrivacy(Request $request): RedirectResponse
+    {
+        try {
+            // Get the authenticated user and their student record
+            $user = auth()->user();
+            
+            if (!$user || !$user->student) {
+                return back()->withErrors(['error' => 'Student record not found.']);
+            }
+
+            $student = $user->student;
+            
+            // Update the hide_from_leaderboard flag based on checkbox presence
+            $hideFromLeaderboard = $request->has('hide_from_leaderboard');
+            
+            $student->update([
+                'hide_from_leaderboard' => $hideFromLeaderboard
+            ]);
+
+            // Provide user-friendly feedback
+            $message = $hideFromLeaderboard 
+                ? 'Your name is now hidden from the leaderboard.' 
+                : 'Your name is now visible on the leaderboard.';
+
+            return back()->with('success', $message);
+
+        } catch (\Exception $e) {
+            // Log the error for debugging (keep this for production monitoring)
+            \Log::error('Error updating leaderboard privacy:', [
+                'user_id' => auth()->id(),
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->withErrors(['error' => 'An error occurred while updating your privacy setting. Please try again.']);
+        }
+    }
 }
+
 
 
 //code ni para reset sa code if ever na delete

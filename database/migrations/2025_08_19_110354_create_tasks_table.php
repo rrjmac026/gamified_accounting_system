@@ -29,7 +29,6 @@ return new class extends Migration
             $table->boolean('is_active')->default(true); // consider removing if redundant
             $table->boolean('auto_grade')->default(false);
             $table->string('attachment')->nullable();
-            $table->boolean('allow_late_submission')->default(false);
             $table->dateTime('late_until')->nullable();
 
             // Question-specific fields

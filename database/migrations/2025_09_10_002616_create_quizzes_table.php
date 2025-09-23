@@ -12,19 +12,29 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('quizzes', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('task_id')->constrained()->onDelete('cascade');
+            $table->id();
+            $table->foreignId('task_id')->constrained()->onDelete('cascade');
 
-        $table->enum('type', ['multiple_choice', 'identification', 'true_false']);
-        $table->text('question_text');
-        $table->json('options')->nullable();     // used for multiple choice / true-false
-        $table->string('correct_answer')->nullable(); // expected answer
-        $table->integer('points')->default(1);
-        $table->string('cell')->nullable();
+            // Template-related fields
+            $table->json('csv_template_headers')->nullable(); 
+            $table->string('template_name')->nullable();
+            $table->text('template_description')->nullable();
 
-        $table->timestamps();
-    });
+            // Quiz type and content
+            $table->enum('type', ['multiple_choice', 'identification', 'true_false']);
+            $table->text('question_text');
+            $table->json('options')->nullable();       // For multiple choice / true-false
+            $table->string('correct_answer')->nullable();
+            $table->integer('points')->default(1);
 
+            // File upload
+            $table->string('quiz_file_path')->nullable();
+
+            // Optional rani for Excel checking
+            $table->string('cell')->nullable();
+
+            $table->timestamps();
+        });
     }
 
     /**

@@ -8,14 +8,14 @@ use App\Models\Student;
 class XpEngine
 {
     public function award(
-        int $studentId,
-        int $amount,
-        string $type,
-        string $source,
-        ?int $sourceId = null,
-        ?string $description = null
+    int $studentId,
+    int $amount,
+    string $type,
+    string $source,
+    ?int $sourceId = null,
+    ?string $description = null
     ) {
-        // Create XP transaction record
+        // Ensure amount can be negative for deductions
         XpTransaction::create([
             'student_id'  => $studentId,
             'amount'      => $amount,
@@ -26,7 +26,19 @@ class XpEngine
             'processed_at'=> now()
         ]);
 
-        // Update total XP on student profile
-        Student::find($studentId)?->increment('total_xp', $amount);
+        $student = Student::find($studentId);
+        if ($student) {
+            if ($amount >= 0) {
+                $student->increment('total_xp', $amount);
+            } else {
+                
+                $student->decrement('total_xp', abs($amount));
+                if ($student->total_xp < 0) {
+                    $student->total_xp = 0;
+                    $student->save();
+                }
+            }
+        }
     }
+
 }

@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Models\SystemNotification;
 
 class TaskController extends Controller
 {
@@ -135,7 +136,19 @@ class TaskController extends Controller
             }
 
             $task->students()->attach($attachData);
+            // 🔔 Notify all students in the section
+            foreach ($section->students as $student) {
+                SystemNotification::create([
+                    'user_id' => $student->user->id,
+                    'title'   => 'New Task Assigned',
+                    'message' => "A new task '{$task->title}' has been assigned to your section.",
+                    'type'    => 'info',
+                    'is_read' => false,
+                ]);
+            }
         }
+
+        
 
         return redirect()->route('instructors.tasks.index')
             ->with('success', 'Task created (with attachment if uploaded) and assigned to students.');
@@ -220,6 +233,16 @@ class TaskController extends Controller
         }
 
         $task->update($validated);
+
+        foreach ($task->section->students as $student) {
+        SystemNotification::create([
+            'user_id' => $student->user->id,
+            'title'   => 'Task Updated',
+            'message' => "The task '{$task->title}' has been updated. Check for new instructions or deadlines.",
+            'type'    => 'warning',
+            'is_read' => false,
+        ]);
+    }
 
         return redirect()->route('instructors.tasks.index')
             ->with('success', 'Task updated successfully');

@@ -50,21 +50,39 @@
 
                         {{-- Department & Specialization --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {{-- Department --}}
                             <div>
                                 <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Department</label>
-                                <input type="text" name="department" value="{{ $instructor->department }}"
-                                       class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
-                                              border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                              text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
-                                       required>
+                                <select name="department"
+                                        class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
+                                            border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                            text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
+                                        required>
+                                    <option value="">-- Select Department --</option>
+                                    <option value="Bachelor of Science in Accountancy & Accounting Information System"
+                                        {{ $instructor->department == 'Bachelor of Science in Accountancy & Accounting Information System' ? 'selected' : '' }}>
+                                        Bachelor of Science in Accountancy & Accounting Information System
+                                    </option>
+                                    <option value="Bachelor of Science in Information Technology"
+                                        {{ $instructor->department == 'Bachelor of Science in Information Technology' ? 'selected' : '' }}>
+                                        Bachelor of Science in Information Technology
+                                    </option>
+                                    <option value="Bachelor of Science in Information System"
+                                        {{ $instructor->department == 'Bachelor of Science in Information System' ? 'selected' : '' }}>
+                                        Bachelor of Science in Information System
+                                    </option>
+                                </select>
                             </div>
+
+                            {{-- Specialization --}}
                             <div>
                                 <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Specialization</label>
                                 <input type="text" name="specialization" value="{{ $instructor->specialization }}"
-                                       class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
-                                              border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                              text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
-                                       required>
+                                    placeholder="e.g. Auditing, Programming, Data Analytics"
+                                    class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
+                                            border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                            text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
+                                    required>
                             </div>
                         </div>
                     </div>

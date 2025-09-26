@@ -11,7 +11,7 @@ class SystemSetting extends Model
     protected $fillable = [
         'key',
         'value',
-        'type', // string, integer, boolean, json
+        'type',
         'description',
         'is_editable'
     ];

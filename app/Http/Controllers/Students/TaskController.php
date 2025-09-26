@@ -9,6 +9,7 @@ use App\Models\TaskSubmission;
 use App\Models\PerformanceLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Models\SystemNotification;
 
 
 class TaskController extends Controller
@@ -33,6 +34,7 @@ class TaskController extends Controller
                 ]);
             }
         }
+        
 
         return view('students.tasks.index', compact('tasks'));
     }
@@ -134,6 +136,16 @@ class TaskController extends Controller
             'value' => $submission->score ?? 0, // or whatever metric you calculate
             'recorded_at' => now(),
         ]);
+
+        SystemNotification::create([
+            'user_id' => $task->instructor->user->id, // notify the instructor
+            'title'   => 'Task Submitted',
+            'message' => "{$student->name} submitted {$task->title}.",
+            'type'    => 'success',
+            'is_read' => false,
+        ]);
+
+        
         
         $this->checkAndAssignBadges($student);
         // FIXED: Add proper redirect with success message

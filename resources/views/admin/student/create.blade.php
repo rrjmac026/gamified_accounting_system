@@ -165,22 +165,25 @@
                             <input type="hidden" name="section_id" id="selected-section" value="{{ old('section') }}">
 
                             {{-- Sections List --}}
-                            <div id="section-list"
-                                class="w-full rounded-lg shadow-sm bg-white border border-[#FFC8FB] 
-                                        text-gray-800 px-4 py-2 transition-all duration-200 max-h-48 overflow-y-auto">
-                                @foreach($sections as $section)
-                                    <label class="flex items-center space-x-3 py-2 hover:bg-[#FFC8FB]/20 rounded cursor-pointer section-item">
-                                        <input type="radio" name="section_id" value="{{ $section->id }}" 
-                                            {{ old('section_id', $student->section_id ?? '') == $section->id ? 'checked' : '' }}
-                                            class="text-[#FF92C2] border-[#FFC8FB] focus:ring-[#FF92C2] focus:ring-2"
-                                            onchange="updateSelectedSection(this.value)">
-                                        <span class="text-gray-800">{{ $section->name }}</span>
-                                    </label>
-                                @endforeach
+                            <div>
+                                <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Section</label>
+                                <select name="section_id" required
+                                        class="w-full rounded-lg shadow-sm bg-white 
+                                            border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                            text-gray-800 px-4 py-2 transition-all duration-200
+                                            @error('section_id') border-red-500 @enderror">
+                                    <option value="">-- Select Section --</option>
+                                    @foreach($sections as $section)
+                                        <option value="{{ $section->id }}" {{ old('section_id') == $section->id ? 'selected' : '' }}>
+                                            {{ $section->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('section_id')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
-                            @error('section_id')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+
 
 
                         {{-- Submit Button --}}

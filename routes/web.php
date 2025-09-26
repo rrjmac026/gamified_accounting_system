@@ -35,6 +35,7 @@ use App\Http\Controllers\Instructors\InstructorSectionController;
 use App\Http\Controllers\Instructors\InstructorSubjectController;
 use App\Http\Controllers\Instructors\QuizController;
 use App\Http\Controllers\Instructors\StudentProgressesController;
+use App\Http\Controllers\Admin\DataBackupController;
 
 // ============================================================================
 // STUDENT CONTROLLERS
@@ -49,6 +50,7 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
 use Laravel\Fortify\Http\Controllers\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\SystemNotificationController;
 
 
 // ============================================================================
@@ -114,6 +116,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profile/badges', [\App\Http\Controllers\ProfileController::class, 'badges'])
     ->name('profile.badges');
+
+    Route::get('/notifications', [SystemNotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/{notification}/read', [SystemNotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::patch('/notifications/read-all', [SystemNotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+    Route::delete('/notifications/{notification}', [SystemNotificationController::class, 'destroy'])->name('notifications.destroy');
+    
+    // Admin broadcast
+    Route::post('/notifications', [SystemNotificationController::class, 'store'])->name('notifications.store');
 });
 
 // ============================================================================
@@ -183,6 +193,22 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/leaderboards/export', [LeaderboardController::class, 'export'])->name('leaderboards.export'); 
     Route::get('/leaderboards/{leaderboard}', [LeaderboardController::class, 'show'])->name('leaderboards.show');
     
+    //Settings
+    Route::prefix('backups')->name('backups.')->group(function () {
+            // Main backup pages
+            Route::get('/', [DataBackupController::class, 'index'])->name('index');
+            Route::get('/{backup}', [DataBackupController::class, 'show'])->name('show'); // Optional: view backup details
+            
+            // Backup operations  
+            Route::post('/', [DataBackupController::class, 'store'])->name('store');
+            Route::get('/{backup}/download', [DataBackupController::class, 'download'])->name('download');
+            Route::delete('/{backup}', [DataBackupController::class, 'destroy'])->name('destroy');
+            
+            // Additional management routes
+            Route::post('/cleanup', [DataBackupController::class, 'cleanup'])->name('cleanup');
+            Route::get('/{backup}/status', [DataBackupController::class, 'status'])->name('status'); // For AJAX status checks
+        });
+    
     // Activity Logs
     Route::resource('/activity-logs', ActivityLogController::class);
     
@@ -203,8 +229,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Feedback Records
     Route::resource('feedback-records', FeedbackRecordController::class);
     
-    // Settings
-    Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
+    // // Settings
+    // Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
     
     // Subject instructor assignment routes
     Route::post('/subjects/{subject}/assign-instructors', [SubjectController::class, 'assignInstructors'])

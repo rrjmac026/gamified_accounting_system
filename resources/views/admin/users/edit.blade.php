@@ -157,34 +157,54 @@
                     </div>
 
                     <!-- Instructor Fields -->
-                    <div id="instructorFields" class="col-span-2 gap-6 instructor-fields" style="display: none;">
-                        <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Employee ID</label>
-                            <input type="text" name="employee_id" 
-                                   value="{{ old('employee_id', $user->instructor->employee_id ?? '') }}"
-                                   class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
-                                          border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                          text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200">
+                        <div id="instructorFields" class="col-span-2 instructor-fields" style="display: none;">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {{-- Employee ID --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Employee ID</label>
+                                    <input type="text" name="employee_id" 
+                                        value="{{ old('employee_id', $user->instructor->employee_id ?? '') }}"
+                                        class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
+                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                                text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200">
+                                </div>
+
+                                {{-- Department (Dropdown) --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Department</label>
+                                    <select name="department"
+                                            class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
+                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                                text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200">
+                                        <option value="">-- Select Department --</option>
+                                        <option value="Bachelor of Science in Accountancy & Accounting Information System"
+                                            {{ old('department', $user->instructor->department ?? '') == 'Bachelor of Science in Accountancy & Accounting Information System' ? 'selected' : '' }}>
+                                            Bachelor of Science in Accountancy & Accounting Information System
+                                        </option>
+                                        <option value="Bachelor of Science in Information Technology"
+                                            {{ old('department', $user->instructor->department ?? '') == 'Bachelor of Science in Information Technology' ? 'selected' : '' }}>
+                                            Bachelor of Science in Information Technology
+                                        </option>
+                                        <option value="Bachelor of Science in Information System"
+                                            {{ old('department', $user->instructor->department ?? '') == 'Bachelor of Science in Information System' ? 'selected' : '' }}>
+                                            Bachelor of Science in Information System
+                                        </option>
+                                    </select>
+                                </div>
+
+                                {{-- Specialization --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Specialization</label>
+                                    <input type="text" name="specialization" 
+                                        value="{{ old('specialization', $user->instructor->specialization ?? '') }}"
+                                        placeholder="e.g. Auditing, Programming"
+                                        class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
+                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
+                                                text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200">
+                                </div>
+                            </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Department</label>
-                            <input type="text" name="department" 
-                                   value="{{ old('department', $user->instructor->department ?? '') }}"
-                                   class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
-                                          border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                          text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Specialization</label>
-                            <input type="text" name="specialization" 
-                                   value="{{ old('specialization', $user->instructor->specialization ?? '') }}"
-                                   class="w-full rounded-lg shadow-sm bg-white dark:from-[#FF92C2] dark:to-[#FF92C2] 
-                                          border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                          text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200">
-                        </div>
-                    </div>
 
                     {{-- Password Fields --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

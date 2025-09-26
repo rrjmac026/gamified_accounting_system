@@ -145,7 +145,7 @@ return [
 
     'features' => [
         Features::registration(),
-        Features::resetPasswords(),  // Make sure this is enabled
+        Features::resetPasswords(),
         Features::updateProfileInformation(),
         Features::updatePasswords(),
         Features::twoFactorAuthentication([

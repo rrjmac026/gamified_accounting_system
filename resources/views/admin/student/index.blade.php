@@ -66,7 +66,15 @@
 
                     {{-- Import Form --}}
                     <div class="mb-4 sm:mb-6 p-4 bg-white rounded-lg border border-pink-200">
-                        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3">Import Students</h3>
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-base sm:text-lg font-medium text-gray-900">Import Students</h3>
+                            <button type="button" 
+                                    onclick="toggleSchemaModal()"
+                                    class="text-sm text-pink-600 hover:text-pink-800 underline flex items-center">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                View Schema
+                            </button>
+                        </div>
                         <form action="{{ route('admin.student.import') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -83,11 +91,12 @@
                                     Import Students
                                 </button>
                             </div>
-                            <p class="mt-2 text-xs text-gray-500">
-                                Accepted formats: CSV, XLSX, XLS. Expected columns: name, email, course, year_level, section, password
+                            <p class="mt-2 text-xs text-gray-500 italic">
+                                📌 Click "View Schema" above to see the required CSV format.
                             </p>
                         </form>
                     </div>
+
                     {{-- Search Bar --}}
                     <div class="mb-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <form action="{{ route('admin.student.index') }}" method="GET" class="flex w-full sm:w-1/2">
@@ -226,4 +235,122 @@
             </div>
         </div>
     </div>
+
+    {{-- Schema Modal --}}
+    <div id="schemaModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">CSV Import Schema</h3>
+                    <button type="button" 
+                            onclick="toggleSchemaModal()" 
+                            class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600 mb-3">
+                        Your CSV/Excel file must contain the following columns with exact header names:
+                    </p>
+                    
+                    <div class="border border-pink-200 rounded-lg overflow-hidden">
+                        <table class="w-full text-sm text-left border-collapse">
+                            <thead class="bg-[#FFC8FB]/30 text-pink-700 uppercase">
+                                <tr>
+                                    <th class="px-4 py-2 border-r border-pink-200">Column Name</th>
+                                    <th class="px-4 py-2 border-r border-pink-200">Description</th>
+                                    <th class="px-4 py-2">Example</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white">
+                                <tr class="border-b border-pink-100">
+                                    <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">name</td>
+                                    <td class="px-4 py-2 border-r border-pink-200">Full name of the student</td>
+                                    <td class="px-4 py-2">John Doe</td>
+                                </tr>
+                                <tr class="border-b border-pink-100">
+                                    <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">email</td>
+                                    <td class="px-4 py-2 border-r border-pink-200">Student email address</td>
+                                    <td class="px-4 py-2">john.doe@example.com</td>
+                                </tr>
+                                <tr class="border-b border-pink-100">
+                                    <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">course</td>
+                                    <td class="px-4 py-2 border-r border-pink-200">Course/Program name</td>
+                                    <td class="px-4 py-2">Computer Science</td>
+                                </tr>
+                                <tr class="border-b border-pink-100">
+                                    <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">year_level</td>
+                                    <td class="px-4 py-2 border-r border-pink-200">Year level (1, 2, 3, or 4)</td>
+                                    <td class="px-4 py-2">2</td>
+                                </tr>
+                                <tr class="border-b border-pink-100">
+                                    <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">section</td>
+                                    <td class="px-4 py-2 border-r border-pink-200">Section identifier</td>
+                                    <td class="px-4 py-2">A</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">password</td>
+                                    <td class="px-4 py-2 border-r border-pink-200">Default password for the student</td>
+                                    <td class="px-4 py-2">password123</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <h4 class="text-sm font-medium text-blue-800 mb-2">💡 Sample CSV Format:</h4>
+                    <div class="bg-white border rounded p-2 text-xs font-mono">
+                        <div class="text-blue-600">name,email,course,year_level,section,password</div>
+                        <div class="text-gray-600">John Doe,john.doe@example.com,Computer Science,2,A,password123</div>
+                        <div class="text-gray-600">Jane Smith,jane.smith@example.com,Information Technology,1,B,password123</div>
+                    </div>
+                </div>
+                
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h4 class="text-sm font-medium text-yellow-800 mb-2">⚠️ Important Notes:</h4>
+                    <ul class="text-xs text-yellow-700 list-disc list-inside space-y-1">
+                        <li>The first row must contain the exact column headers shown above</li>
+                        <li>All fields are required for each student record</li>
+                        <li>Email addresses must be unique</li>
+                        <li>Year level should be a number between 1-4</li>
+                        <li>Supported file formats: CSV, XLSX, XLS</li>
+                    </ul>
+                </div>
+                
+                <div class="flex justify-end mt-4">
+                    <button type="button" 
+                            onclick="toggleSchemaModal()"
+                            class="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-colors duration-200">
+                        Got it!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSchemaModal() {
+            const modal = document.getElementById('schemaModal');
+            modal.classList.toggle('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('schemaModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                toggleSchemaModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('schemaModal');
+                if (!modal.classList.contains('hidden')) {
+                    toggleSchemaModal();
+                }
+            }
+        });
+    </script>
 </x-app-layout>

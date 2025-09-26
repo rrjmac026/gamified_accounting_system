@@ -12,7 +12,7 @@ class SystemNotification extends Model
         'user_id',
         'title',
         'message',
-        'type', // info, warning, success, error
+        'type',
         'is_read',
         'read_at',
         'expires_at'

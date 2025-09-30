@@ -35,6 +35,7 @@
                 <i class="fas fa-tasks w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>
                 <span>Tasks</span>
             </a>
+
             {{-- Sidebar To-Do Dropdown --}}
             <div x-data="{ open: {{ request()->routeIs('students.todo.*') ? 'true' : 'false' }} }" class="space-y-1">
                 <!-- Parent link (click to expand) -->
@@ -117,6 +118,19 @@
                 </div>
             </div>
         </div>
+
+        <!-- New Transactions link -->
+            <span class="px-3 text-xs font-semibold text-[#595758] dark:text-[#FFC8FB] uppercase tracking-wider border-l-4 border-[#FF92C2] bg-gradient-to-r from-[#FF92C2]/10 to-transparent rounded-r-lg py-2">
+                Performance Tasks
+            </span>
+            <div class="mt-3 space-y-2">
+                <a href="{{ route('students.transactions.index') }}"
+                class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 hover:scale-[0.98] group relative overflow-hidden
+                {{ request()->routeIs('students.transactions.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FF92C2]/30 text-[#595758] shadow-lg border border-[#FF92C2]/20' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-gradient-to-r hover:from-[#FFEEF2] hover:to-[#FFF0F5]' }}">
+                    <i class="fas fa-file-invoice-dollar w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>
+                    <span>Transactions</span>
+                </a>
+            </div>
     </div>
 
     <!-- Progress -->

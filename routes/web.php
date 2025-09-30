@@ -36,6 +36,7 @@ use App\Http\Controllers\Instructors\InstructorSubjectController;
 use App\Http\Controllers\Instructors\QuizController;
 use App\Http\Controllers\Instructors\StudentProgressesController;
 use App\Http\Controllers\Admin\DataBackupController;
+use App\Http\Controllers\Instructors\TransactionController;
 
 // ============================================================================
 // STUDENT CONTROLLERS
@@ -45,6 +46,7 @@ use App\Http\Controllers\Students\TodoController;
 use App\Http\Controllers\Students\StudentSubjectController;
 use App\Http\Controllers\Students\StudentProgressController;
 use App\Http\Controllers\Students\FeedbackController;
+use App\Http\Controllers\Students\StudentTransactionEntryController;
 
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
@@ -291,6 +293,8 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
     Route::get('/task-submissions', [TaskSubmissionController::class, 'index'])->name('task-submissions.index');
     Route::get('/task-submissions/{taskSubmission}', [TaskSubmissionController::class, 'show'])->name('task-submissions.show');
     Route::post('/task-submissions/{taskSubmission}/grade', [TaskSubmissionController::class, 'grade'])->name('task-submissions.grade');
+
+    Route::resource('transactions', TransactionController::class);
 });
 
 // Student Progress Routes (Instructor Side)
@@ -332,6 +336,8 @@ Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.
     
     // Quiz Submissions
     Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submitAnswer'])->name('quizzes.submit');
+
+
     
     // Feedback Management
     Route::resource('feedback', FeedbackController::class)->only(['create', 'store', 'index', 'show']);
@@ -345,6 +351,18 @@ Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.
     //Hide the Leaderboard name
     Route::patch('/profile/leaderboard-privacy', [ProfileController::class, 'updateLeaderboardPrivacy'])
          ->name('updateLeaderboardPrivacy');
+
+     // List all transactions (step 1 templates to answer)
+    Route::get('/transactions', [StudentTransactionEntryController::class, 'index'])
+        ->name('transactions.index');
+
+    // Show form to answer a single transaction
+    Route::get('/transactions/{transaction}/answer', [StudentTransactionEntryController::class, 'create'])
+        ->name('transactions.create');
+
+    // Store student's answers for a single transaction
+    Route::post('/transactions/{transaction}/answer', [StudentTransactionEntryController::class, 'store'])
+        ->name('transactions.store');
 });
 
 // ============================================================================

@@ -1,6 +1,6 @@
 <div x-data="navigationComponent()" x-init="init()">
     <nav class="fixed top-0 left-0 right-0 z-50 border-b border-pink-200/50 dark:border-pink-800/50 shadow-lg bg-gradient-to-r from-pink-500 via-pink-400 to-pink-500 dark:from-pink-900 dark:via-pink-800 dark:to-pink-900"
-         style="background: linear-gradient(90deg, #FF92C2 0%, #ff9ec9 50%, #FF92C2 100%);"
+         style="background: linear-gradient(90deg, #D5006D 0%, #E0007A 50%, #D5006D 100%);"
          @scroll.window="isScrolled = (window.pageYOffset > 10)"
          :class="{ 'backdrop-blur-md bg-pink-400/90 dark:bg-pink-900/90': isScrolled }">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -10,7 +10,7 @@
                     <!-- Toggle Button -->
                     <button @click="$store.sidebar.toggle()" 
                         class="p-3 rounded-xl bg-gradient-to-br from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 group"
-                        style="background: linear-gradient(135deg, #FF92C2 0%, #e879a5 100%);">
+                        style="background: linear-gradient(135deg, #D5006D 0%, #B0005A 100%);">
                         <i class="fas fa-bars-staggered text-white transition-transform duration-200 group-hover:rotate-12"></i>
                     </button>
 
@@ -24,10 +24,9 @@
                                     class="h-8 w-8 object-contain" />
                             </div>
                             <div>
-                                <span class="text-2xl font-black tracking-tight text-gray-800 dark:text-gray-200">
+                                <span class="text-2xl font-black tracking-tight text-white dark:text-gray-200">
                                     GAS System
                                 </span>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Guidance and Assessment System</p>
                             </div>
                         </a>
                     </div>
@@ -140,14 +139,13 @@
                             </div>
                             <div class="flex items-center gap-3">
                                 <div>
-                                    <span class="text-sm font-bold text-gray-700 dark:text-gray-300 group-hover:text-pink-600 transition-colors duration-300" x-text="userName">
+                                    <span class="text-sm font-bold text-white dark:text-gray-300 group-hover:text-pink-100 transition-colors duration-300" x-text="userName">
                                         {{ Auth::user()->name }}
                                     </span>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">User</p>
+                                    <p class="text-xs text-pink-100 dark:text-gray-400">User</p>
                                 </div>
-                                <i class="fas fa-chevron-down text-sm opacity-75 group-hover:text-pink-500 transform group-hover:rotate-180 transition-all duration-300" 
-                                   :class="{ 'rotate-180': profileOpen }"
-                                   style="color: #FF92C2;"></i>
+                                <i class="fas fa-chevron-down text-sm text-white opacity-75 group-hover:text-pink-100 transform group-hover:rotate-180 transition-all duration-300" 
+                                   :class="{ 'rotate-180': profileOpen }"></i>
                             </div>
                         </button>
                         
@@ -161,10 +159,10 @@
                             x-transition:leave-end="opacity-0 scale-90 translate-y-[-10px]"
                             class="absolute right-0 mt-4 w-80 rounded-3xl shadow-2xl border-0 backdrop-blur-xl overflow-hidden z-50"
                             style="background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 240, 247, 0.95) 50%, rgba(255, 228, 242, 0.98) 100%); 
-                                    box-shadow: 0 25px 50px -12px rgba(255, 146, 194, 0.25), 0 0 0 1px rgba(255, 146, 194, 0.1);">
+                                    box-shadow: 0 25px 50px -12px rgba(213, 0, 109, 0.25), 0 0 0 1px rgba(213, 0, 109, 0.1);">
                             
                             <!-- Decorative Top Bar -->
-                            <div class="h-1 bg-gradient-to-r from-pink-400 via-pink-500 to-rose-400"></div>
+                            <div class="h-1 bg-gradient-to-r from-[#D5006D] via-[#E0007A] to-[#D5006D]"></div>
                             
                             <!-- Profile Header with Enhanced Design -->
                             <div class="relative px-6 py-5 bg-gradient-to-br from-pink-50/80 to-rose-50/60">
@@ -176,7 +174,7 @@
                                     <!-- Enhanced Avatar -->
                                     <div class="relative">
                                         <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-400 via-pink-500 to-rose-500 flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300" 
-                                            style="background: linear-gradient(135deg, #FF92C2 0%, #f472b6 50%, #e879a5 100%);">
+                                            style="background: linear-gradient(135deg, #D5006D 0%, #B0005A 50%, #8C0047 100%);">
                                             <span class="text-base font-bold text-white" x-text="userInitial">
                                                 {{ substr(Auth::user()->name, 0, 1) }}
                                             </span>
@@ -188,7 +186,7 @@
                                     <div class="flex-1">
                                         <h3 class="text-base font-bold text-gray-800 dark:text-gray-100 mb-1" x-text="userName">{{ Auth::user()->name }}</h3>
                                         <div class="flex items-center space-x-2">
-                                            <span class="px-3 py-1 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-medium rounded-full shadow-sm">
+                                            <span class="px-3 py-1 text-white text-xs font-medium rounded-full shadow-sm" style="background: linear-gradient(135deg, #D5006D 0%, #B0005A 100%);">
                                                 ✨ System User
                                             </span>
                                         </div>

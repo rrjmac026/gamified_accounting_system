@@ -1,5 +1,10 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
+import jspreadsheet from 'jspreadsheet-ce';
+import 'jspreadsheet-ce/dist/jspreadsheet.css';
+
+import jSuites from 'jsuites';
+import 'jsuites/dist/jsuites.css';
 
 window.Alpine = Alpine;
 

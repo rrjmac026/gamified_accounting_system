@@ -36,6 +36,7 @@ use App\Http\Controllers\Instructors\InstructorSubjectController;
 use App\Http\Controllers\Instructors\QuizController;
 use App\Http\Controllers\Instructors\StudentProgressesController;
 use App\Http\Controllers\Admin\DataBackupController;
+use App\Http\Controllers\Instructors\PerformanceTaskController;
 
 // ============================================================================
 // STUDENT CONTROLLERS
@@ -45,6 +46,7 @@ use App\Http\Controllers\Students\TodoController;
 use App\Http\Controllers\Students\StudentSubjectController;
 use App\Http\Controllers\Students\StudentProgressController;
 use App\Http\Controllers\Students\FeedbackController;
+use App\Http\Controllers\Students\StudentPerformanceTaskController;
 
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
@@ -286,6 +288,14 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
         ->name('quizzes.downloadTemplate');
     Route::post('/quizzes/template/preview', [QuizController::class, 'previewTemplate'])
         ->name('quizzes.previewTemplate');
+
+    Route::get('performance-tasks', [PerformanceTaskController::class, 'index'])->name('performance-tasks.index');
+    Route::get('performance-tasks/create', [PerformanceTaskController::class, 'create'])->name('performance-tasks.create');
+    Route::post('performance-tasks', [PerformanceTaskController::class, 'store'])->name('performance-tasks.store');
+    Route::get('performance-tasks/{task}', [PerformanceTaskController::class, 'show'])->name('performance-tasks.show');
+    Route::get('performance-tasks/{task}/edit', [PerformanceTaskController::class, 'edit'])->name('performance-tasks.edit');
+    Route::put('performance-tasks/{task}', [PerformanceTaskController::class, 'update'])->name('performance-tasks.update');
+    Route::delete('performance-tasks/{task}', [PerformanceTaskController::class, 'destroy'])->name('performance-tasks.destroy');
     
     // Task Submissions
     Route::get('/task-submissions', [TaskSubmissionController::class, 'index'])->name('task-submissions.index');
@@ -332,6 +342,13 @@ Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.
     
     // Quiz Submissions
     Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submitAnswer'])->name('quizzes.submit');
+    // Performance Task Routes
+    Route::get('/performance-tasks', [StudentPerformanceTaskController::class, 'index'])
+        ->name('performance-tasks.index');
+    Route::get('/performance-tasks/{id}', [StudentPerformanceTaskController::class, 'show'])
+        ->name('performance-tasks.show');
+    Route::post('/performance-tasks/{id}/submit', [StudentPerformanceTaskController::class, 'submit'])
+        ->name('performance-tasks.submit');
     
     // Feedback Management
     Route::resource('feedback', FeedbackController::class)->only(['create', 'store', 'index', 'show']);

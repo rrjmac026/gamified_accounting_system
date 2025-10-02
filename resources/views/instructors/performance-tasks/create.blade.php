@@ -221,6 +221,8 @@
                     'cut',
                     'paste',
                     '---------',
+                    'mergeCells',
+                    '---------',
                     'alignment',
                     '---------',
                     'clear_column'
@@ -255,7 +257,7 @@
                 selectionMode: 'multiple',
                 
                 // Merge cells support
-                mergeCells: false,
+                mergeCells: true,
                 
                 // Comments
                 comments: true,

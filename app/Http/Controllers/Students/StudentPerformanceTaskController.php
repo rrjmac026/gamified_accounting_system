@@ -14,7 +14,13 @@ class StudentPerformanceTaskController extends Controller
      */
      public function index()
     {
-        $tasks = PerformanceTask::all();
+        // Get tasks assigned to the current student's section
+        $tasks = PerformanceTask::whereHas('section', function($query) {
+            $query->whereHas('students', function($q) {
+                $q->where('student_id', auth()->user()->student->id);
+            });
+        })->get();
+        
         return view('students.performance-tasks.index', compact('tasks'));
     }
 

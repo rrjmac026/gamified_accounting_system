@@ -36,13 +36,64 @@
                 <span>Tasks</span>
             </a>
             
-            <!-- Performance Tasks Link -->
-            <a href="{{ route('students.performance-tasks.index') }}" 
-            class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 hover:scale-[0.98] group relative overflow-hidden
-            {{ request()->routeIs('students.performance-tasks.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FF92C2]/30 text-[#595758] shadow-lg border border-[#FF92C2]/20' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-gradient-to-r hover:from-[#FFEEF2] hover:to-[#FFF0F5]' }}">
-                <i class="fas fa-table w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>
-                <span>Performance Tasks</span>
-            </a>
+            <!-- Performance Tasks Dropdown -->
+            @php
+                $performanceTasks = auth()->user()->student->performanceTasks ?? collect();
+            @endphp
+
+            <div x-data="{ openPerformance: {{ request()->routeIs('students.performance-tasks.*') ? 'true' : 'false' }} }" class="space-y-1">
+                <!-- Parent link (click to expand) -->
+                <button @click="openPerformance = !openPerformance"
+                    class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 hover:scale-[0.98] group relative overflow-hidden
+                    {{ request()->routeIs('students.performance-tasks.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FF92C2]/30 text-[#595758] shadow-lg border border-[#FF92C2]/20' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-gradient-to-r hover:from-[#FFEEF2] hover:to-[#FFF0F5]' }}">
+                    <span class="flex items-center gap-3">
+                        <i class="fas fa-table w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>
+                        <span>Performance Tasks</span>
+                        @if($performanceTasks->count() > 0)
+                            <span class="ml-2 px-2 py-0.5 text-xs bg-[#FF92C2] text-white rounded-full">
+                                {{ $performanceTasks->count() }}
+                            </span>
+                        @endif
+                    </span>
+                    <div class="flex items-center gap-2">
+                        <i :class="openPerformance ? 'fas fa-chevron-up transition-all duration-300 text-[#FF92C2] transform rotate-180' : 'fas fa-chevron-down transition-all duration-300 group-hover:text-[#FF92C2] transform rotate-0'"></i>
+                    </div>
+                </button>
+
+                <!-- Dropdown items -->
+                <div x-show="openPerformance" x-cloak 
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 transform -translate-y-4 scale-95"
+                     x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 transform translate-y-0 scale-100"
+                     x-transition:leave-end="opacity-0 transform -translate-y-4 scale-95"
+                     class="ml-6 space-y-1 bg-gradient-to-br from-[#FFEEF2]/50 to-[#FFF0F5]/50 backdrop-blur-sm rounded-xl p-3 border border-[#FF92C2]/10 shadow-lg">
+                    
+                    @forelse($performanceTasks as $pTask)
+                        <a href="{{ route('students.performance-tasks.show', $pTask->id) }}"
+                            class="flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200 hover:bg-white/60 hover:shadow-sm hover:translate-x-1 relative group
+                            {{ request()->route('task') && request()->route('task')->id == $pTask->id ? 'font-semibold text-[#FF92C2] bg-white/40 border-l-2 border-[#FF92C2]' : 'text-[#595758] hover:text-[#FF92C2]' }}">
+                            <div class="flex items-center gap-3">
+                                <span class="w-2 h-2 bg-[#FF92C2] rounded-full"></span>
+                                <span>{{ $pTask->title }}</span>
+                            </div>
+                            @php
+                                $attemptsUsed = $pTask->submissions()->where('student_id', auth()->id())->count();
+                                $status = $attemptsUsed >= $pTask->max_attempts ? 'completed' : 'available';
+                            @endphp
+                            <span class="px-2 py-0.5 text-xs rounded-full {{ $status == 'completed' ? 'bg-gray-100 text-gray-600' : 'bg-green-100 text-green-600' }}">
+                                {{ $attemptsUsed }}/{{ $pTask->max_attempts }}
+                            </span>
+                        </a>
+                    @empty
+                        <div class="flex flex-col items-center justify-center py-6 text-center">
+                            <i class="fas fa-clipboard-list text-[#FF92C2] text-2xl mb-2 opacity-50"></i>
+                            <p class="text-sm text-gray-500">No performance tasks available yet</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
 
             {{-- Sidebar To-Do Dropdown --}}
             <div x-data="{ open: {{ request()->routeIs('students.todo.*') ? 'true' : 'false' }} }" class="space-y-1">

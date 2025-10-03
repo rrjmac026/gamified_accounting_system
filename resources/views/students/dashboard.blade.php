@@ -106,7 +106,8 @@
                         </div>
                         <div class="p-6 space-y-4">
                             @forelse($upcomingDeadlines as $task)
-                                <div class="bg-[#FFF6FD] border border-[#FFC8FB]/30 rounded-lg p-4 hover:bg-[#FFD9FF]/30 transition-colors duration-200">
+                                <a href="{{ route('students.tasks.show', $task->id) }}" 
+                                class="block bg-[#FFF6FD] border border-[#FFC8FB]/30 rounded-lg p-4 hover:bg-[#FFD9FF]/30 transition-colors duration-200">
                                     <div class="flex justify-between items-start">
                                         <div class="flex-1">
                                             <h3 class="font-medium text-gray-800 mb-1">{{ $task->title }}</h3>
@@ -127,7 +128,7 @@
                                             @endif
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             @empty
                                 <div class="text-center py-8">
                                     <div class="text-[#FF92C2] mb-2">

@@ -127,15 +127,6 @@
                         <div class="mb-2 text-sm text-gray-600">
                             <strong>Excel Features:</strong> Formulas (=SUM, =AVERAGE, etc.), Copy/Paste, Fill Down, Undo/Redo, Cell Formatting
                         </div>
-                        <!-- Add column controls -->
-                        <div class="mb-2">
-                            <button type="button" id="addColumn" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">
-                                Add Column
-                            </button>
-                            <button type="button" id="removeColumn" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 ml-2">
-                                Remove Column
-                            </button>
-                        </div>
                         <div id="spreadsheet" style="width: 100%; height: 500px; overflow: hidden;"></div>
                         <input type="hidden" name="template_data" id="templateData" required>
                         @error('template_data')
@@ -170,88 +161,54 @@
                 licenseKey: 'internal-use-in-handsontable',
             });
 
-            // Create empty data with 15 rows and 26 columns (A-Z)
-            const initialData = Array(15).fill().map(() => Array(26).fill(''));
-
             hot = new Handsontable(container, {
-                data: initialData,
-                colHeaders: true, // This will automatically use A, B, C... for column headers
+                data: Array(15).fill().map(() => Array(14).fill('')), // 15 rows, 14 columns
+                colHeaders: false,
                 rowHeaders: true,
                 width: '100%',
                 height: 500,
                 licenseKey: 'non-commercial-and-evaluation',
-                
-                // Excel-like formula support
-                formulas: {
-                    engine: hyperformulaInstance,
-                },
-                
-                // Enable Excel-like features
+
+                nestedHeaders: [
+                    [
+                        { label: 'ASSETS', colspan: 6 },
+                        { label: 'LIABILITIES', colspan: 2 },
+                        { label: "OWNER'S EQUITY", colspan: 3 },
+                        { label: 'EXPENSES', colspan: 3 }
+                    ],
+                    [
+                        'Cash', 'Accounts Receivable', 'Supplies', 'Furniture & Fixtures', 'Land', 'Equipment',
+                        'Accounts Payable', 'Notes Payable',
+                        'Capital', 'Withdrawal', 'Service Revenue',
+                        'Rent Expense', 'Utilities Expense', 'Salaries Expense'
+                    ]
+                ],
+
+                // Column settings — now 14 columns
+                columns: Array(14).fill({ type: 'text' }),
+
+                // Features...
+                formulas: { engine: hyperformulaInstance },
+                contextMenu: true,
                 undo: true,
                 manualColumnResize: true,
                 manualRowResize: true,
                 manualColumnMove: true,
                 manualRowMove: true,
                 fillHandle: true,
-                autoColumnSize: true,
+                autoColumnSize: false,
                 autoRowSize: false,
-                
-                // Enable all Excel-like features
                 copyPaste: true,
+                minRows: 15,
+                minCols: 14,
+                stretchH: 'all',
+                enterMoves: { row: 1, col: 0 },
+                tabMoves: { row: 0, col: 1 },
+                outsideClickDeselects: false,
+                selectionMode: 'multiple',
                 mergeCells: true,
                 comments: true,
                 customBorders: true,
-                
-                // Minimum dimensions
-                minRows: 15,
-                minCols: 5,
-                
-                // Make the table horizontally scrollable
-                stretchH: 'all',
-                overflow: 'hidden',
-                
-                // Other settings remain the same
-                outsideClickDeselects: false,
-                selectionMode: 'multiple',
-                enterMoves: { row: 1, col: 0 },
-                tabMoves: { row: 0, col: 1 },
-                
-                // Context menu with column operations
-                contextMenu: [
-                    'row_above',
-                    'row_below',
-                    'col_left',
-                    'col_right',
-                    '---------',
-                    'remove_row',
-                    'remove_col',
-                    '---------',
-                    'undo',
-                    'redo',
-                    '---------',
-                    'copy',
-                    'cut',
-                    'paste',
-                    '---------',
-                    'mergeCells',
-                    '---------',
-                    'alignment',
-                    'clear_column'
-                ],
-            });
-
-            // Add column button handler
-            document.getElementById('addColumn').addEventListener('click', function() {
-                const currentCols = hot.countCols();
-                hot.alter('insert_col', currentCols);
-            });
-
-            // Remove column button handler
-            document.getElementById('removeColumn').addEventListener('click', function() {
-                const currentCols = hot.countCols();
-                if (currentCols > 1) {
-                    hot.alter('remove_col', currentCols - 1);
-                }
             });
 
             // Capture spreadsheet data on submit

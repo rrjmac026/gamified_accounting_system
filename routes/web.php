@@ -279,15 +279,6 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
     Route::get('tasks/{task}/students/{student}', [TaskController::class, 'showStudentTask'])->name('tasks.show-student-task');
     Route::get('tasks/{task}/students/{student}/grade', [TaskController::class, 'gradeStudentForm'])->name('tasks.grade-student-form');
     Route::put('tasks/{task}/students/{student}/grade', [TaskController::class, 'gradeStudent'])->name('tasks.grade-student');
-    
-    // Quiz Management
-    Route::resource('/quizzes', QuizController::class);
-    Route::get('/quizzes/create/{taskId}', [QuizController::class, 'create'])->name('quizzes.create');
-    Route::post('/quizzes/{taskId}/import', [QuizController::class, 'import'])->name('quizzes.import');
-    Route::get('/quizzes/{quiz}/template/download', [QuizController::class, 'downloadTemplate'])
-        ->name('quizzes.downloadTemplate');
-    Route::post('/quizzes/template/preview', [QuizController::class, 'previewTemplate'])
-        ->name('quizzes.previewTemplate');
 
     Route::get('performance-tasks', [PerformanceTaskController::class, 'index'])->name('performance-tasks.index');
     Route::get('performance-tasks/create', [PerformanceTaskController::class, 'create'])->name('performance-tasks.create');
@@ -296,6 +287,19 @@ Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('inst
     Route::get('performance-tasks/{task}/edit', [PerformanceTaskController::class, 'edit'])->name('performance-tasks.edit');
     Route::put('performance-tasks/{task}', [PerformanceTaskController::class, 'update'])->name('performance-tasks.update');
     Route::delete('performance-tasks/{task}', [PerformanceTaskController::class, 'destroy'])->name('performance-tasks.destroy');
+
+
+    // Steps 1–10
+    Route::get('/step1', [PerformanceTaskController::class, 'step1'])->name('step1');
+    Route::get('/step2', [PerformanceTaskController::class, 'step2'])->name('step2');
+    Route::get('/step3', [PerformanceTaskController::class, 'step3'])->name('step3');
+    Route::get('/step4', [PerformanceTaskController::class, 'step4'])->name('step4');
+    Route::get('/step5', [PerformanceTaskController::class, 'step5'])->name('step5');
+    Route::get('/step6', [PerformanceTaskController::class, 'step6'])->name('step6');
+    Route::get('/step7', [PerformanceTaskController::class, 'step7'])->name('step7');
+    Route::get('/step8', [PerformanceTaskController::class, 'step8'])->name('step8');
+    Route::get('/step9', [PerformanceTaskController::class, 'step9'])->name('step9');
+    Route::get('/step10', [PerformanceTaskController::class, 'step10'])->name('step10');
     
     // Task Submissions
     Route::get('/task-submissions', [TaskSubmissionController::class, 'index'])->name('task-submissions.index');
@@ -342,14 +346,21 @@ Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.
     
     // Quiz Submissions
     Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submitAnswer'])->name('quizzes.submit');
-    // Performance Task Routes
+    // List all performance tasks assigned to the student
+
+    // Performance Tasks - Step 1 is the index
     Route::get('/performance-tasks', [StudentPerformanceTaskController::class, 'index'])
         ->name('performance-tasks.index');
-    Route::get('/performance-tasks/{id}', [StudentPerformanceTaskController::class, 'show'])
-        ->name('performance-tasks.show');
-    Route::post('/performance-tasks/{id}/submit', [StudentPerformanceTaskController::class, 'submit'])
-        ->name('performance-tasks.submit');
     
+    Route::get('/performance-tasks/step/{step}', [StudentPerformanceTaskController::class, 'step'])
+        ->name('performance-tasks.step');
+    
+    Route::post('/performance-tasks/step/{step}/save', [StudentPerformanceTaskController::class, 'saveStep'])
+        ->name('performance-tasks.save-step');
+    
+    Route::post('/performance-tasks/submit', [StudentPerformanceTaskController::class, 'submit'])
+        ->name('performance-tasks.submit');
+        
     // Feedback Management
     Route::resource('feedback', FeedbackController::class)->only(['create', 'store', 'index', 'show']);
     
@@ -368,28 +379,3 @@ Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.
 // DUPLICATE LOGOUT ROUTE
 // ============================================================================
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
-
-// ============================================================================
-// COMMENTED OUT ROUTES (For Future Reference)
-// ============================================================================
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
-
-// Route::get('/students', [AdminController::class, 'students'])->name('student.index');
-// Route::post('/students', [StudentManagementController::class, 'store'])->name('student.store');
-
-// Route::get('/instructors', [AdminController::class, 'instructors'])->name('instructors.index');
-// Route::get('/subjects', [AdminController::class, 'subjects'])->name('subjects.index');
-
-// Route::resource('/xp', [StudentController::class, 'index'])->name('xp-transactions');
-// Route::get('/xp', [StudentController::class, 'viewXp'])->name('xp');
-
-// Route::post('/admin/backup-now', [DataBackupController::class, 'backupNow'])
-//     ->name('admin.backup.now')
-//     ->middleware(['auth', 'is_admin']);
-
-// Add this temporarily for testing
-// Route::get('/test-task-route', function() {
-//     dd('Route is accessible');
-// });

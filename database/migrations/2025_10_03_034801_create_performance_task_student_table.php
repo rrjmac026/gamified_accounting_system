@@ -18,7 +18,8 @@ return new class extends Migration
             
             // Task assignment & submission info
             $table->enum('status', ['assigned', 'in_progress', 'submitted', 'graded', 'returned'])->default('assigned');
-            $table->json('submission_data')->nullable(); // Student's spreadsheet data
+            $table->json('completed_steps')->nullable();
+            $table->json('submission_data')->nullable();
             $table->integer('score')->nullable();
             $table->text('feedback')->nullable();
             $table->integer('attempts')->default(0);

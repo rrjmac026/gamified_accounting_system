@@ -36,64 +36,57 @@
                 <span>Tasks</span>
             </a>
             
-            <!-- Performance Tasks Dropdown -->
-            @php
-                $performanceTasks = auth()->user()->student->performanceTasks ?? collect();
-            @endphp
-
-            <div x-data="{ openPerformance: {{ request()->routeIs('students.performance-tasks.*') ? 'true' : 'false' }} }" class="space-y-1">
-                <!-- Parent link (click to expand) -->
-                <button @click="openPerformance = !openPerformance"
-                    class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 hover:scale-[0.98] group relative overflow-hidden
-                    {{ request()->routeIs('students.performance-tasks.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FF92C2]/30 text-[#595758] shadow-lg border border-[#FF92C2]/20' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-gradient-to-r hover:from-[#FFEEF2] hover:to-[#FFF0F5]' }}">
-                    <span class="flex items-center gap-3">
-                        <i class="fas fa-table w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>
-                        <span>Performance Tasks</span>
-                        @if($performanceTasks->count() > 0)
-                            <span class="ml-2 px-2 py-0.5 text-xs bg-[#FF92C2] text-white rounded-full">
-                                {{ $performanceTasks->count() }}
-                            </span>
-                        @endif
+                <div class="mb-6">
+                    <span class="px-3 text-xs font-semibold text-[#595758] dark:text-[#FFC8FB] uppercase tracking-wider border-l-4 border-[#FF92C2] bg-gradient-to-r from-[#FF92C2]/10 to-transparent rounded-r-lg py-2">
+                        Performance Task
                     </span>
-                    <div class="flex items-center gap-2">
-                        <i :class="openPerformance ? 'fas fa-chevron-up transition-all duration-300 text-[#FF92C2] transform rotate-180' : 'fas fa-chevron-down transition-all duration-300 group-hover:text-[#FF92C2] transform rotate-0'"></i>
-                    </div>
-                </button>
-
-                <!-- Dropdown items -->
-                <div x-show="openPerformance" x-cloak 
-                     x-transition:enter="transition ease-out duration-300"
-                     x-transition:enter-start="opacity-0 transform -translate-y-4 scale-95"
-                     x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
-                     x-transition:leave="transition ease-in duration-200"
-                     x-transition:leave-start="opacity-100 transform translate-y-0 scale-100"
-                     x-transition:leave-end="opacity-0 transform -translate-y-4 scale-95"
-                     class="ml-6 space-y-1 bg-gradient-to-br from-[#FFEEF2]/50 to-[#FFF0F5]/50 backdrop-blur-sm rounded-xl p-3 border border-[#FF92C2]/10 shadow-lg">
-                    
-                    @forelse($performanceTasks as $pTask)
-                        <a href="{{ route('students.performance-tasks.show', $pTask->id) }}"
-                            class="flex items-center justify-between px-3 py-2.5 text-sm rounded-lg transition-all duration-200 hover:bg-white/60 hover:shadow-sm hover:translate-x-1 relative group
-                            {{ request()->route('task') && request()->route('task')->id == $pTask->id ? 'font-semibold text-[#FF92C2] bg-white/40 border-l-2 border-[#FF92C2]' : 'text-[#595758] hover:text-[#FF92C2]' }}">
+                    <div class="mt-3 space-y-2">
+                        <!-- Dropdown Toggle -->
+                        <button onclick="togglePerformanceSteps()" 
+                                class="w-full flex items-center justify-between gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 hover:scale-[0.98] group relative overflow-hidden text-[#595758] dark:text-[#FF92C2] hover:bg-gradient-to-r hover:from-[#FFEEF2] hover:to-[#FFF0F5]
+                                {{ request()->routeIs('students.performance-tasks.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FF92C2]/30 shadow-lg border border-[#FF92C2]/20' : '' }}">
                             <div class="flex items-center gap-3">
-                                <span class="w-2 h-2 bg-[#FF92C2] rounded-full"></span>
-                                <span>{{ $pTask->title }}</span>
+                                <i class="fas fa-table w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>
+                                <span>Performance Task</span>
                             </div>
-                            @php
-                                $attemptsUsed = $pTask->submissions()->where('student_id', auth()->id())->count();
-                                $status = $attemptsUsed >= $pTask->max_attempts ? 'completed' : 'available';
-                            @endphp
-                            <span class="px-2 py-0.5 text-xs rounded-full {{ $status == 'completed' ? 'bg-gray-100 text-gray-600' : 'bg-green-100 text-green-600' }}">
-                                {{ $attemptsUsed }}/{{ $pTask->max_attempts }}
-                            </span>
-                        </a>
-                    @empty
-                        <div class="flex flex-col items-center justify-center py-6 text-center">
-                            <i class="fas fa-clipboard-list text-[#FF92C2] text-2xl mb-2 opacity-50"></i>
-                            <p class="text-sm text-gray-500">No performance tasks available yet</p>
+                            <i id="dropdown-icon" class="fas fa-chevron-down text-xs transition-transform duration-300"></i>
+                        </button>
+
+                        <!-- Dropdown Steps -->
+                        <div id="performance-steps" class="ml-4 space-y-1 hidden">
+                            <!-- Step 1 -->
+                            <a href="{{ route('students.performance-tasks.step', 1) }}" 
+                            class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
+                            {{ request()->routeIs('students.performance-tasks.step') && request()->route('step') == 1 ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
+                                <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">1</span>
+                                <span>Journal Entries</span>
+                            </a>
+
+                            <!-- Steps 2-10 -->
+                            @for($i = 2; $i <= 10; $i++)
+                                <a href="{{ route('students.performance-tasks.step', $i) }}" 
+                                class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
+                                {{ request()->routeIs('students.performance-tasks.step') && request()->route('step') == $i ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
+                                    <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">{{ $i }}</span>
+                                    <span>
+                                        @switch($i)
+                                            @case(2) General Ledger @break
+                                            @case(3) Trial Balance @break
+                                            @case(4) Adjusting Entries @break
+                                            @case(5) Adjusted Trial Balance @break
+                                            @case(6) Income Statement @break
+                                            @case(7) Statement of Changes @break
+                                            @case(8) Balance Sheet @break
+                                            @case(9) Closing Entries @break
+                                            @case(10) Post-Closing Trial Balance @break
+                                        @endswitch
+                                    </span>
+                                </a>
+                            @endfor
                         </div>
-                    @endforelse
+                    </div>
                 </div>
-            </div>
+
 
             {{-- Sidebar To-Do Dropdown --}}
             <div x-data="{ open: {{ request()->routeIs('students.todo.*') ? 'true' : 'false' }} }" class="space-y-1">
@@ -222,3 +215,30 @@
         </div>
     </div>
 </nav>
+
+<script>
+    function togglePerformanceSteps() {
+        const dropdown = document.getElementById('performance-steps');
+        const icon = document.getElementById('dropdown-icon');
+        
+        // Toggle the hidden class
+        dropdown.classList.toggle('hidden');
+        
+        // Rotate the icon when expanded
+        if (dropdown.classList.contains('hidden')) {
+            icon.classList.remove('rotate-180');
+        } else {
+            icon.classList.add('rotate-180');
+        }
+    }
+
+    // Check if we're on a performance task step page and auto-expand the dropdown
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.location.pathname.includes('performance-tasks/step')) {
+            const dropdown = document.getElementById('performance-steps');
+            const icon = document.getElementById('dropdown-icon');
+            dropdown.classList.remove('hidden');
+            icon.classList.add('rotate-180');
+        }
+    });
+</script>

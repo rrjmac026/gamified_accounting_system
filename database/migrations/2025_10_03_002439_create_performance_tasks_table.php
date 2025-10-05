@@ -22,7 +22,6 @@ return new class extends Migration
             // Task info
             $table->string('title');
             $table->text('description')->nullable();
-            $table->json('template_data');
             $table->integer('max_attempts')->default(2);
             $table->integer('xp_reward')->default(50);
 

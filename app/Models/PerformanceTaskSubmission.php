@@ -9,6 +9,7 @@ class PerformanceTaskSubmission extends Model
     protected $fillable = [
         'task_id',
         'student_id',
+        'step',
         'submission_data',
         'status',
         'score',

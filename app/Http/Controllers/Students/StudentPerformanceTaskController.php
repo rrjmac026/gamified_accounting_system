@@ -3,64 +3,103 @@
 namespace App\Http\Controllers\Students;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\PerformanceTask;
 use App\Models\PerformanceTaskSubmission;
+use Illuminate\Http\Request;
 
 class StudentPerformanceTaskController extends Controller
 {
-    /**
-     * Show a performance task for the student to answer
-     */
-     public function index()
+    // Redirect index -> Step 1
+    public function index()
     {
-        // Get tasks assigned to the current student's section
-        $tasks = PerformanceTask::whereHas('section', function($query) {
-            $query->whereHas('students', function($q) {
-                $q->where('student_id', auth()->user()->student->id);
-            });
-        })->get();
-        
-        return view('students.performance-tasks.index', compact('tasks'));
+        return redirect()->route('students.performance-tasks.step', 1);
     }
 
-    public function show($id)
+    public function step($step)
     {
-        $task = PerformanceTask::findOrFail($id);
+        $user = auth()->user();
         
-        // Count how many attempts this student has made
-        $attemptsUsed = PerformanceTaskSubmission::where('task_id', $id)
-            ->where('student_id', auth()->id())
-            ->count();
+        $performanceTask = PerformanceTask::whereHas('section.students', function ($query) use ($user) {
+            $query->where('student_id', $user->student->id);
+        })
+        ->latest()
+        ->first();
 
-        return view('students.performance-tasks.show', compact('task', 'attemptsUsed'));
-    }
-
-    public function submit(Request $request, $id)
-    {
-        $task = PerformanceTask::findOrFail($id);
-        
-        // Check if student has attempts left
-        $attemptsUsed = PerformanceTaskSubmission::where('task_id', $id)
-            ->where('student_id', auth()->id())
-            ->count();
-
-        if ($attemptsUsed >= $task->max_attempts) {
-            return back()->with('error', 'You have reached the maximum number of attempts.');
+        if (!$performanceTask) {
+            return redirect()->route('students.dashboard')
+                ->with('error', 'No active performance task found.');
         }
 
-        $request->validate([
-            'submission_data' => 'required|json',
-        ]);
+        // Get the current submission for this step
+        $submission = PerformanceTaskSubmission::where([
+            'task_id' => $performanceTask->id,
+            'student_id' => $user->student->id,
+            'step' => $step
+        ])->first();
 
-        PerformanceTaskSubmission::create([
-            'task_id' => $id,
-            'student_id' => auth()->id(),
-            'submission_data' => json_decode($request->submission_data, true),
-            'status' => 'pending', // or 'submitted'
-        ]);
+        // Get all submissions to check progress
+        $submissions = PerformanceTaskSubmission::where([
+            'task_id' => $performanceTask->id,
+            'student_id' => $user->student->id,
+        ])->pluck('step')->toArray();
 
-        return redirect()->route('students.performance-tasks.index')
-            ->with('success', 'Your answer has been submitted successfully!');
+        // Only check for previous step completion if not step 1
+        if ($step > 1 && !in_array($step - 1, $submissions)) {
+            return redirect()->route('students.performance-tasks.step', $step - 1)
+                ->with('error', "You must complete Step " . ($step - 1) . " first.");
+        }
+
+        return view("students.performance-tasks.step-$step", [
+            'performanceTask' => $performanceTask,
+            'submission' => $submission,
+            'completedSteps' => $submissions
+        ]);
+    }
+
+    public function saveStep(Request $request, $step)
+    {
+        $user = auth()->user();
+        
+        // Get the current performance task
+        $task = PerformanceTask::whereHas('section.students', function ($query) use ($user) {
+            $query->where('student_id', $user->student->id);
+        })
+        ->latest()
+        ->first();
+
+        if (!$task) {
+            return back()->with('error', 'No active performance task found.');
+        }
+
+        try {
+            // Save submission
+            $submission = PerformanceTaskSubmission::updateOrCreate(
+                [
+                    'task_id' => $task->id,
+                    'student_id' => $user->student->id,
+                    'step' => $step,
+                ],
+                [
+                    'submission_data' => $request->template_data,
+                    'status' => 'in-progress'
+                ]
+            );
+
+            return redirect()->route('students.performance-tasks.step', $step + 1)
+                ->with('success', "Step $step saved successfully!");
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error saving your submission. Please try again.');
+        }
+    }
+
+
+
+
+
+    // Final submit
+    public function submit()
+    {
+        return back()->with('success', 'Performance task submitted!');
     }
 }

@@ -93,7 +93,7 @@
                             <div class="overflow-x-auto overflow-y-auto" style="max-height: calc(100vh - 400px); min-height: 400px;">
                                 <div id="spreadsheet" class="bg-white min-w-full"></div>
                             </div>
-                            <input type="hidden" name="template_data" id="templateData" required>
+                            <input type="hidden" name="submission_data" id="submissionData" required>
                         </div>
 
                         <!-- Mobile Scroll Hint -->
@@ -225,7 +225,7 @@
                     const data = hot.getData();
                     
                     // Set the template data
-                    document.getElementById("templateData").value = JSON.stringify(data);
+                    document.getElementById("submissionData").value = JSON.stringify(data);
                     
                     // Now submit the form
                     this.submit();

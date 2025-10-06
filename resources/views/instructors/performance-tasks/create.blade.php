@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@14.1.0/dist/handsontable.full.min.css" />
     <!-- Formula Parser (HyperFormula) -->
     <script src="https://cdn.jsdelivr.net/npm/hyperformula@2.6.2/dist/hyperformula.full.min.js"></script>
-
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             Create Performance Task
@@ -99,8 +99,8 @@
                     <!-- Description -->
                     <div class="mb-4">
                         <label for="description" class="block font-medium text-sm text-gray-700">Description</label>
-                        <textarea id="description" name="description" rows="3" 
-                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 p-2 @error('description') border-red-500 @enderror">{{ old('description') }}</textarea>
+                        <div id="editor" style="height: 200px; background: white;" class="mt-1 border border-gray-300 rounded-md"></div>
+                        <textarea id="description" name="description" style="display:none;">{{ old('description') }}</textarea>
                         @error('description')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -147,5 +147,32 @@
             </div>
         </div>
     </div>
-
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    var quill = new Quill('#editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                ['blockquote', 'code-block'],
+                [{ 'header': 1 }, { 'header': 2 }],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                [{ 'indent': '-1'}, { 'indent': '+1' }],
+                ['link'],
+                ['clean']
+            ]
+        }
+    });
+    
+    // Load old content if validation fails
+    var oldContent = `{!! old('description') !!}`;
+    if(oldContent) {
+        quill.root.innerHTML = oldContent;
+    }
+    
+    // Sync Quill content to textarea on form submit
+    document.getElementById('taskForm').onsubmit = function() {
+        document.getElementById('description').value = quill.root.innerHTML;
+    };
+</script>
 </x-app-layout>

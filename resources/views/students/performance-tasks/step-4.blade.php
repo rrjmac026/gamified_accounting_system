@@ -48,6 +48,10 @@
             <p class="mt-2 text-gray-600 text-sm sm:text-base">
                 List all accounts and their debit or credit balances to ensure totals are equal.
             </p>
+            <!-- Add attempts counter -->
+            <div class="mt-2 text-sm text-gray-600">
+                Attempts remaining: {{ 2 - ($submission->attempts ?? 0) }}/2
+            </div>
         </div>
 
         {{-- ✅ Main Card --}}
@@ -76,7 +80,8 @@
                             ← Back
                         </button>
                         <button type="submit"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base">
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                            {{ ($submission->attempts ?? 0) >= 2 ? 'disabled' : '' }}>
                             💾 Save and Continue
                         </button>
                     </div>

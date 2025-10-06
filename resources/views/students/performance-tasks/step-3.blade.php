@@ -29,6 +29,10 @@
             <p class="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl">
                 Identify which accounts are affected by each transaction and determine whether they should be debited or credited.
             </p>
+            <!-- Add attempts counter -->
+            <div class="mt-2 text-sm text-gray-600">
+                Attempts remaining: {{ 2 - ($submission->attempts ?? 0) }}/2
+            </div>
         </div>
 
         {{-- Spreadsheet Container --}}
@@ -66,7 +70,8 @@
                         </button>
 
                         <button type="submit"
-                            class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition text-sm sm:text-base">
+                            class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 transition-colors text-sm sm:text-base"
+                            {{ ($submission->attempts ?? 0) >= 2 ? 'disabled' : '' }}>
                             💾 Save and Continue
                         </button>
                     </div>

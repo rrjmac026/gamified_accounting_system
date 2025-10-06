@@ -68,6 +68,10 @@
                         <p class="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl">
                             Record your business transactions chronologically in the journal. Each entry should include the date, accounts affected, and corresponding debit and credit amounts.
                         </p>
+                        <!-- Add attempts counter -->
+                        <div class="mt-2 text-sm text-gray-600">
+                            Attempts remaining: {{ 2 - ($submission->attempts ?? 0) }}/2
+                        </div>
                     </div>
                 </div>
             </div>
@@ -114,7 +118,9 @@
                                 </svg>
                                 Back
                             </button>
-                            <button type="submit" id="submitButton" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors text-sm sm:text-base">
+                            <button type="submit" id="submitButton" 
+                            class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 transition-colors text-sm sm:text-base"
+                            {{ ($submission->attempts ?? 0) >= 2 ? 'disabled' : '' }}>
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>

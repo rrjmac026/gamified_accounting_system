@@ -10,8 +10,12 @@
             </span>
             <h1 class="text-3xl font-bold mt-2">Balance Sheet</h1>
             <p class="text-gray-600 mt-2">
-                Prepare the balance sheet showing assets, liabilities, and owner’s equity as of the end of the period.
+                Prepare the balance sheet showing assets, liabilities, and owner's equity as of the end of the period.
             </p>
+            <!-- Add attempts counter -->
+            <div class="mt-2 text-sm text-gray-600">
+                Attempts remaining: {{ 2 - ($submission->attempts ?? 0) }}/2
+            </div>
         </div>
 
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -21,7 +25,8 @@
                 @csrf
                 <input type="hidden" name="submission_data" id="submission_data">
                 <button type="submit"
-                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition">
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition"
+                    {{ ($submission->attempts ?? 0) >= 2 ? 'disabled' : '' }}>
                     💾 Save and Continue
                 </button>
             </form>

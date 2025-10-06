@@ -13,6 +13,10 @@
             <p class="mt-2 text-gray-600 text-sm sm:text-base">
                 Record adjusting entries for accrued, deferred, and estimated items before preparing financial statements.
             </p>
+            <!-- Add attempts counter -->
+            <div class="mt-2 text-sm text-gray-600">
+                Attempts remaining: {{ 2 - ($submission->attempts ?? 0) }}/2
+            </div>
         </div>
 
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
@@ -23,7 +27,8 @@
                     @csrf
                     <input type="hidden" name="submission_data" id="submission_data">
                     <button type="submit"
-                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition">
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg shadow transition"
+                        {{ ($submission->attempts ?? 0) >= 2 ? 'disabled' : '' }}>
                         💾 Save and Continue
                     </button>
                 </form>

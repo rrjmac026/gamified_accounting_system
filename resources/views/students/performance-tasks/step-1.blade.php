@@ -156,12 +156,14 @@
 
                 nestedHeaders: [
                     [
+                        '',
                         { label: 'ASSETS', colspan: 6 },
                         { label: 'LIABILITIES', colspan: 2 },
                         { label: "OWNER'S EQUITY", colspan: 3 },
                         { label: 'EXPENSES', colspan: 3 }
                     ],
                     [
+                        '',
                         'Cash', 'Accounts Receivable', 'Supplies', 'Furniture & Fixtures', 'Land', 'Equipment',
                         'Accounts Payable', 'Notes Payable',
                         'Capital', 'Withdrawal', 'Service Revenue',
@@ -186,7 +188,7 @@
                 autoRowSize: false,
                 copyPaste: true,
                 minRows: 15,
-                minCols: 14,
+                minCols: 15,
                 stretchH: 'none',
                 enterMoves: { row: 1, col: 0 },
                 tabMoves: { row: 0, col: 1 },

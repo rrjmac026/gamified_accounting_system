@@ -21,15 +21,19 @@ class PerformanceTask extends Model
         'template_data' => 'array',
     ];
 
+    // 🔹 Relation to submissions (students' answers)
     public function submissions()
     {
         return $this->hasMany(PerformanceTaskSubmission::class, 'task_id');
     }
+
+    // 🔹 Relation to instructor
     public function instructor()
     {
         return $this->belongsTo(User::class, 'instructor_id');
     }
 
+    // 🔹 Relation to students
     public function students()
     {
         return $this->belongsToMany(Student::class, 'performance_task_student')
@@ -37,13 +41,20 @@ class PerformanceTask extends Model
             ->withTimestamps();
     }
 
+    // 🔹 Relation to subject and section
     public function subject()
     {
         return $this->belongsTo(Subject::class, 'subject_id');
     }
+
     public function section()
     {
         return $this->belongsTo(Section::class, 'section_id');
     }
-}
 
+    
+    public function steps()
+    {
+        return $this->hasMany(PerformanceTaskStep::class, 'performance_task_id');
+    }
+}

@@ -9,6 +9,8 @@ use App\Models\PerformanceTask;
 use App\Models\Section;
 use App\Models\Subject;
 use App\Models\SystemNotification;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Models\PerformanceTaskStep;
 
 class PerformanceTaskController extends Controller
 {
@@ -41,49 +43,66 @@ class PerformanceTaskController extends Controller
     /**
      * Store new performance task
      */
-    public function store(Request $request)
+    public function saveStep(Request $request, $step)
     {
-        $validated = $request->validate([
-            'title'        => 'required|string|max:255',
-            'description'  => 'nullable|string',
-            'xp_reward'    => 'required|integer|min:0',
-            'max_attempts' => 'required|integer|min:1',
-            'subject_id'   => 'required|exists:subjects,id',
-            'section_id'   => 'required|exists:sections,id',
-        ]);
+        $user = auth()->user();
 
-        $validated['instructor_id'] = Auth::user()->instructor->id;
+        // Get the student's active task
+        $task = PerformanceTask::whereHas('section.students', function ($query) use ($user) {
+            $query->where('student_id', $user->student->id);
+        })
+        ->latest()
+        ->first();
 
-        $task = PerformanceTask::create($validated);
+        if (!$task) {
+            return back()->with('error', 'No active performance task found.');
+        }
 
-        $section = Section::with('students')->findOrFail($validated['section_id']);
-        $attachData = [];
+        // Retrieve instructor's correct data for this step
+        $correctStep = $task->steps()->where('step_number', $step)->first();
 
-        if ($section->students && $section->students->count() > 0) {
-            foreach ($section->students as $student) {
-                $attachData[$student->id] = [
-                    'status'     => 'assigned',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-            }
+        if (!$correctStep) {
+            return back()->with('error', "Step $step data not found in instructor template.");
+        }
 
-            $task->students()->attach($attachData);
+        $correctData = $correctStep->template_data;
+        $studentData = json_decode($request->template_data, true);
 
-            foreach ($section->students as $student) {
-                SystemNotification::create([
-                    'user_id' => $student->user->id,
-                    'title'   => 'New Performance Task Assigned',
-                    'message' => "A new performance task '{$task->title}' has been assigned to your section.",
-                    'type'    => 'info',
-                    'is_read' => false,
-                ]);
+        // Auto-check comparison
+        $matches = 0;
+        $totalCells = 0;
+
+        foreach ($correctData as $r => $row) {
+            foreach ($row as $c => $value) {
+                $totalCells++;
+                if (trim(strtolower($studentData[$r][$c] ?? '')) === trim(strtolower($value ?? ''))) {
+                    $matches++;
+                }
             }
         }
 
-        return redirect()->route('instructors.performance-tasks.index')
-            ->with('success', 'Performance task created and assigned to students.');
+        $accuracy = $totalCells > 0 ? round(($matches / $totalCells) * 100, 2) : 0;
+        $remarks = $accuracy >= 80 ? 'Perfect! Your entry is balanced.' : 'Please review your answers.';
+
+        // Save submission with auto-check results
+        $submission = PerformanceTaskSubmission::updateOrCreate(
+            [
+                'task_id' => $task->id,
+                'student_id' => $user->student->id,
+                'step' => $step,
+            ],
+            [
+                'submission_data' => $studentData,
+                'status' => $accuracy >= 80 ? 'completed' : 'in-progress',
+                'score' => $accuracy,
+                'remarks' => $remarks,
+            ]
+        );
+
+        return redirect()->route('students.performance-tasks.step', $step + 1)
+            ->with('success', "Step $step checked and saved! Accuracy: {$accuracy}%");
     }
+
 
     /**
      * Show single task

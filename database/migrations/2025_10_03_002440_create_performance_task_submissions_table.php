@@ -15,6 +15,7 @@ return new class extends Migration
             $table->integer('step');
             $table->json('submission_data')->nullable();
             $table->string('status')->default('in-progress');
+            $table->integer('attempts')->default(0);
             $table->timestamps();
 
             // Unique constraint to prevent duplicate submissions for the same step

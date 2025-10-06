@@ -12,8 +12,9 @@ class PerformanceTaskSubmission extends Model
         'step',
         'submission_data',
         'status',
-        'score',
-        'feedback'
+        'score',  
+        'remarks',    
+        'attempts'      
     ];
 
     protected $casts = [

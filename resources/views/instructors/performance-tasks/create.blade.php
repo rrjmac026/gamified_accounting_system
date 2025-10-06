@@ -25,7 +25,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('instructors.performance-tasks.store') }}" method="POST" id="taskForm">
+                <form action="{{ route('instructors.performance-tasks.store') }}" method="POST" id="taskForm" enctype="multipart/form-data">
                     @csrf
 
                     <!-- Task Title -->
@@ -83,6 +83,19 @@
                         @enderror
                     </div>
 
+                    <!-- Template File Upload -->
+                    <div class="mb-4">
+                        <label for="template_file" class="block font-medium text-sm text-gray-700">
+                            Upload Answer Sheet (Excel) <span class="text-red-500">*</span>
+                        </label>
+                        <input type="file" name="template_file" id="template_file" accept=".xlsx,.xls" required
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 @error('template_file') border-red-500 @enderror">
+                        <p class="text-xs text-gray-500 mt-1">Upload the Excel file containing the 10 accounting cycle steps.</p>
+                        @error('template_file')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <!-- Description -->
                     <div class="mb-4">
                         <label for="description" class="block font-medium text-sm text-gray-700">Description</label>
@@ -118,6 +131,7 @@
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+
                     <div class="flex items-center justify-end mt-6">
                         <a href="{{ route('instructors.performance-tasks.index') }}" 
                            class="mr-4 text-gray-600 hover:text-gray-800">
@@ -133,6 +147,5 @@
             </div>
         </div>
     </div>
-
 
 </x-app-layout>

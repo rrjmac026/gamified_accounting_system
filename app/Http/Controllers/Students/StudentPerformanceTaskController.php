@@ -59,8 +59,8 @@ class StudentPerformanceTaskController extends Controller
     public function saveStep(Request $request, $step)
     {
         $user = auth()->user();
-        
-        // Get the current performance task
+
+        // Get the current performance task of the student's section
         $task = PerformanceTask::whereHas('section.students', function ($query) use ($user) {
             $query->where('student_id', $user->student->id);
         })
@@ -72,21 +72,36 @@ class StudentPerformanceTaskController extends Controller
         }
 
         try {
-            // Save submission
-            $submission = PerformanceTaskSubmission::updateOrCreate(
-                [
-                    'task_id' => $task->id,
-                    'student_id' => $user->student->id,
-                    'step' => $step,
-                ],
-                [
-                    'submission_data' => $request->template_data,
-                    'status' => 'in-progress'
-                ]
-            );
+            // 🔍 Check existing submission
+            $submission = PerformanceTaskSubmission::firstOrNew([
+                'task_id' => $task->id,
+                'student_id' => $user->student->id,
+                'step' => $step,
+            ]);
 
+            // 🚫 Stop if already reached 2 attempts
+            if ($submission->attempts >= 2) {
+                return back()->with('error', 'You have reached the maximum of 2 attempts for this step.');
+            }
+
+            // 📝 Save submission data (from Handsontable or JSON)
+            $submission->submission_data = $request->input('submission_data');
+            $submission->status = 'in-progress';
+            $submission->attempts = $submission->attempts + 1;
+            $submission->save();
+
+            // ✅ Feedback
+            $message = "Step $step saved successfully! (Attempt {$submission->attempts}/2)";
+
+            // 🧭 If last step, redirect to dashboard
+            if ($step >= 10) {
+                return redirect()->route('students.dashboard')
+                    ->with('success', 'You have successfully completed all 10 steps of the performance task!');
+            }
+
+            // Otherwise go to next step
             return redirect()->route('students.performance-tasks.step', $step + 1)
-                ->with('success', "Step $step saved successfully!");
+                ->with('success', $message);
 
         } catch (\Exception $e) {
             return back()->with('error', 'Error saving your submission. Please try again.');
@@ -95,9 +110,6 @@ class StudentPerformanceTaskController extends Controller
 
 
 
-
-
-    // Final submit
     public function submit()
     {
         return back()->with('success', 'Performance task submitted!');

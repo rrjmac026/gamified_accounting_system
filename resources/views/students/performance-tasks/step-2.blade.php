@@ -2,10 +2,9 @@
     <!-- Handsontable -->
     <script src="https://cdn.jsdelivr.net/npm/handsontable@14.1.0/dist/handsontable.full.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@14.1.0/dist/handsontable.full.min.css" />
-    <!-- Formula Parser (HyperFormula) -->
-    <script src="https://cdn.jsdelivr.net/npm/hyperformula@2.6.2/dist/hyperformula.full.min.js"></script>
-    
+
     <div class="py-4 sm:py-6 lg:py-8">
+        {{-- Flash Messages --}}
         @if (session('error'))
             <div class="mb-6 animate-slideDown">
                 <div class="flex items-start gap-3 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm">
@@ -17,43 +16,131 @@
             </div>
         @endif
 
-        <!-- Similar structure as step-1 but for General Ledger -->
+        @if (session('success'))
+            <div class="mb-6 animate-slideDown">
+                <div class="flex items-start gap-3 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow-sm">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-semibold text-green-800 mb-1">Success</h3>
+                        <p class="text-sm text-green-700 leading-relaxed">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Step Header -->
         <div class="mb-6 sm:mb-8">
-            <div class="relative">
-                <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs sm:text-sm font-semibold mb-3">
-                    <span>Step 2 of 10</span>
-                </div>
-                
-                <div class="flex-1">
-                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
-                        General Ledger
-                    </h1>
-                    <p class="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl">
-                        Transfer entries from the journal to individual ledger accounts.
-                    </p>
-                </div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs sm:text-sm font-semibold mb-3">
+                <span>Step 2 of 10</span>
+            </div>
+
+            <div class="flex-1">
+                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
+                    Chart of Accounts
+                </h1>
+                <p class="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl">
+                    List all accounts used in the accounting system along with their account numbers.
+                </p>
             </div>
         </div>
 
         <!-- Main Content -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <!-- Add spreadsheet implementation similar to step-1 -->
-            <div id="spreadsheet"></div>
+        <div class="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-4 sm:p-6 border-b border-gray-200">
+                <p class="text-xs sm:text-sm text-gray-600">
+                    {{ $performanceTask->description ?? 'No instructions provided by your instructor.' }}
+                </p>
+            </div>
+
+            <form id="saveForm" method="POST" action="{{ route('students.performance-tasks.save-step', 2) }}">
+                @csrf
+
+                <!-- Spreadsheet -->
+                <div class="p-3 sm:p-4 lg:p-6">
+                    <div class="border rounded-lg shadow-inner bg-gray-50 overflow-hidden">
+                        <div class="overflow-x-auto overflow-y-auto" style="max-height: calc(100vh - 400px); min-height: 400px;">
+                            <div id="spreadsheet" class="bg-white min-w-full"></div>
+                        </div>
+                        <input type="hidden" name="template_data" id="template_data" required>
+                    </div>
+
+                    <div class="mt-2 text-xs text-gray-500 sm:hidden text-center">
+                        <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                        </svg>
+                        Swipe to scroll spreadsheet
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="p-4 sm:p-6 bg-gray-50 border-t border-gray-200">
+                    <div class="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
+                        <button type="button" onclick="window.history.back()" 
+                            class="inline-flex items-center justify-center px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors text-sm sm:text-base">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                            </svg>
+                            Back
+                        </button>
+
+                        <button type="submit" id="submitButton" 
+                            class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors text-sm sm:text-base">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Save and Continue
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const container = document.getElementById('spreadsheet');
-            
-            // Get saved data if it exists
             const savedData = @json($submission->submission_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array(15).fill().map(() => Array(14).fill(''));
 
-            hot = new Handsontable(container, {
+            // ✅ Fixed: independent rows (no shared references)
+            const initialData = savedData 
+                ? JSON.parse(savedData) 
+                : Array.from({ length: 15 }, () => ['', '']);
+
+            const hot = new Handsontable(container, {
                 data: initialData,
-                // ...rest of your Handsontable configuration...
+                rowHeaders: true,
+                colHeaders: ['Account Name', 'Account Number'],
+                columns: [
+                    { type: 'text', width: 300 },
+                    { type: 'numeric', width: 150 }
+                ],
+                stretchH: 'all',
+                height: 'auto',
+                licenseKey: 'non-commercial-and-evaluation',
+                contextMenu: true,
+                manualColumnResize: true,
+                manualRowResize: true,
+                minSpareRows: 1,
+            });
+
+            // 🔹 Save on submit
+            const form = document.getElementById('saveForm');
+            form.addEventListener('submit', function(e) {
+                document.getElementById('template_data').value = JSON.stringify(hot.getData());
             });
         });
     </script>
+
+    <style>
+        body { overflow-x: hidden; }
+        .handsontable td { border-color: #d1d5db; }
+        .handsontable .area { background-color: rgba(59,130,246,0.1); }
+        .overflow-x-auto { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+
+        @media (max-width: 640px) {
+            .handsontable { font-size: 12px; }
+        }
+        @media (min-width: 640px) and (max-width: 1024px) {
+            .handsontable { font-size: 13px; }
+        }
+    </style>
 </x-app-layout>

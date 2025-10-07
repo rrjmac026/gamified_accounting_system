@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,9 +14,11 @@ return new class extends Migration
             $table->integer('step');
             $table->json('submission_data')->nullable();
             $table->string('status')->default('in-progress');
+            $table->integer('score')->default(0); // ✅ ADDED
+            $table->text('remarks')->nullable(); // ✅ ADDED
             $table->integer('attempts')->default(0);
             $table->timestamps();
-
+            
             // Unique constraint to prevent duplicate submissions for the same step
             $table->unique(['task_id', 'student_id', 'step']);
         });

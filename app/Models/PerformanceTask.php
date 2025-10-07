@@ -56,4 +56,9 @@ class PerformanceTask extends Model
     {
         return $this->hasMany(PerformanceTaskStep::class, 'performance_task_id');
     }
+
+    public function answerSheets()
+    {
+        return $this->hasMany(PerformanceTaskAnswerSheet::class);
+    }
 }

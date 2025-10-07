@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Students;
 use App\Http\Controllers\Controller;
 use App\Models\PerformanceTask;
 use App\Models\PerformanceTaskSubmission;
+use App\Models\PerformanceTaskAnswerSheet;
 use Illuminate\Http\Request;
 
 class StudentPerformanceTaskController extends Controller
@@ -60,7 +61,6 @@ class StudentPerformanceTaskController extends Controller
     {
         $user = auth()->user();
 
-        // Get the current performance task of the student's section
         $task = PerformanceTask::whereHas('section.students', function ($query) use ($user) {
             $query->where('student_id', $user->student->id);
         })
@@ -80,20 +80,61 @@ class StudentPerformanceTaskController extends Controller
             ]);
 
             // 🚫 Stop if already reached 2 attempts
-            if ($submission->attempts >= 2) {
+            if ($submission->exists && $submission->attempts >= 2) {
                 return back()->with('error', 'You have reached the maximum of 2 attempts for this step.');
             }
 
-            // 📝 Save submission data (from Handsontable or JSON)
-            $submission->submission_data = $request->input('submission_data');
-            $submission->status = 'in-progress';
-            $submission->attempts = $submission->attempts + 1;
+            // 📝 Save student's data
+            $studentData = $request->input('submission_data');
+            
+            // Decode and validate JSON
+            $studentDataArray = json_decode($studentData, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return back()->with('error', 'Invalid submission data format.');
+            }
+
+            $submission->submission_data = $studentData;
+            $submission->attempts = ($submission->attempts ?? 0) + 1;
+
+            // 🔍 Fetch the correct answer sheet
+            $answerSheet = PerformanceTaskAnswerSheet::where([
+                'performance_task_id' => $task->id,
+                'step' => $step
+            ])->first();
+
+            if ($answerSheet && $answerSheet->correct_data) {
+                $correctData = $answerSheet->correct_data;
+                
+                // 🔧 FIXED: Handle if correct_data is still a string
+                if (is_string($correctData)) {
+                    $correctData = json_decode($correctData, true);
+                }
+                
+                // Normalize both arrays for comparison (sort keys recursively)
+                $normalizedStudent = $this->normalizeArray($studentDataArray);
+                $normalizedCorrect = $this->normalizeArray($correctData);
+                
+                // 🔍 Compare normalized arrays
+                if ($normalizedStudent === $normalizedCorrect) {
+                    $submission->status = 'correct';
+                    $submission->score = 100;
+                    $submission->remarks = 'Perfect! Your entry is correct.';
+                } else {
+                    $submission->status = 'wrong';
+                    $submission->score = 0;
+                    $submission->remarks = 'Your answer is incorrect. Please review and retry.';
+                }
+            } else {
+                $submission->status = 'in-progress';
+                $submission->remarks = 'Answer sheet not found for this step.';
+            }
+
             $submission->save();
 
-            // ✅ Feedback
+            // ✅ Feedback message
             $message = "Step $step saved successfully! (Attempt {$submission->attempts}/2)";
 
-            // 🧭 If last step, redirect to dashboard
+            // 🧭 If last step, go to dashboard
             if ($step >= 10) {
                 return redirect()->route('students.dashboard')
                     ->with('success', 'You have successfully completed all 10 steps of the performance task!');
@@ -104,11 +145,30 @@ class StudentPerformanceTaskController extends Controller
                 ->with('success', $message);
 
         } catch (\Exception $e) {
+            \Log::error('Performance Task Submission Error: ' . $e->getMessage());
             return back()->with('error', 'Error saving your submission. Please try again.');
         }
     }
 
-
+    /**
+     * Normalize array for comparison (recursive ksort)
+     */
+    private function normalizeArray($array)
+    {
+        if (!is_array($array)) {
+            return $array;
+        }
+        
+        ksort($array);
+        
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $array[$key] = $this->normalizeArray($value);
+            }
+        }
+        
+        return $array;
+    }
 
     public function submit()
     {

@@ -37,6 +37,8 @@ use App\Http\Controllers\Instructors\QuizController;
 use App\Http\Controllers\Instructors\StudentProgressesController;
 use App\Http\Controllers\Admin\DataBackupController;
 use App\Http\Controllers\Instructors\PerformanceTaskController;
+use App\Http\Controllers\Instructors\PerformanceTaskAnswerSheetController;
+
 
 // ============================================================================
 // STUDENT CONTROLLERS
@@ -244,68 +246,69 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 // ============================================================================
 // INSTRUCTOR ROUTES
 // ============================================================================
-Route::middleware(['auth', 'role:instructor'])->prefix('instructor')->name('instructors.')->group(function () {
-    
-    // Dashboard
-    Route::get('/dashboard', [InstructorController::class, 'dashboard'])->name('dashboard');
-    
-    // Section Management
-    Route::get('/sections', [InstructorSectionController::class, 'index'])->name('sections.index');
-    Route::get('/sections/{section}', [InstructorSectionController::class, 'show'])->name('sections.show');
-    
-    // Subject Management
-    Route::get('subjects', [InstructorSubjectController::class, 'index'])->name('subjects.index');
-    Route::get('subjects/{subject}', [InstructorSubjectController::class, 'show'])->name('subjects.show');
-    
-    // Task Management
-    Route::resource('tasks', TaskController::class);
-    Route::post('/tasks/{task}/assign-students', [TaskController::class, 'assignToStudent'])->name('tasks.assign-students');
-    Route::get('/tasks/{task}/assign-students', [TaskController::class, 'showAssignStudentsForm'])->name('tasks.assign-students-form');
-    Route::post('/instructors/tasks/{task}/sync-students', [TaskController::class, 'syncStudentsToTask'])
-    ->name('tasks.sync-students');
-    Route::post('/instructors/tasks/sync-all', [TaskController::class, 'syncAllStudentsToTasks'])
-    ->name('tasks.sync-all');
-    
-    // Question Management for Tasks
-    Route::post('tasks/{task}/add-question', [TaskController::class, 'addQuestion'])->name('tasks.add-question');
-    Route::get('tasks/{task}/questions/{question}/edit', [TaskController::class, 'editQuestion'])->name('tasks.edit-question');
-    Route::put('tasks/{task}/questions/{question}', [TaskController::class, 'updateQuestion'])->name('tasks.update-question');
-    Route::delete('tasks/{task}/questions/{question}', [TaskController::class, 'deleteQuestion'])->name('tasks.delete-question');
-    
-    // Student Assignment for Tasks
-    Route::post('tasks/{task}/assign-student', [TaskController::class, 'assignToStudent'])->name('tasks.assign-student');
-    Route::post('tasks/bulk-assign', [TaskController::class, 'bulkAssign'])->name('tasks.bulk-assign');
-    Route::get('tasks/student-tasks', [TaskController::class, 'studentTasks'])->name('tasks.student-tasks');
-    Route::get('tasks/{task}/students/{student}', [TaskController::class, 'showStudentTask'])->name('tasks.show-student-task');
-    Route::get('tasks/{task}/students/{student}/grade', [TaskController::class, 'gradeStudentForm'])->name('tasks.grade-student-form');
-    Route::put('tasks/{task}/students/{student}/grade', [TaskController::class, 'gradeStudent'])->name('tasks.grade-student');
+Route::middleware(['auth', 'role:instructor'])
+    ->prefix('instructor')
+    ->name('instructors.')
+    ->group(function () {
 
-    Route::get('performance-tasks', [PerformanceTaskController::class, 'index'])->name('performance-tasks.index');
-    Route::get('performance-tasks/create', [PerformanceTaskController::class, 'create'])->name('performance-tasks.create');
-    Route::post('performance-tasks', [PerformanceTaskController::class, 'store'])->name('performance-tasks.store');
-    Route::get('performance-tasks/{task}', [PerformanceTaskController::class, 'show'])->name('performance-tasks.show');
-    Route::get('performance-tasks/{task}/edit', [PerformanceTaskController::class, 'edit'])->name('performance-tasks.edit');
-    Route::put('performance-tasks/{task}', [PerformanceTaskController::class, 'update'])->name('performance-tasks.update');
-    Route::delete('performance-tasks/{task}', [PerformanceTaskController::class, 'destroy'])->name('performance-tasks.destroy');
+        // Dashboard
+        Route::get('/dashboard', [InstructorController::class, 'dashboard'])->name('dashboard');
+
+        // Section Management
+        Route::get('/sections', [InstructorSectionController::class, 'index'])->name('sections.index');
+        Route::get('/sections/{section}', [InstructorSectionController::class, 'show'])->name('sections.show');
+
+        // Subject Management
+        Route::get('subjects', [InstructorSubjectController::class, 'index'])->name('subjects.index');
+        Route::get('subjects/{subject}', [InstructorSubjectController::class, 'show'])->name('subjects.show');
+
+        // Task Management
+        Route::resource('tasks', TaskController::class);
+        Route::post('/tasks/{task}/assign-students', [TaskController::class, 'assignToStudent'])->name('tasks.assign-students');
+        Route::get('/tasks/{task}/assign-students', [TaskController::class, 'showAssignStudentsForm'])->name('tasks.assign-students-form');
+        Route::post('/instructors/tasks/{task}/sync-students', [TaskController::class, 'syncStudentsToTask'])->name('tasks.sync-students');
+        Route::post('/instructors/tasks/sync-all', [TaskController::class, 'syncAllStudentsToTasks'])->name('tasks.sync-all');
+
+        // Question Management for Tasks
+        Route::post('tasks/{task}/add-question', [TaskController::class, 'addQuestion'])->name('tasks.add-question');
+        Route::get('tasks/{task}/questions/{question}/edit', [TaskController::class, 'editQuestion'])->name('tasks.edit-question');
+        Route::put('tasks/{task}/questions/{question}', [TaskController::class, 'updateQuestion'])->name('tasks.update-question');
+        Route::delete('tasks/{task}/questions/{question}', [TaskController::class, 'deleteQuestion'])->name('tasks.delete-question');
+
+        // Student Assignment for Tasks
+        Route::post('tasks/{task}/assign-student', [TaskController::class, 'assignToStudent'])->name('tasks.assign-student');
+        Route::post('tasks/bulk-assign', [TaskController::class, 'bulkAssign'])->name('tasks.bulk-assign');
+        Route::get('tasks/student-tasks', [TaskController::class, 'studentTasks'])->name('tasks.student-tasks');
+        Route::get('tasks/{task}/students/{student}', [TaskController::class, 'showStudentTask'])->name('tasks.show-student-task');
+        Route::get('tasks/{task}/students/{student}/grade', [TaskController::class, 'gradeStudentForm'])->name('tasks.grade-student-form');
+        Route::put('tasks/{task}/students/{student}/grade', [TaskController::class, 'gradeStudent'])->name('tasks.grade-student');
+
+        // Performance Task Management
+        Route::get('performance-tasks', [PerformanceTaskController::class, 'index'])->name('performance-tasks.index');
+        Route::get('performance-tasks/create', [PerformanceTaskController::class, 'create'])->name('performance-tasks.create');
+        Route::post('performance-tasks', [PerformanceTaskController::class, 'store'])->name('performance-tasks.store');
+        Route::get('performance-tasks/{task}', [PerformanceTaskController::class, 'show'])->name('performance-tasks.show');
+        Route::get('performance-tasks/{task}/edit', [PerformanceTaskController::class, 'edit'])->name('performance-tasks.edit');
+        Route::put('performance-tasks/{task}', [PerformanceTaskController::class, 'update'])->name('performance-tasks.update');
+        Route::delete('performance-tasks/{task}', [PerformanceTaskController::class, 'destroy'])->name('performance-tasks.destroy');
+
+        // Task Submissions
+        Route::get('/task-submissions', [TaskSubmissionController::class, 'index'])->name('task-submissions.index');
+        Route::get('/task-submissions/{taskSubmission}', [TaskSubmissionController::class, 'show'])->name('task-submissions.show');
+        Route::post('/task-submissions/{taskSubmission}/grade', [TaskSubmissionController::class, 'grade'])->name('task-submissions.grade');
+        // Answer Sheets for each Performance Task
+        Route::prefix('performance-task-answer-sheets')->name('performance-tasks.answer-sheets.')->group(function () {
+            Route::get('/', [PerformanceTaskAnswerSheetController::class, 'index'])->name('index');
+            Route::get('/{task}', [PerformanceTaskAnswerSheetController::class, 'show'])->name('show');
+            Route::get('/{task}/step/{step}/edit', [PerformanceTaskAnswerSheetController::class, 'edit'])->name('edit');
+            Route::put('/{task}/step/{step}', [PerformanceTaskAnswerSheetController::class, 'update'])->name('update');
+            Route::post('/{task}/step/{step}', [PerformanceTaskAnswerSheetController::class, 'store'])->name('store');
+        });
 
 
-    // Steps 1–10
-    Route::get('/step1', [PerformanceTaskController::class, 'step1'])->name('step1');
-    Route::get('/step2', [PerformanceTaskController::class, 'step2'])->name('step2');
-    Route::get('/step3', [PerformanceTaskController::class, 'step3'])->name('step3');
-    Route::get('/step4', [PerformanceTaskController::class, 'step4'])->name('step4');
-    Route::get('/step5', [PerformanceTaskController::class, 'step5'])->name('step5');
-    Route::get('/step6', [PerformanceTaskController::class, 'step6'])->name('step6');
-    Route::get('/step7', [PerformanceTaskController::class, 'step7'])->name('step7');
-    Route::get('/step8', [PerformanceTaskController::class, 'step8'])->name('step8');
-    Route::get('/step9', [PerformanceTaskController::class, 'step9'])->name('step9');
-    Route::get('/step10', [PerformanceTaskController::class, 'step10'])->name('step10');
-    
-    // Task Submissions
-    Route::get('/task-submissions', [TaskSubmissionController::class, 'index'])->name('task-submissions.index');
-    Route::get('/task-submissions/{taskSubmission}', [TaskSubmissionController::class, 'show'])->name('task-submissions.show');
-    Route::post('/task-submissions/{taskSubmission}/grade', [TaskSubmissionController::class, 'grade'])->name('task-submissions.grade');
-});
+        Route::post('/{task}/step/{step}', [PerformanceTaskAnswerSheetController::class, 'store'])->name('performance-tasks.answer-sheets.store');
+    });
+
 
 // Student Progress Routes (Instructor Side)
 Route::middleware(['auth', 'role:instructor'])->group(function () {

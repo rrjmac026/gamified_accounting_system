@@ -9,7 +9,6 @@ class PerformanceTask extends Model
     protected $fillable = [
         'title',
         'description',
-        'template_data',
         'max_attempts',
         'xp_reward',
         'subject_id',

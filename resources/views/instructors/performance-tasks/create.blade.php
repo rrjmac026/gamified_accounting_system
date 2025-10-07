@@ -83,18 +83,6 @@
                         @enderror
                     </div>
 
-                    <!-- Template File Upload -->
-                    <div class="mb-4">
-                        <label for="template_file" class="block font-medium text-sm text-gray-700">
-                            Upload Answer Sheet (Excel) <span class="text-red-500">*</span>
-                        </label>
-                        <input type="file" name="template_file" id="template_file" accept=".xlsx,.xls" required
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2 @error('template_file') border-red-500 @enderror">
-                        <p class="text-xs text-gray-500 mt-1">Upload the Excel file containing the 10 accounting cycle steps.</p>
-                        @error('template_file')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
 
                     <!-- Description -->
                     <div class="mb-4">

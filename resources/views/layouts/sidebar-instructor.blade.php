@@ -79,64 +79,33 @@
                     </button>
 
                     <!-- Dropdown Content -->
-                    <div id="performance-steps" class="ml-4 space-y-1 hidden">
-                        <!-- Main Performance Task Index -->
+                    <div id="performance-steps" class="ml-2 space-y-3 hidden">
+                        <!-- All Tasks Link -->
                         <a href="{{ route('instructors.performance-tasks.index') }}" 
-                        class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
-                        {{ request()->routeIs('instructors.performance-tasks.index') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
-                            <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
-                                <i class="fas fa-list text-xs"></i>
-                            </span>
+                        class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-all duration-200 hover:translate-x-1 group
+                        {{ request()->routeIs('instructors.performance-tasks.index') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium border-l-2 border-[#FF92C2]' : 'text-[#595758]/70 dark:text-[#FF92C2]/70 hover:bg-[#FFEEF2]/50' }}">
+                            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FFC8FB] to-[#FF92C2]/40 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                                <i class="fas fa-list text-xs text-[#595758]"></i>
+                            </div>
                             <span>All Tasks</span>
                         </a>
 
-                        
-
-
-
-
                         <!-- Answer Sheets Section -->
-                        <div class="pl-4 mt-2 space-y-2">
-                            <span class="text-xs uppercase tracking-wide text-[#595758]/70 dark:text-[#FFC8FB]/70 font-semibold">Answer Sheets</span>
+                        <div class="pl-3 space-y-2 pt-2 border-l border-[#FF92C2]/20">
+                            <div class="flex items-center gap-2 px-3 mb-3">
+                                <div class="w-1 h-1 rounded-full bg-[#FF92C2]"></div>
+                                <span class="text-xs uppercase tracking-wide text-[#595758]/60 dark:text-[#FFC8FB]/60 font-semibold">Answer Sheets</span>
+                            </div>
 
-                            <!-- Dropdown to Choose Performance Task -->
+                            <!-- Performance Tasks Selection -->
                             <a href="{{ route('instructors.performance-tasks.answer-sheets.index') }}" 
-                            class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
-                            {{ request()->routeIs('instructors.performance-tasks.index') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
-                                <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
-                                    <i class="fas fa-list text-xs"></i>
-                                </span>
-                                <span>Performance Tasks</span>
+                            class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-all duration-200 hover:translate-x-1 group
+                            {{ request()->routeIs('instructors.performance-tasks.answer-sheets.*') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium border-l-2 border-[#FF92C2]' : 'text-[#595758]/70 dark:text-[#FF92C2]/70 hover:bg-[#FFEEF2]/50' }}">
+                                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FFC8FB] to-[#FF92C2]/40 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                                    <i class="fas fa-folder-open text-xs text-[#595758]"></i>
+                                </div>
+                                <span>Select Task</span>
                             </a>
-
-                            <!-- Steps 1–10 for selected task -->
-                            @php
-                                $selectedTaskId = request('task_id');
-                            @endphp
-
-                            @if($selectedTaskId)
-                                @for($i = 1; $i <= 10; $i++)
-                                    <a href="{{ route('instructors.answer-sheets.edit', ['task' => $selectedTaskId, 'step' => $i]) }}" 
-                                    class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
-                                    {{ request()->routeIs('instructors.answer-sheets.edit') && request()->route('step') == $i ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
-                                        <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">{{ $i }}</span>
-                                        <span>
-                                            @switch($i)
-                                                @case(1) Journal Entries @break
-                                                @case(2) General Ledger @break
-                                                @case(3) Trial Balance @break
-                                                @case(4) Adjusting Entries @break
-                                                @case(5) Adjusted Trial Balance @break
-                                                @case(6) Income Statement @break
-                                                @case(7) Statement of Changes @break
-                                                @case(8) Balance Sheet @break
-                                                @case(9) Closing Entries @break
-                                                @case(10) Post-Closing Trial Balance @break
-                                            @endswitch
-                                        </span>
-                                    </a>
-                                @endfor
-                            @endif
                         </div>
                     </div>
                 </div>
@@ -170,21 +139,13 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // auto open if we’re on performance/answersheet pages
+        // Auto open if we're on performance/answersheet pages
         const path = window.location.pathname;
         if (path.includes('performance-tasks') || path.includes('answer-sheets')) {
             const dropdown = document.getElementById('performance-steps');
             const icon = document.getElementById('dropdown-icon');
             dropdown.classList.remove('hidden');
             icon.classList.add('rotate-180');
-        }
-
-        // Auto submit when selecting a Performance Task
-        const selector = document.getElementById('taskSelector');
-        if (selector) {
-            selector.addEventListener('change', function() {
-                this.form.submit();
-            });
         }
     });
 </script>

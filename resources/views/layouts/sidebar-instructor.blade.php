@@ -90,6 +90,11 @@
                             <span>All Tasks</span>
                         </a>
 
+                        
+
+
+
+
                         <!-- Answer Sheets Section -->
                         <div class="pl-4 mt-2 space-y-2">
                             <span class="text-xs uppercase tracking-wide text-[#595758]/70 dark:text-[#FFC8FB]/70 font-semibold">Answer Sheets</span>
@@ -101,7 +106,7 @@
                                 <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
                                     <i class="fas fa-list text-xs"></i>
                                 </span>
-                                <span>All Tasks</span>
+                                <span>Performance Tasks</span>
                             </a>
 
                             <!-- Steps 1–10 for selected task -->

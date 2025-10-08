@@ -38,6 +38,7 @@ use App\Http\Controllers\Instructors\StudentProgressesController;
 use App\Http\Controllers\Admin\DataBackupController;
 use App\Http\Controllers\Instructors\PerformanceTaskController;
 use App\Http\Controllers\Instructors\PerformanceTaskAnswerSheetController;
+use App\Http\Controllers\Instructors\PerformanceTaskSubmissionController;
 
 
 // ============================================================================
@@ -305,8 +306,18 @@ Route::middleware(['auth', 'role:instructor'])
             Route::post('/{task}/step/{step}', [PerformanceTaskAnswerSheetController::class, 'store'])->name('store');
         });
 
-
         Route::post('/{task}/step/{step}', [PerformanceTaskAnswerSheetController::class, 'store'])->name('performance-tasks.answer-sheets.store');
+
+        // List submissions for a specific task
+        Route::get('/performance-tasks/{task}/submissions', [PerformanceTaskSubmissionController::class, 'index'])
+            ->name('performance-tasks.submissions.index');
+
+        // Show a single student's submissions
+        Route::get('/performance-tasks/{task}/submissions/{student}', [PerformanceTaskSubmissionController::class, 'show'])
+            ->name('performance-tasks.submissions.show');
+        // Optional: Manual override score
+        Route::put('performance-tasks/{task}/submissions/{submission}/override', [PerformanceTaskSubmissionController::class, 'override'])
+            ->name('performance-tasks.submissions.override');
     });
 
 

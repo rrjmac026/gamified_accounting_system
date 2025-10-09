@@ -6,93 +6,113 @@
 
                 <form action="{{ route('admin.student.store') }}" method="POST" class="space-y-4 sm:space-y-6">
                     @csrf
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                        {{-- Basic Info Fields --}}
-                        <div class="sm:col-span-2">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                                {{-- First Name --}}
-                                <div>
-                                    <label class="block text-sm font-semibold text-[#FF92C2] mb-1">First Name</label>
-                                    <input type="text" name="first_name" 
-                                        value="{{ old('first_name') }}"
-                                        class="w-full rounded-lg shadow-sm bg-white 
-                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
-                                                text-gray-800 px-4 py-2 transition-all duration-200
-                                                @error('first_name') border-red-500 @enderror"
-                                        required>
-                                    @error('first_name')
-                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                {{-- Last Name --}}
-                                <div>
-                                    <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Last Name</label>
-                                    <input type="text" name="last_name" 
-                                        value="{{ old('last_name') }}"
-                                        class="w-full rounded-lg shadow-sm bg-white 
-                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
-                                                text-gray-800 px-4 py-2 transition-all duration-200
-                                                @error('last_name') border-red-500 @enderror"
-                                        required>
-                                    @error('last_name')
-                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
-                                </div>
+                    
+                    {{-- Basic Information Section --}}
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-[#FF92C2] border-b border-[#FFC8FB] pb-2">Basic Information</h3>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            {{-- First Name --}}
+                            <div>
+                                <label class="block text-sm font-semibold text-[#FF92C2] mb-1">First Name</label>
+                                <input type="text" name="first_name" 
+                                    value="{{ old('first_name') }}"
+                                    class="w-full rounded-lg shadow-sm bg-white 
+                                            border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                            text-gray-800 px-4 py-2 transition-all duration-200
+                                            @error('first_name') border-red-500 @enderror"
+                                    required>
+                                @error('first_name')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
 
-                        </div>
-                        
-                        {{-- Student Number --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Student ID</label>
-                            <input type="text" name="student_number" 
-                                   value="{{ old('student_number') }}"
-                                   class="w-full rounded-lg shadow-sm bg-white 
-                                           border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
-                                           text-gray-800 px-4 py-2 transition-all duration-200"
-                                   required>
-                            @error('student_number')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            {{-- Middle Name --}}
+                            <div>
+                                <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Middle Name</label>
+                                <input type="text" name="middle_name" 
+                                    value="{{ old('middle_name') }}"
+                                    class="w-full rounded-lg shadow-sm bg-white 
+                                            border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                            text-gray-800 px-4 py-2 transition-all duration-200">
+                            </div>
+
+                            {{-- Last Name --}}
+                            <div>
+                                <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Last Name</label>
+                                <input type="text" name="last_name" 
+                                    value="{{ old('last_name') }}"
+                                    class="w-full rounded-lg shadow-sm bg-white 
+                                            border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                            text-gray-800 px-4 py-2 transition-all duration-200
+                                            @error('last_name') border-red-500 @enderror"
+                                    required>
+                                @error('last_name')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
-                        {{-- Email --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Email</label>
-                            <input type="email" name="email" 
-                                   value="{{ old('email') }}"
-                                   class="w-full rounded-lg shadow-sm bg-white 
-                                           border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
-                                           text-gray-800 px-4 py-2 transition-all duration-200"
-                                   required>
-                            @error('email')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {{-- Student ID --}}
+                            <div>
+                                <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Student ID</label>
+                                <input type="text" name="student_number" 
+                                    value="{{ old('student_number') }}"
+                                    class="w-full rounded-lg shadow-sm bg-white 
+                                            border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                            text-gray-800 px-4 py-2 transition-all duration-200
+                                            @error('student_number') border-red-500 @enderror"
+                                    required>
+                                @error('student_number')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            {{-- Email --}}
+                            <div>
+                                <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Email</label>
+                                <input type="email" name="email" 
+                                    value="{{ old('email') }}"
+                                    class="w-full rounded-lg shadow-sm bg-white 
+                                            border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                            text-gray-800 px-4 py-2 transition-all duration-200
+                                            @error('email') border-red-500 @enderror"
+                                    required>
+                                @error('email')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
-                        {{-- Password Field --}}
+                        {{-- Password --}}
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Password</label>
                             <input type="password" name="password" 
                                 class="w-full rounded-lg shadow-sm bg-white 
                                         border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
-                                        text-gray-800 px-4 py-2 transition-all duration-200"
+                                        text-gray-800 px-4 py-2 transition-all duration-200
+                                        @error('password') border-red-500 @enderror"
                                 required>
                             @error('password')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
+                    </div>
 
-                        {{-- Course & Year Level --}}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {{-- Academic Information Section --}}
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-[#FF92C2] border-b border-[#FFC8FB] pb-2">Academic Information</h3>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            {{-- Course --}}
                             <div>
-                                <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Course</label>
+                                <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Course</label>
                                 <select name="course_id" required
-                                        class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
-                                               border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                               text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200
-                                               @error('course_id') border-red-500 @enderror">
+                                        class="w-full rounded-lg shadow-sm bg-white 
+                                            border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                            text-gray-800 px-4 py-2 transition-all duration-200
+                                            @error('course_id') border-red-500 @enderror">
                                     <option value="">Select Course</option>
                                     @foreach($courses as $course)
                                         <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
@@ -104,43 +124,79 @@
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
+
+                            {{-- Year Level --}}
                             <div>
-                                <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Year Level</label>
-                                <select name="year_level" 
-                                       class="w-full rounded-lg shadow-sm bg-white dark:from-[#595758] dark:to-[#4B4B4B] 
-                                              border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 dark:focus:ring-pink-500
-                                              text-gray-800 dark:text-black-200 px-4 py-2 transition-all duration-200"
-                                       required>
+                                <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Year Level</label>
+                                <select name="year_level" required
+                                    class="w-full rounded-lg shadow-sm bg-white 
+                                            border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                            text-gray-800 px-4 py-2 transition-all duration-200
+                                            @error('year_level') border-red-500 @enderror">
                                     <option value="">Select Year Level</option>
                                     @for ($i = 1; $i <= 4; $i++)
-                                        <option value="{{ $i }}">{{ $i }}</option>
+                                        <option value="{{ $i }}" {{ old('year_level') == $i ? 'selected' : '' }}>Year {{ $i }}</option>
                                     @endfor
                                 </select>
+                                @error('year_level')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            {{-- Section --}}
+                            <div>
+                                <label class="block text-sm font-semibold text-[#FF92C2] mb-2">Section</label>
+                                
+                                {{-- Search Input --}}
+                                <input type="text" id="section-search" placeholder="Search sections..."
+                                    class="w-full mb-2 rounded-lg border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                            text-gray-800 px-3 py-2 text-sm transition-all duration-200" />
+
+                                {{-- Hidden input to store selected section --}}
+                                <input type="hidden" name="section_id" id="selected-section-id" value="{{ old('section_id') }}">
+
+                                {{-- Sections Radio List --}}
+                                <div id="section-list"
+                                    class="w-full rounded-lg shadow-sm bg-white border border-[#FFC8FB] 
+                                            max-h-60 overflow-y-auto">
+                                    @foreach($sections as $section)
+                                        <label class="flex items-center space-x-3 px-4 py-2.5 hover:bg-[#FFC8FB]/20 cursor-pointer section-item border-b border-[#FFC8FB]/30 last:border-b-0">
+                                            <input type="radio" name="section_radio" value="{{ $section->id }}"
+                                                {{ old('section_id') == $section->id ? 'checked' : '' }}
+                                                class="text-[#FF92C2] border-[#FFC8FB] focus:ring-[#FF92C2] focus:ring-2"
+                                                onchange="document.getElementById('selected-section-id').value = this.value;">
+                                            <span class="text-gray-800 text-sm font-medium">
+                                                {{ $section->name }}
+                                            </span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                @error('section_id')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 
-                        {{-- Subjects Selection --}}
+                        {{-- Subjects Section --}}
                         <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Assign Subjects</label>
-
+                            <label class="block text-sm font-semibold text-[#FF92C2] mb-2">Assign Subjects</label>
+                            
                             {{-- Search Input --}}
-                            <div class="mb-2">
-                                <input type="text" id="subject-search" placeholder="Search subjects..."
-                                    class="w-full rounded-lg border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
-                                            text-gray-800 px-3 py-2 text-sm transition-all duration-200" />
-                            </div>
+                            <input type="text" id="subject-search" placeholder="Search subjects by code or name..."
+                                class="w-full mb-2 rounded-lg border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                        text-gray-800 px-3 py-2 text-sm transition-all duration-200" />
 
-                            {{-- Subjects List --}}
+                            {{-- Subjects Checkbox List --}}
                             <div id="subject-list"
                                 class="w-full rounded-lg shadow-sm bg-white border border-[#FFC8FB] 
-                                        text-gray-800 px-4 py-2 transition-all duration-200 max-h-48 overflow-y-auto">
+                                        max-h-60 overflow-y-auto">
                                 @foreach($subjects as $subject)
-                                    <label class="flex items-center space-x-3 py-2 hover:bg-[#FFC8FB]/20 rounded cursor-pointer subject-item">
+                                    <label class="flex items-center space-x-3 px-4 py-2.5 hover:bg-[#FFC8FB]/20 cursor-pointer subject-item border-b border-[#FFC8FB]/30 last:border-b-0">
                                         <input type="checkbox" name="subjects[]" value="{{ $subject->id }}"
                                             {{ (is_array(old('subjects')) && in_array($subject->id, old('subjects'))) ? 'checked' : '' }}
                                             class="text-[#FF92C2] border-[#FFC8FB] rounded focus:ring-[#FF92C2] focus:ring-2">
-                                        <span class="text-gray-800">
-                                            {{ $subject->subject_code }} - {{ $subject->subject_name }}
+                                        <span class="text-gray-800 text-sm">
+                                            <span class="font-semibold">{{ $subject->subject_code }}</span> - {{ $subject->subject_name }}
                                         </span>
                                     </label>
                                 @endforeach
@@ -149,79 +205,38 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
+                    </div>
 
-                        {{-- Section & Password --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FF92C2] mb-1">Section</label>
-                            
-                            {{-- Search Input --}}
-                            <div class="mb-2">
-                                <input type="text" id="section-search" placeholder="Search sections..."
-                                    class="w-full rounded-lg border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
-                                            text-gray-800 px-3 py-2 text-sm transition-all duration-200" />
-                            </div>
-
-                            {{-- Hidden input to store the selected value --}}
-                            <input type="hidden" name="section_id" id="selected-section" value="{{ old('section') }}">
-
-                            {{-- Sections List --}}
-                            <div>
-                                <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Section</label>
-                                <select name="section_id" required
-                                        class="w-full rounded-lg shadow-sm bg-white 
-                                            border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
-                                            text-gray-800 px-4 py-2 transition-all duration-200
-                                            @error('section_id') border-red-500 @enderror">
-                                    <option value="">-- Select Section --</option>
-                                    @foreach($sections as $section)
-                                        <option value="{{ $section->id }}" {{ old('section_id') == $section->id ? 'selected' : '' }}>
-                                            {{ $section->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('section_id')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-
-
-                        {{-- Submit Button --}}
-                        <br>
-                        <div class="sm:col-span-2 flex justify-end">
-                            <button type="submit" 
-                                    class="w-full sm:w-auto px-6 py-2 bg-gradient-to-r from-[#FF92C2] to-[#FF5DA2] hover:from-[#FF5DA2] hover:to-[#FF92C2] 
-                                           text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
-                                Create Student
-                            </button>
-                        </div>
+                    {{-- Submit Button --}}
+                    <div class="flex justify-end pt-4">
+                        <button type="submit" 
+                                class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-[#FF92C2] to-[#FF5DA2] hover:from-[#FF5DA2] hover:to-[#FF92C2] 
+                                    text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200">
+                            Create Student
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-<script>
-    // Section search functionality
-    document.getElementById('section-search').addEventListener('keyup', function () {
-        let query = this.value.toLowerCase();
-        document.querySelectorAll('#section-list .section-item').forEach(function (item) {
-            let text = item.innerText.toLowerCase();
-            item.style.display = text.includes(query) ? '' : 'none';
-        });
-    });
 
-    // Update hidden input when section is selected
-    function updateSelectedSection(value) {
-        document.getElementById('selected-section').value = value;
-    }
-
-    // Subject search functionality (keep existing)
-    document.getElementById('subject-search').addEventListener('keyup', function () {
-        let query = this.value.toLowerCase();
-        document.querySelectorAll('#subject-list .subject-item').forEach(function (item) {
-            let text = item.innerText.toLowerCase();
-            item.style.display = text.includes(query) ? '' : 'none';
+    <script>
+        // Subject search functionality
+        document.getElementById('subject-search').addEventListener('keyup', function () {
+            let query = this.value.toLowerCase();
+            document.querySelectorAll('#subject-list .subject-item').forEach(function (item) {
+                let text = item.innerText.toLowerCase();
+                item.style.display = text.includes(query) ? '' : 'none';
+            });
         });
-    });
-</script>
+
+        // Section search functionality
+        document.getElementById('section-search').addEventListener('keyup', function () {
+            let query = this.value.toLowerCase();
+            document.querySelectorAll('#section-list .section-item').forEach(function (item) {
+                let text = item.innerText.toLowerCase();
+                item.style.display = text.includes(query) ? '' : 'none';
+            });
+        });
+    </script>
 </x-app-layout>

@@ -2,7 +2,7 @@
 <x-app-layout>
     <div class="py-6 sm:py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {{-- Add Student & Import Section --}}
+            {{-- Header Section --}}
             <div class="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-4">
                 <h2 class="text-lg sm:text-xl font-semibold text-[#FF92C2]">Student Management</h2>
                 <div class="w-full sm:w-auto">
@@ -13,7 +13,6 @@
                     </a>
                 </div>
             </div>
-            
 
             <div class="bg-[#FFF0FA] overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 sm:rounded-lg">
                 <div class="p-6 text-gray-700">
@@ -64,66 +63,68 @@
                         </div>
                     @endif
 
-                    {{-- Import Form --}}
-                    <div class="mb-4 sm:mb-6 p-4 bg-white rounded-lg border border-pink-200">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-base sm:text-lg font-medium text-gray-900">Import Students</h3>
-                            <button type="button" 
-                                    onclick="toggleSchemaModal()"
-                                    class="text-sm text-pink-600 hover:text-pink-800 underline flex items-center">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                View Schema
-                            </button>
-                        </div>
-                        <form action="{{ route('admin.student.import') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                                <div class="w-full">
-                                    <label for="file" class="block text-sm font-medium text-gray-700 mb-1">
-                                        Select CSV File
-                                    </label>
-                                    <input type="file" name="file" id="file" accept=".csv,.xlsx,.xls"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                                           required>
-                                </div>
-                                <button type="submit" 
-                                        class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-colors duration-200">
+                    {{-- Tab Navigation --}}
+                    <div class="mb-6">
+                        <div class="border-b border-pink-200">
+                            <nav class="flex gap-2" aria-label="Tabs">
+                                <button 
+                                    onclick="switchTab('search')"
+                                    id="search-tab"
+                                    class="tab-button active px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200">
+                                    <i class="fas fa-search mr-2"></i>
+                                    Search Students
+                                </button>
+                                <button 
+                                    onclick="switchTab('import')"
+                                    id="import-tab"
+                                    class="tab-button px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200">
+                                    <i class="fas fa-file-import mr-2"></i>
                                     Import Students
                                 </button>
-                            </div>
-                            <p class="mt-2 text-xs text-gray-500 italic">
-                                📌 Click "View Schema" above to see the required CSV format.
-                            </p>
-                        </form>
+                            </nav>
+                        </div>
                     </div>
 
-                    {{-- Search Bar --}}
-                    <div class="mb-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <form action="{{ route('admin.student.index') }}" method="GET" class="flex w-full sm:w-1/2">
-                            <div class="relative flex-grow">
-                                <input type="text" 
-                                    name="search" 
-                                    value="{{ request('search') }}" 
-                                    placeholder="Search students by name, email, or student ID..."
-                                    class="w-full pl-10 pr-4 py-2 border border-[#FFC8FB] rounded-l-lg focus:ring-2 focus:ring-[#FF92C2] focus:border-[#FF92C2] text-sm sm:text-base">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                    <i class="fas fa-search"></i>
-                                </span>
-                            </div>
-                            <button type="submit" 
-                                    class="px-4 py-2 bg-[#FF92C2] text-white rounded-r-lg hover:bg-[#ff6fb5] focus:outline-none focus:ring-2 focus:ring-[#FF92C2]">
-                                Search
-                            </button>
-                        </form>
+                    {{-- Tab Content --}}
+                    <div id="tab-content">
+                        {{-- Search Tab Content --}}
+                        <div id="search-content" class="tab-content active">
+                            {{-- Search Bar --}}
+                            <div class="mb-6">
+                                <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-[#FFC8FB]/30 p-6">
+                                    <div class="flex items-center mb-4">
+                                        <div class="w-8 h-8 bg-gradient-to-r from-[#FF92C2] to-[#FFC8FB] rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-search text-white text-sm"></i>
+                                        </div>
+                                        <h3 class="text-lg font-semibold text-gray-800">Search Students</h3>
+                                    </div>
 
-                        {{-- Optional: Reset button --}}
-                        @if(request('search'))
-                            <a href="{{ route('admin.student.index') }}" 
-                            class="text-sm text-[#FF92C2] hover:text-[#ff6fb5]">
-                                <i class="fas fa-times"></i> Clear
-                            </a>
-                        @endif
-                    </div>
+                                    <div class="space-y-4">
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                <i class="fas fa-search text-gray-400"></i>
+                                            </div>
+                                            <input 
+                                                type="text" 
+                                                id="student-search"
+                                                placeholder="Search by name, email, ID, course, or section..." 
+                                                class="w-full pl-11 pr-4 py-3 border border-[#FFC8FB]/50 rounded-xl bg-white/70 focus:bg-white focus:border-[#FF92C2] focus:ring-2 focus:ring-[#FF92C2]/20 focus:outline-none transition-all duration-200 text-gray-700 placeholder-gray-400">
+                                        </div>
+
+                                        <div class="flex justify-between items-center text-xs text-gray-500">
+                                            <span id="student-counter">
+                                                Showing {{ $students->count() }} students
+                                            </span>
+                                            @if(request('search'))
+                                                <a href="{{ route('admin.student.index') }}" 
+                                                class="text-[#FF92C2] hover:text-[#ff6fb5] flex items-center gap-1">
+                                                    <i class="fas fa-times"></i> Clear
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                     {{-- Students Table --}}
                     <div class="overflow-x-auto relative sm:rounded-lg">
@@ -172,7 +173,11 @@
                                                 Year {{ $student->year_level ?? '-' }}
                                             </span>
                                             <span class="block text-sm text-gray-500">
-                                                Section {{ $student->section ?? '-' }}
+                                                @if ($student->sections->isNotEmpty())
+                                                    {{ $student->sections->pluck('name')->join(', ') }}
+                                                @else
+                                                    N/A
+                                                @endif
                                             </span>
                                         </td>
                                         <td class="py-3 px-4">
@@ -189,12 +194,12 @@
                                         <td class="py-3 px-4">
                                             <div class="flex flex-col sm:flex-row gap-2">
                                                 <a href="{{ route('admin.student.show', $student->id) }}" 
-                                                   class="text-indigo-600 hover:text-indigo-900">
+                                                   class="text-[#FF92C2] hover:text-[#ff6fb5]">
                                                     <i class="fas fa-eye"></i>
                                                     <span class="sm:hidden ml-1">View</span>
                                                 </a>
                                                 <a href="{{ route('admin.student.edit', $student->id) }}" 
-                                                   class="text-yellow-600 hover:text-yellow-900">
+                                                   class="text-[#FF92C2] hover:text-[#ff6fb5]">
                                                     <i class="fas fa-edit"></i>
                                                     <span class="sm:hidden ml-1">Edit</span>
                                                 </a>
@@ -225,112 +230,278 @@
                         </table>
                     </div>
 
-                    {{-- Pagination --}}
-                    @if($students->hasPages())
-                        <div class="mt-6">
-                            {{ $students->appends(request()->query())->links() }}
+                            {{-- Pagination --}}
+                            @if($students->hasPages())
+                                <div class="mt-6">
+                                    {{ $students->appends(request()->query())->links() }}
+                                </div>
+                            @endif
                         </div>
-                    @endif
+
+                        {{-- Import Tab Content --}}
+                        <div id="import-content" class="tab-content">
+                            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-[#FFC8FB]/30 p-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-8 h-8 bg-gradient-to-r from-[#FF92C2] to-[#FFC8FB] rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-file-import text-white text-sm"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-800">Import Students from File</h3>
+                                </div>
+
+                                <div class="flex justify-end mb-4">
+                                    <button type="button" 
+                                            onclick="toggleSchemaModal()"
+                                            class="text-sm text-pink-600 hover:text-pink-800 underline flex items-center">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        View Required Format
+                                    </button>
+                                </div>
+
+                                <form action="{{ route('admin.student.import') }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label for="file" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Select CSV or Excel File
+                                            </label>
+                                            <div class="relative">
+                                                <input type="file" 
+                                                       name="file" 
+                                                       id="file" 
+                                                       accept=".csv,.xlsx,.xls"
+                                                       class="w-full px-4 py-3 border-2 border-dashed border-[#FFC8FB] rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white/50 hover:bg-white transition-all duration-200"
+                                                       required>
+                                            </div>
+                                            <p class="mt-2 text-xs text-gray-500 italic">
+                                                📌 Supported formats: CSV, XLSX, XLS
+                                            </p>
+                                        </div>
+
+                                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                            <h4 class="text-sm font-medium text-blue-800 mb-2">💡 Quick Tips:</h4>
+                                            <ul class="text-xs text-blue-700 list-disc list-inside space-y-1">
+                                                <li>Make sure your file has the correct column headers</li>
+                                                <li>All required fields must be filled for each student</li>
+                                                <li>Email addresses must be unique</li>
+                                                <li>Click "View Required Format" to see the schema</li>
+                                            </ul>
+                                        </div>
+
+                                        <button type="submit" 
+                                                class="w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-lg hover:from-pink-600 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200 font-medium">
+                                            <i class="fas fa-upload mr-2"></i>
+                                            Import Students
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     {{-- Schema Modal --}}
-    <div id="schemaModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
-        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-medium text-gray-900">CSV Import Schema</h3>
-                    <button type="button" 
-                            onclick="toggleSchemaModal()" 
-                            class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
+<div id="schemaModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">CSV/Excel Import Schema</h3>
+                <button type="button" 
+                        onclick="toggleSchemaModal()" 
+                        class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-sm text-gray-600 mb-3">
+                    Your CSV/Excel file must contain the following columns with exact header names (in this order):
+                </p>
                 
-                <div class="mb-4">
-                    <p class="text-sm text-gray-600 mb-3">
-                        Your CSV/Excel file must contain the following columns with exact header names:
-                    </p>
-                    
-                    <div class="border border-pink-200 rounded-lg overflow-hidden">
-                        <table class="w-full text-sm text-left border-collapse">
-                            <thead class="bg-[#FFC8FB]/30 text-pink-700 uppercase">
-                                <tr>
-                                    <th class="px-4 py-2 border-r border-pink-200">Column Name</th>
-                                    <th class="px-4 py-2 border-r border-pink-200">Description</th>
-                                    <th class="px-4 py-2">Example</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white">
-                                <tr class="border-b border-pink-100">
-                                    <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">name</td>
-                                    <td class="px-4 py-2 border-r border-pink-200">Full name of the student</td>
-                                    <td class="px-4 py-2">John Doe</td>
-                                </tr>
-                                <tr class="border-b border-pink-100">
-                                    <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">email</td>
-                                    <td class="px-4 py-2 border-r border-pink-200">Student email address</td>
-                                    <td class="px-4 py-2">john.doe@example.com</td>
-                                </tr>
-                                <tr class="border-b border-pink-100">
-                                    <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">course</td>
-                                    <td class="px-4 py-2 border-r border-pink-200">Course/Program name</td>
-                                    <td class="px-4 py-2">Computer Science</td>
-                                </tr>
-                                <tr class="border-b border-pink-100">
-                                    <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">year_level</td>
-                                    <td class="px-4 py-2 border-r border-pink-200">Year level (1, 2, 3, or 4)</td>
-                                    <td class="px-4 py-2">2</td>
-                                </tr>
-                                <tr class="border-b border-pink-100">
-                                    <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">section</td>
-                                    <td class="px-4 py-2 border-r border-pink-200">Section identifier</td>
-                                    <td class="px-4 py-2">A</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">password</td>
-                                    <td class="px-4 py-2 border-r border-pink-200">Default password for the student</td>
-                                    <td class="px-4 py-2">password123</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="border border-pink-200 rounded-lg overflow-hidden">
+                    <table class="w-full text-sm text-left border-collapse">
+                        <thead class="bg-[#FFC8FB]/30 text-pink-700 uppercase">
+                            <tr>
+                                <th class="px-4 py-2 border-r border-pink-200">Column Order</th>
+                                <th class="px-4 py-2 border-r border-pink-200">Column Name</th>
+                                <th class="px-4 py-2 border-r border-pink-200">Description</th>
+                                <th class="px-4 py-2">Example</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white">
+                            <tr class="border-b border-pink-100">
+                                <td class="px-4 py-2 border-r border-pink-200 font-bold text-pink-600">1</td>
+                                <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">first_name</td>
+                                <td class="px-4 py-2 border-r border-pink-200">Student's first name</td>
+                                <td class="px-4 py-2">John</td>
+                            </tr>
+                            <tr class="border-b border-pink-100">
+                                <td class="px-4 py-2 border-r border-pink-200 font-bold text-pink-600">2</td>
+                                <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">middle_name</td>
+                                <td class="px-4 py-2 border-r border-pink-200">Student's middle name (optional)</td>
+                                <td class="px-4 py-2">Michael</td>
+                            </tr>
+                            <tr class="border-b border-pink-100">
+                                <td class="px-4 py-2 border-r border-pink-200 font-bold text-pink-600">3</td>
+                                <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">last_name</td>
+                                <td class="px-4 py-2 border-r border-pink-200">Student's last name</td>
+                                <td class="px-4 py-2">Doe</td>
+                            </tr>
+                            <tr class="border-b border-pink-100">
+                                <td class="px-4 py-2 border-r border-pink-200 font-bold text-pink-600">4</td>
+                                <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">email</td>
+                                <td class="px-4 py-2 border-r border-pink-200">Student email address (must be unique)</td>
+                                <td class="px-4 py-2">john.doe@example.com</td>
+                            </tr>
+                            <tr class="border-b border-pink-100">
+                                <td class="px-4 py-2 border-r border-pink-200 font-bold text-pink-600">4</td>
+                                <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">course</td>
+                                <td class="px-4 py-2 border-r border-pink-200">Course/Program name</td>
+                                <td class="px-4 py-2">Computer Science</td>
+                            </tr>
+                            <tr class="border-b border-pink-100">
+                                <td class="px-4 py-2 border-r border-pink-200 font-bold text-pink-600">5</td>
+                                <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">year_level</td>
+                                <td class="px-4 py-2 border-r border-pink-200">Year level (1, 2, 3, 4, or 5)</td>
+                                <td class="px-4 py-2">2</td>
+                            </tr>
+                            <tr class="border-b border-pink-100">
+                                <td class="px-4 py-2 border-r border-pink-200 font-bold text-pink-600">6</td>
+                                <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">section</td>
+                                <td class="px-4 py-2 border-r border-pink-200">Section identifier</td>
+                                <td class="px-4 py-2">A</td>
+                            </tr>
+                            <tr class="border-b border-pink-100">
+                                <td class="px-4 py-2 border-r border-pink-200 font-bold text-pink-600">7</td>
+                                <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">password</td>
+                                <td class="px-4 py-2 border-r border-pink-200">Default password (defaults to "password123" if empty)</td>
+                                <td class="px-4 py-2">password123</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-2 border-r border-pink-200 font-bold text-pink-600">8</td>
+                                <td class="px-4 py-2 border-r border-pink-200 font-mono text-pink-600">id_number</td>
+                                <td class="px-4 py-2 border-r border-pink-200">Student ID number (auto-generated if empty)</td>
+                                <td class="px-4 py-2">STU202400001</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <h4 class="text-sm font-medium text-blue-800 mb-2">💡 Sample CSV Format:</h4>
+                <div class="bg-white border rounded p-3 text-xs font-mono overflow-x-auto">
+                    <div class="text-blue-600 mb-1">first_name,last_name,email,course,year_level,section,password,id_number</div>
+                    <div class="text-gray-600 mb-1">John,Doe,john.doe@example.com,Computer Science,2,A,password123,STU202400001</div>
+                    <div class="text-gray-600 mb-1">Jane,Smith,jane.smith@example.com,Information Technology,1,B,password123,STU202400002</div>
+                    <div class="text-gray-600">Bob,Johnson,bob.j@example.com,Engineering,3,C,mypass456,STU202400003</div>
+                </div>
+            </div>
+
+            <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
+                <h4 class="text-sm font-medium text-purple-800 mb-2">📋 Database Structure:</h4>
+                <div class="text-xs text-purple-700 space-y-2">
+                    <div>
+                        <strong>Users Table:</strong> Stores login credentials and personal information
+                        <ul class="list-disc list-inside ml-4 mt-1">
+                            <li>id_number (auto-generated if not provided)</li>
+                            <li>first_name, last_name, email (from CSV)</li>
+                            <li>password (hashed automatically)</li>
+                            <li>role (automatically set to "student")</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong>Students Table:</strong> Stores academic information
+                        <ul class="list-disc list-inside ml-4 mt-1">
+                            <li>user_id (links to Users table)</li>
+                            <li>course, year_level, section (from CSV)</li>
+                        </ul>
                     </div>
                 </div>
-                
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                    <h4 class="text-sm font-medium text-blue-800 mb-2">💡 Sample CSV Format:</h4>
-                    <div class="bg-white border rounded p-2 text-xs font-mono">
-                        <div class="text-blue-600">name,email,course,year_level,section,password</div>
-                        <div class="text-gray-600">John Doe,john.doe@example.com,Computer Science,2,A,password123</div>
-                        <div class="text-gray-600">Jane Smith,jane.smith@example.com,Information Technology,1,B,password123</div>
-                    </div>
-                </div>
-                
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 class="text-sm font-medium text-yellow-800 mb-2">⚠️ Important Notes:</h4>
-                    <ul class="text-xs text-yellow-700 list-disc list-inside space-y-1">
-                        <li>The first row must contain the exact column headers shown above</li>
-                        <li>All fields are required for each student record</li>
-                        <li>Email addresses must be unique</li>
-                        <li>Year level should be a number between 1-4</li>
-                        <li>Supported file formats: CSV, XLSX, XLS</li>
-                    </ul>
-                </div>
-                
-                <div class="flex justify-end mt-4">
-                    <button type="button" 
-                            onclick="toggleSchemaModal()"
-                            class="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-colors duration-200">
-                        Got it!
-                    </button>
-                </div>
+            </div>
+            
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h4 class="text-sm font-medium text-yellow-800 mb-2">⚠️ Important Notes:</h4>
+                <ul class="text-xs text-yellow-700 list-disc list-inside space-y-1">
+                    <li><strong>Column order matters!</strong> Columns must be in the exact order shown above</li>
+                    <li><strong>Required fields:</strong> first_name, last_name, email are mandatory</li>
+                    <li><strong>Email must be unique</strong> - duplicate emails will be skipped</li>
+                    <li><strong>Password defaults:</strong> If password column is empty, "password123" will be used</li>
+                    <li><strong>ID number auto-generation:</strong> If id_number is empty, system generates one (e.g., STU20240001)</li>
+                    <li><strong>Year level:</strong> Should be a number between 1-5</li>
+                    <li><strong>Supported formats:</strong> CSV, XLSX, XLS</li>
+                    <li><strong>Header row:</strong> First row must contain column names exactly as shown</li>
+                </ul>
+            </div>
+            
+            <div class="flex justify-end mt-4">
+                <button type="button" 
+                        onclick="toggleSchemaModal()"
+                        class="px-6 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-colors duration-200">
+                    Got it!
+                </button>
             </div>
         </div>
     </div>
+</div>
+
+    <style>
+        .tab-button {
+            color: #9ca3af;
+            background-color: transparent;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab-button:hover {
+            color: #FF92C2;
+        }
+        
+        .tab-button.active {
+            color: #FF92C2;
+            background-color: white;
+            border-bottom-color: #FF92C2;
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 
     <script>
+        // Tab Switching Function
+        function switchTab(tabName) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Add active class to selected tab and content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            document.getElementById(tabName + '-content').classList.add('active');
+        }
+
         function toggleSchemaModal() {
             const modal = document.getElementById('schemaModal');
             modal.classList.toggle('hidden');
@@ -351,6 +522,37 @@
                     toggleSchemaModal();
                 }
             }
+        });
+
+        function confirmAction(message, formId) {
+            if (confirm(message)) {
+                document.getElementById(formId).submit();
+            }
+            return false;
+        }
+
+        // Live Search Functionality
+        const studentSearch = document.getElementById("student-search");
+        const studentTableBody = document.querySelector("table tbody");
+        const studentRows = studentTableBody.getElementsByTagName("tr");
+        const studentCounter = document.getElementById("student-counter");
+
+        studentSearch.addEventListener("keyup", function() {
+            let searchValue = this.value.toLowerCase();
+            let visibleCount = 0;
+
+            for (let i = 0; i < studentRows.length; i++) {
+                let rowText = studentRows[i].textContent.toLowerCase();
+
+                if (rowText.includes(searchValue)) {
+                    studentRows[i].style.display = "";
+                    visibleCount++;
+                } else {
+                    studentRows[i].style.display = "none";
+                }
+            }
+
+            studentCounter.textContent = `Showing ${visibleCount} student${visibleCount !== 1 ? 's' : ''}`;
         });
     </script>
 </x-app-layout>

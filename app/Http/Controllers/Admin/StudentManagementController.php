@@ -24,19 +24,25 @@ class StudentManagementController extends Controller
 
     public function index(Request $request)
     {
-        $query = Student::with('user', 'course');
+        $query = Student::with(['user', 'course', 'sections'])
+            ->join('users', 'students.user_id', '=', 'users.id');
 
         if ($request->has('search')) {
             $search = $request->search;
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            })
-            ->orWhere('student_number', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->where('users.first_name', 'like', "%{$search}%")
+                ->orWhere('users.last_name', 'like', "%{$search}%")
+                ->orWhere('users.email', 'like', "%{$search}%")
+                ->orWhere('students.student_number', 'like', "%{$search}%");
+            });
         }
 
-        $students = $query->paginate(10);
+        // Sort alphabetically by last name, then first name
+        $query->orderBy('users.last_name', 'asc')
+            ->orderBy('users.first_name', 'asc');
+
+        // Select only students.* to avoid column conflicts
+        $students = $query->select('students.*')->paginate(10);
 
         return view('admin.student.index', compact('students'));
     }
@@ -54,6 +60,7 @@ class StudentManagementController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'student_number' => 'required|string|unique:students,student_number',
@@ -77,12 +84,14 @@ class StudentManagementController extends Controller
             // Create user
             $user = User::create([
                 'first_name' => $request->first_name,
+                'middle_name' => $request->middle_name,
                 'last_name' => $request->last_name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'role' => 'student',
                 'is_active' => true
             ]);
+
 
             // Create student
             $student = Student::create([
@@ -385,6 +394,7 @@ class StudentManagementController extends Controller
 {
     $validator = Validator::make($request->all(), [
         'first_name' => 'required|string|max:255',
+        'middle_name' => 'nullable|string|max:255',
         'last_name' => 'required|string|max:255',
         'email' => ['required', 'email', Rule::unique('users')->ignore($student->user_id)],
         'student_number' => ['required', 'string', Rule::unique('students')->ignore($student->id)],
@@ -409,6 +419,7 @@ class StudentManagementController extends Controller
         // Update user details
         $userData = [
             'first_name' => $request->first_name,
+            'middle_name' => $request->middle_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
         ];

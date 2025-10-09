@@ -23,52 +23,27 @@
                 <h3 class="text-lg font-semibold text-gray-800">Search Instructors</h3>
             </div>
             
-            <form action="{{ route('admin.instructors.index') }}" method="GET" class="space-y-4">
+            {{-- ✅ Converted to client-side search --}}
+            <div class="space-y-4">
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
                     </div>
                     <input type="text" 
-                           name="search" 
-                           value="{{ request('search') }}"
+                           id="instructor-search"
                            placeholder="Search by name, email, or department..." 
                            class="w-full pl-11 pr-4 py-3 border border-[#FFC8FB]/50 rounded-xl bg-white/70 focus:bg-white focus:border-[#FF92C2] focus:ring-2 focus:ring-[#FF92C2]/20 focus:outline-none transition-all duration-200 text-gray-700 placeholder-gray-400">
                 </div>
-                
-                <div class="flex flex-col sm:flex-row gap-3 justify-end">
-                    <button type="submit" 
-                            class="px-6 py-3 bg-gradient-to-r from-[#FF92C2] to-[#ff6fb5] text-white rounded-xl hover:from-[#ff6fb5] hover:to-[#FF92C2] focus:outline-none focus:ring-2 focus:ring-[#FF92C2]/30 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                        <i class="fas fa-search mr-2"></i>
-                        Search Instructors
-                    </button>
-                    
-                    @if(request('search'))
-                        <a href="{{ route('admin.instructors.index') }}" 
-                           class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all duration-200 font-medium border border-gray-200 hover:border-gray-300 flex items-center justify-center">
-                            <i class="fas fa-times mr-2"></i>
-                            Clear Search
-                        </a>
-                    @endif
+                <div class="flex justify-end">
+                    <span class="text-xs text-gray-500" id="instructor-counter">
+                        Showing {{ $instructors->count() }} instructors
+                    </span>
                 </div>
-
-                {{-- Search Results Info --}}
-                @if(request('search'))
-                    <div class="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
-                        <div class="flex items-center">
-                            <i class="fas fa-info-circle text-blue-500 mr-2"></i>
-                            <span class="text-sm text-blue-700">
-                                Showing results for: <strong>"{{ request('search') }}"</strong>
-                            </span>
-                        </div>
-                        <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
-                            {{ $instructors->total() ?? 0 }} found
-                        </span>
-                    </div>
-                @endif
-            </form>
+            </div>
         </div>
     </div>
 
+    {{-- Table Section --}}
     <div class="py-6 sm:py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-[#FFF0FA] overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 sm:rounded-lg">
@@ -104,9 +79,9 @@
                                                 </th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody id="instructor-table-body">
                                             @forelse ($instructors as $instructor)
-                                                <tr class="bg-white border-b border-[#FFC8FB] hover:bg-[#FFD9FF]">
+                                                <tr class="bg-white border-b border-[#FFC8FB] hover:bg-[#FFD9FF] transition-colors duration-150">
                                                     <td class="py-3 px-4 font-medium">
                                                         {{ $instructor->name }}
                                                         <div class="text-xs text-gray-500 mt-1">
@@ -135,12 +110,12 @@
                                                     <td class="py-3 px-4">
                                                         <div class="flex flex-col sm:flex-row gap-2">
                                                             <a href="{{ route('admin.instructors.show', $instructor->id) }}" 
-                                                               class="inline-flex items-center text-blue-600 hover:text-blue-900">
+                                                               class="text-[#FF92C2] hover:text-[#ff6fb5]">
                                                                 <i class="fas fa-eye"></i>
                                                                 <span class="ml-2 sm:hidden">View</span>
                                                             </a>
                                                             <a href="{{ route('admin.instructors.edit', $instructor->id) }}" 
-                                                               class="inline-flex items-center text-yellow-600 hover:text-yellow-900">
+                                                               class="text-[#FF92C2] hover:text-[#ff6fb5]">
                                                                 <i class="fas fa-edit"></i>
                                                                 <span class="ml-2 sm:hidden">Edit</span>
                                                             </a>
@@ -148,38 +123,30 @@
                                                                   method="POST" 
                                                                   class="inline-flex" 
                                                                   onsubmit="return confirm('Are you sure you want to delete this instructor?');">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="inline-flex items-center text-red-600 hover:text-red-900">
-                                                                <i class="fas fa-trash"></i>
-                                                                <span class="ml-2 sm:hidden">Delete</span>
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="5" class="py-8 px-4 text-center text-gray-500">
-                                                    <div class="flex flex-col items-center">
-                                                        <i class="fas fa-user-tie text-4xl mb-4"></i>
-                                                        @if(request('search'))
-                                                            <p class="text-lg font-medium text-gray-900 mb-1">No instructors found</p>
-                                                            <p class="text-gray-600">No results match your search for "{{ request('search') }}"</p>
-                                                            <a href="{{ route('admin.instructors.index') }}" 
-                                                               class="mt-3 text-[#FF92C2] hover:text-[#ff6fb5] font-medium">
-                                                                Clear search and view all instructors
-                                                            </a>
-                                                        @else
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="inline-flex items-center text-red-600 hover:text-red-900">
+                                                                    <i class="fas fa-trash"></i>
+                                                                    <span class="ml-2 sm:hidden">Delete</span>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="5" class="py-8 px-4 text-center text-gray-500">
+                                                        <div class="flex flex-col items-center">
+                                                            <i class="fas fa-user-tie text-4xl mb-4"></i>
                                                             <p class="text-lg font-medium text-gray-900 mb-1">No instructors found</p>
                                                             <p class="text-gray-600">Add a new instructor to get started</p>
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -187,11 +154,35 @@
                     {{-- Pagination --}}
                     @if($instructors->hasPages())
                         <div class="mt-4 sm:mt-6">
-                            {{ $instructors->appends(request()->query())->links() }}
+                            {{ $instructors->links() }}
                         </div>
                     @endif
                 </div>
             </div>
         </div>
     </div>
+
+    {{-- ✅ Client-side Search Script (copied from subjects & adapted) --}}
+    <script>
+        const instructorSearch = document.getElementById("instructor-search");
+        const instructorTableBody = document.getElementById("instructor-table-body");
+        const instructorRows = instructorTableBody.getElementsByTagName("tr");
+        const instructorCounter = document.getElementById("instructor-counter");
+
+        instructorSearch.addEventListener("keyup", function() {
+            let searchValue = this.value.toLowerCase();
+            let visibleCount = 0;
+
+            for (let i = 0; i < instructorRows.length; i++) {
+                let rowText = instructorRows[i].textContent.toLowerCase();
+                if (rowText.includes(searchValue)) {
+                    instructorRows[i].style.display = "";
+                    visibleCount++;
+                } else {
+                    instructorRows[i].style.display = "none";
+                }
+            }
+            instructorCounter.textContent = `Showing ${visibleCount} instructor(s)`;
+        });
+    </script>
 </x-app-layout>

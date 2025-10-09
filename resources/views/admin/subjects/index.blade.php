@@ -1,4 +1,5 @@
 @section('title', 'Subjects Management')
+
 <x-app-layout>
     <div class="flex justify-between items-center px-4 sm:px-8 mt-4">
         <h1 class="text-xl sm:text-2xl font-bold text-[#FF92C2]">Subjects Management</h1>
@@ -20,14 +21,34 @@
                         </div>
                     @endif
 
-                    {{-- Search Bar --}}
-                    <div class="flex justify-between items-center mb-4">
-                        <input type="text" id="subject-search" 
-                            placeholder="Search subjects..." 
-                            class="w-full sm:w-1/3 px-3 py-2 text-sm border border-[#FFC8FB] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF92C2] focus:border-transparent shadow-sm">
-                        <span class="ml-4 text-xs text-gray-500" id="subject-counter">
-                            Showing {{ $subjects->count() }} subjects
-                        </span>
+                    {{-- 🌸 Stylish Search Bar (Copied from Instructor Page) --}}
+                    <div class="mb-6">
+                        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-[#FFC8FB]/30 p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-gradient-to-r from-[#FF92C2] to-[#FFC8FB] rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-search text-white text-sm"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-800">Search Subjects</h3>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <i class="fas fa-search text-gray-400"></i>
+                                    </div>
+                                    <input type="text" 
+                                           id="subject-search"
+                                           placeholder="Search by subject code, name, or year..." 
+                                           class="w-full pl-11 pr-4 py-3 border border-[#FFC8FB]/50 rounded-xl bg-white/70 focus:bg-white focus:border-[#FF92C2] focus:ring-2 focus:ring-[#FF92C2]/20 focus:outline-none transition-all duration-200 text-gray-700 placeholder-gray-400">
+                                </div>
+
+                                <div class="flex justify-end">
+                                    <span class="text-xs text-gray-500" id="subject-counter">
+                                        Showing {{ $subjects->count() }} subjects
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Table --}}

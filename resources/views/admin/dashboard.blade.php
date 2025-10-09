@@ -151,38 +151,44 @@
                 </div>
             </div>
 
-            <!-- Quick Actions Section -->
+            <!-- 🌸 Quick Actions Section -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-[#FFF0FA] rounded-2xl shadow-sm border border-[#FFC8FB] p-6 hover:shadow-lg transition-all duration-300">
+                <!-- Manage Users -->
+                <a href="{{ route('admin.student.index') }}" 
+                class="block bg-[#FFF0FA] rounded-2xl shadow-sm border border-[#FFC8FB] p-6 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group">
                     <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 bg-[#FFC8FB] rounded-xl flex items-center justify-center">
+                        <div class="w-12 h-12 bg-[#FFC8FB] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                             <i class="fas fa-user-plus text-[#FF92C2]"></i>
                         </div>
                         <h3 class="text-lg font-semibold text-[#FF92C2]">Manage Users</h3>
                     </div>
                     <p class="text-gray-600 text-sm">Add, edit, or remove students and instructors from your system.</p>
-                </div>
+                </a>
 
-                <div class="bg-[#FFF0FA] rounded-2xl shadow-sm border border-[#FFC8FB] p-6 hover:shadow-lg transition-all duration-300">
+                <!-- Course Management -->
+                <a href="{{ route('admin.subjects.index') }}" 
+                class="block bg-[#FFF0FA] rounded-2xl shadow-sm border border-[#FFC8FB] p-6 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group">
                     <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                             <i class="fas fa-book-open text-white"></i>
                         </div>
                         <h3 class="text-lg font-semibold text-[#FF92C2]">Course Management</h3>
                     </div>
                     <p class="text-gray-600 text-sm">Create and organize subjects, modules, and learning materials.</p>
-                </div>
+                </a>
 
-                <div class="bg-[#FFF0FA] rounded-2xl shadow-sm border border-[#FFC8FB] p-6 hover:shadow-lg transition-all duration-300">
+                <!-- Analytics -->
+                <a href="{{ route('admin.reports.index') }}" 
+                class="block bg-[#FFF0FA] rounded-2xl shadow-sm border border-[#FFC8FB] p-6 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 group">
                     <div class="flex items-center space-x-4 mb-4">
-                        <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center">
+                        <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                             <i class="fas fa-chart-bar text-white"></i>
                         </div>
                         <h3 class="text-lg font-semibold text-[#FF92C2]">Analytics</h3>
                     </div>
                     <p class="text-gray-600 text-sm">View detailed reports and insights about system performance.</p>
-                </div>
+                </a>
             </div>
-        </div>
+
     
 @endsection

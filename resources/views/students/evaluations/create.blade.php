@@ -1,4 +1,94 @@
 <x-app-layout>
+    <style>
+        .star-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+
+        .star {
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .star svg {
+            width: 100%;
+            height: 100%;
+            fill: #E0E0E0;
+            transition: fill 0.2s ease, transform 0.2s ease;
+        }
+
+        .star:hover svg,
+        .star.hovered svg {
+            fill: #FFD700;
+            transform: scale(1.15);
+        }
+
+        .star.selected svg {
+            fill: #FF6B35;
+        }
+
+        .star:active {
+            transform: scale(0.95);
+        }
+
+        .rating-text {
+            color: #666;
+            font-size: 14px;
+            margin-left: 12px;
+            min-width: 100px;
+            font-weight: 500;
+        }
+
+        .dark .rating-text {
+            color: #FFC8FB;
+        }
+
+        .rating-descriptions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            padding: 0 4px;
+            max-width: 240px;
+        }
+
+        .rating-desc {
+            font-size: 11px;
+            color: #999;
+            text-align: center;
+            width: 40px;
+        }
+
+        .dark .rating-desc {
+            color: #FFC8FB;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 640px) {
+            .star {
+                width: 36px;
+                height: 36px;
+            }
+
+            .rating-desc {
+                font-size: 10px;
+                width: 36px;
+            }
+
+            .rating-text {
+                font-size: 13px;
+                min-width: 80px;
+            }
+        }
+    </style>
+
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-[#FFF0FA] dark:bg-[#595758] overflow-hidden shadow-xl sm:rounded-2xl">
@@ -81,8 +171,8 @@
                                             required>
                                         <option value="">Choose a course</option>
                                         @forelse($courses as $course)
-                                            <option value="{{ $course->id }}">{{ $course->course_name }}</option>
-                                                {{ $course->name }}
+                                            <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
+                                                {{ $course->course_name }}
                                             </option>
                                         @empty
                                             <option value="" disabled>No courses available</option>
@@ -109,39 +199,38 @@
                                     </svg>
                                     Evaluation Criteria
                                 </h3>
-                                <p class="text-sm text-gray-600 dark:text-[#FFC8FB]/80 mt-2">Please rate each aspect on a scale of 1-5 (1 = Poor, 5 = Excellent)</p>
+                                <p class="text-sm text-gray-600 dark:text-[#FFC8FB]/80 mt-2">Please rate each aspect by clicking the stars (1 = Poor, 5 = Excellent)</p>
                             </div>
 
                             @foreach($criteria as $key => $criterion)
                                 <div class="bg-white dark:bg-[#4a4949] p-6 rounded-xl border border-[#FFC8FB]/30 shadow-sm">
                                     <label class="block text-sm font-medium text-gray-700 dark:text-[#FFC8FB] mb-4">{{ $criterion }}</label>
-                                    <div class="flex flex-wrap gap-4">
+                                    
+                                    <div class="star-rating" data-rating-name="criterion_{{ $key }}">
                                         @for($i = 1; $i <= 5; $i++)
-                                            <label class="flex items-center space-x-3 cursor-pointer hover:bg-[#FF92C2]/5 p-3 rounded-lg transition-all duration-200">
-                                                <input type="radio" 
-                                                       name="responses[{{ $key }}]" 
-                                                       value="{{ $i }}" 
-                                                       class="w-4 h-4 text-[#FF92C2] border-2 border-[#FFC8FB] focus:ring-2 focus:ring-[#FF92C2]/20" 
-                                                       {{ old("responses.{$key}") == $i ? 'checked' : '' }}
-                                                       required>
-                                                <div class="flex items-center space-x-2">
-                                                    <span class="text-sm font-medium text-gray-600 dark:text-[#FFC8FB]">{{ $i }}</span>
-                                                    <div class="flex">
-                                                        @for($j = 1; $j <= $i; $j++)
-                                                            <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 24 24">
-                                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                                            </svg>
-                                                        @endfor
-                                                        @for($k = $i + 1; $k <= 5; $k++)
-                                                            <svg class="w-4 h-4 text-gray-300 fill-current" viewBox="0 0 24 24">
-                                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                                            </svg>
-                                                        @endfor
-                                                    </div>
-                                                </div>
+                                            <input type="radio" 
+                                                   name="responses[{{ $key }}]" 
+                                                   value="{{ $i }}" 
+                                                   id="criterion_{{ $key }}_{{ $i }}"
+                                                   {{ old("responses.{$key}") == $i ? 'checked' : '' }}
+                                                   required>
+                                            <label for="criterion_{{ $key }}_{{ $i }}" class="star" data-value="{{ $i }}">
+                                                <svg viewBox="0 0 24 24">
+                                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                                </svg>
                                             </label>
                                         @endfor
+                                        <span class="rating-text">Not rated</span>
                                     </div>
+
+                                    <div class="rating-descriptions">
+                                        <span class="rating-desc">Poor</span>
+                                        <span class="rating-desc">Fair</span>
+                                        <span class="rating-desc">Good</span>
+                                        <span class="rating-desc">Very Good</span>
+                                        <span class="rating-desc">Excellent</span>
+                                    </div>
+
                                     @error("responses.{$key}")
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
@@ -187,4 +276,87 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ratingTexts = {
+                1: 'Poor',
+                2: 'Fair',
+                3: 'Good',
+                4: 'Very Good',
+                5: 'Excellent'
+            };
+
+            // Handle star rating interactions for each rating container
+            document.querySelectorAll('.star-rating').forEach(container => {
+                const stars = container.querySelectorAll('.star');
+                const ratingText = container.querySelector('.rating-text');
+                const inputs = container.querySelectorAll('input[type="radio"]');
+                let currentRating = 0;
+
+                // Check if there's a pre-selected value (from old input)
+                inputs.forEach((input, index) => {
+                    if (input.checked) {
+                        currentRating = index + 1;
+                        ratingText.textContent = ratingTexts[currentRating];
+                        updateStarsSelected(currentRating, stars);
+                    }
+                });
+
+                stars.forEach((star, index) => {
+                    // Hover effect
+                    star.addEventListener('mouseenter', () => {
+                        updateStars(index + 1, stars);
+                    });
+
+                    // Click to select
+                    star.addEventListener('click', () => {
+                        currentRating = index + 1;
+                        const input = star.previousElementSibling;
+                        input.checked = true;
+                        ratingText.textContent = ratingTexts[currentRating];
+                        updateStarsSelected(currentRating, stars);
+                    });
+                });
+
+                // Reset on mouse leave if no rating selected
+                container.addEventListener('mouseleave', () => {
+                    if (currentRating > 0) {
+                        updateStarsSelected(currentRating, stars);
+                    } else {
+                        resetStars(stars);
+                    }
+                });
+            });
+
+            function updateStars(rating, stars) {
+                stars.forEach((star, index) => {
+                    if (index < rating) {
+                        star.classList.add('hovered');
+                        star.classList.remove('selected');
+                    } else {
+                        star.classList.remove('hovered');
+                    }
+                });
+            }
+
+            function updateStarsSelected(rating, stars) {
+                stars.forEach((star, index) => {
+                    star.classList.remove('hovered');
+                    if (index < rating) {
+                        star.classList.add('selected');
+                    } else {
+                        star.classList.remove('selected');
+                    }
+                });
+            }
+
+            function resetStars(stars) {
+                stars.forEach(star => {
+                    star.classList.remove('hovered');
+                    star.classList.remove('selected');
+                });
+            }
+        });
+    </script>
 </x-app-layout>

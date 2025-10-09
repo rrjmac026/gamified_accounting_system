@@ -97,6 +97,33 @@
                 </div>
             </div>
 
+            <!-- Important Rules Section -->
+            <div class="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">Important Rules for Post-Closing Trial Balance</h3>
+                        <div class="mt-2 text-sm text-yellow-700">
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Only permanent accounts should be included (Assets, Liabilities, Owner's Capital)</li>
+                                <li>All temporary accounts should be zero (Revenue, Expenses, Withdrawals)</li>
+                                <li>Total debits must equal total credits</li>
+                                <li>All account balances must carry their normal balances</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validation Status Section -->
+            <div id="validationStatus" class="mt-4 p-4 rounded hidden">
+                <ul class="list-disc list-inside space-y-2" id="validationMessages"></ul>
+            </div>
+
             <form id="answerKeyForm" action="{{ route('instructors.performance-tasks.answer-sheets.update', ['task' => $task, 'step' => 10]) }}" method="POST">
                 @csrf
                 @method('PUT')
@@ -266,6 +293,77 @@
 
             // Initial check
             calculateTotals();
+
+            // Validation function
+            function validateAnswerKey(data) {
+                const validationMessages = [];
+                let hasErrors = false;
+
+                // Check for temporary accounts
+                const temporaryAccounts = ['Revenue', 'Sales', 'Income', 'Expense', 'Withdrawal'];
+                data.forEach((row, index) => {
+                    if (row[0] && temporaryAccounts.some(term => row[0].toLowerCase().includes(term.toLowerCase()))) {
+                        validationMessages.push({
+                            type: 'error',
+                            message: `Row ${index + 1}: Temporary account "${row[0]}" should not appear in post-closing trial balance`
+                        });
+                        hasErrors = true;
+                    }
+                });
+
+                // Calculate totals
+                let debitTotal = 0;
+                let creditTotal = 0;
+                data.forEach(row => {
+                    debitTotal += parseFloat(row[2] || 0);
+                    creditTotal += parseFloat(row[3] || 0);
+                });
+
+                // Check if totals match
+                if (Math.abs(debitTotal - creditTotal) > 0.01) {
+                    validationMessages.push({
+                        type: 'error',
+                        message: `Debits (${debitTotal.toFixed(2)}) do not equal Credits (${creditTotal.toFixed(2)})`
+                    });
+                    hasErrors = true;
+                } else if (debitTotal > 0) {
+                    validationMessages.push({
+                        type: 'success',
+                        message: `✓ Balanced - Total: ₱${debitTotal.toFixed(2)}`
+                    });
+                }
+
+                // Update validation status display
+                const statusDiv = document.getElementById('validationStatus');
+                const messagesList = document.getElementById('validationMessages');
+                messagesList.innerHTML = '';
+
+                validationMessages.forEach(msg => {
+                    const li = document.createElement('li');
+                    li.className = msg.type === 'error' ? 'text-red-600' : 'text-green-600';
+                    li.textContent = msg.message;
+                    messagesList.appendChild(li);
+                });
+
+                statusDiv.className = `mt-4 p-4 rounded ${hasErrors ? 'bg-red-50' : 'bg-green-50'}`;
+                statusDiv.classList.remove('hidden');
+
+                return !hasErrors;
+            }
+
+            // Modify form submission
+            document.getElementById('answerKeyForm').addEventListener('submit', function(e) {
+                const data = hot.getData();
+                if (!validateAnswerKey(data)) {
+                    e.preventDefault();
+                    alert('Please correct the validation errors before saving the answer key.');
+                }
+            });
+
+            // Add validation check on data changes
+            hot.addHook('afterChange', function() {
+                validateAnswerKey(hot.getData());
+            });
 
             // Capture spreadsheet data on submit
             const answerKeyForm = document.getElementById("answerKeyForm");

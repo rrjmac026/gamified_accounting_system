@@ -10,4 +10,12 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+
+    server: {
+        host: '0.0.0.0',
+        hmr: {
+            host: '192.168.254.122', // imong local IP address gamiton
+        },
+        port: 5173,
+    },
 });

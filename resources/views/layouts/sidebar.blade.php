@@ -7,13 +7,17 @@
     </div>
 
     <!-- Sidebar -->
-    <aside x-show="$store.sidebar.isOpen" x-cloak
+    <aside 
+        x-show="$store.sidebar.isOpen"
+        x-cloak
         x-transition:enter="transform transition-transform duration-300 ease-in-out"
         x-transition:enter-start="-translate-x-full"
         x-transition:enter-end="translate-x-0"
         x-transition:leave="transform transition-transform duration-300 ease-in-out"
         x-transition:leave-start="translate-x-0"
         x-transition:leave-end="-translate-x-full"
+        @click.outside="$store.sidebar.isOpen = false"
+        @click.capture="if ($event.target.closest('a') && window.innerWidth < 1024) $store.sidebar.isOpen = false"
         :class="{
             'fixed': window.innerWidth < 1024,
             'absolute lg:fixed': window.innerWidth >= 1024

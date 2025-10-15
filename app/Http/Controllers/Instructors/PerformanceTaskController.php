@@ -31,14 +31,14 @@ class PerformanceTaskController extends Controller
     /**
      * Show form to create a new performance task
      */
-    // public function create()
-    // {
-    //     $instructor = Auth::user()->instructor;
-    //     $subjects = $instructor->subjects()->with('sections')->get();
-    //     $sections = $instructor->sections;
+    public function create()
+    {
+        $instructor = Auth::user()->instructor;
+        $subjects = $instructor->subjects()->with('sections')->get();
+        $sections = $instructor->sections;
 
-    //     return view('instructors.performance-tasks.create', compact('subjects', 'sections'));
-    // }
+        return view('instructors.performance-tasks.create', compact('subjects', 'sections'));
+    }
 
     public function store(Request $request)
     {

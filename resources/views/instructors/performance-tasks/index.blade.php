@@ -69,7 +69,7 @@
                                             Step {{ $task->step }}
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-500">
-                                            {{ Str::limit($task->description, 50) }}
+                                            {!! Str::limit(strip_tags($task->description), 50) !!}
                                         </td>
                                         <td class="px-6 py-4 text-center">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">

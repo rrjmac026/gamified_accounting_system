@@ -84,7 +84,7 @@
                 <!-- Instructions Section -->
                 <div class="p-4 sm:p-6 border-b border-gray-200">
                     <p class="text-xs sm:text-sm text-gray-600">
-                        {{ $performanceTask->description ?? 'No instructions provided by your instructor.' }}
+                        {!! $performanceTask->description ?? 'No instructions provided by your instructor.' !!}
                     </p>
                 </div>
 

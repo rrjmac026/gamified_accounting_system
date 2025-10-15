@@ -39,7 +39,7 @@
         <div class="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-4 sm:p-6 border-b border-gray-200">
                 <p class="text-xs sm:text-sm text-gray-600">
-                    {{ $performanceTask->description ?? 'Analyze the transactions below and fill in the affected accounts and amounts.' }}
+                    {!! $performanceTask->description ?? 'Analyze the transactions below and fill in the affected accounts and amounts.' !!}
                 </p>
             </div>
 

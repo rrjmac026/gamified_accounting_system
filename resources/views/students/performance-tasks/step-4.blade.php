@@ -58,7 +58,7 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-4 sm:p-6 border-b border-gray-200">
                 <p class="text-xs sm:text-sm text-gray-600">
-                    {{ $performanceTask->description ?? 'Review your ledger balances before continuing.' }}
+                    {!! $performanceTask->description ?? 'Review your ledger balances before continuing.' !!}
                 </p>
             </div>
 

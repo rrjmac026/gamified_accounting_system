@@ -145,12 +145,17 @@
 
                             {{-- Section --}}
                             <div>
-                                <label class="block text-sm font-semibold text-[#FF92C2] mb-2">Section</label>
+                                <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Section</label>
                                 
-                                {{-- Search Input --}}
-                                <input type="text" id="section-search" placeholder="Search sections..."
-                                    class="w-full mb-2 rounded-lg border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
-                                            text-gray-800 px-3 py-2 text-sm transition-all duration-200" />
+                                {{-- Search Input with icon --}}
+                                <div class="relative mb-2">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-search text-gray-400 text-sm"></i>
+                                    </div>
+                                    <input type="text" id="section-search" placeholder="Search sections..."
+                                        class="w-full pl-10 pr-4 py-2 rounded-lg border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                                text-gray-800 text-sm transition-all duration-200 bg-white" />
+                                </div>
 
                                 {{-- Hidden input to store selected section --}}
                                 <input type="hidden" name="section_id" id="selected-section-id" value="{{ old('section_id') }}">
@@ -178,17 +183,25 @@
                         </div>
 
                         {{-- Subjects Section --}}
-                        <div>
+                        <div class="col-span-1 sm:col-span-3">
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-2">Assign Subjects</label>
                             
-                            {{-- Search Input --}}
-                            <input type="text" id="subject-search" placeholder="Search subjects by code or name..."
-                                class="w-full mb-2 rounded-lg border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
-                                        text-gray-800 px-3 py-2 text-sm transition-all duration-200" />
+                            {{-- Search Input with icon --}}
+                            <div class="relative mb-3">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                                    <i class="fas fa-search text-gray-500 text-sm"></i>
+                                </div>
+                                <input type="text" 
+                                       id="subject-search" 
+                                       placeholder="Search subjects by code or name..."
+                                       class="relative w-full pl-10 pr-4 py-2.5 rounded-lg border-2 border-[#FFC8FB] 
+                                              focus:border-[#FF92C2] focus:ring-2 focus:ring-[#FF92C2]/20 focus:outline-none
+                                              text-gray-800 text-sm transition-all duration-200 bg-white shadow-sm" />
+                            </div>
 
                             {{-- Subjects Checkbox List --}}
                             <div id="subject-list"
-                                class="w-full rounded-lg shadow-sm bg-white border border-[#FFC8FB] 
+                                class="w-full rounded-lg shadow-md bg-white border-2 border-[#FFC8FB] 
                                         max-h-60 overflow-y-auto">
                                 @foreach($subjects as $subject)
                                     <label class="flex items-center space-x-3 px-4 py-2.5 hover:bg-[#FFC8FB]/20 cursor-pointer subject-item border-b border-[#FFC8FB]/30 last:border-b-0">

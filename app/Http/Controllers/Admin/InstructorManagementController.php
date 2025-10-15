@@ -46,6 +46,7 @@ class InstructorManagementController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'first_name'     => 'required|string|max:255',
+            'middle_name'    => 'required|string|max:255',
             'last_name'      => 'required|string|max:255',
             'email'          => 'required|email|unique:users,email',
             'employee_id'    => 'required|string|max:50|unique:instructors',
@@ -63,6 +64,7 @@ class InstructorManagementController extends Controller
 
             $user = User::create([
                 'first_name' => $request->first_name,
+                'middle_name' => $request->middle_name,
                 'last_name'  => $request->last_name,
                 'email'      => $request->email,
                 'password'   => Hash::make($request->password),
@@ -84,6 +86,7 @@ class InstructorManagementController extends Controller
                 $instructor->id,
                 [
                     'first_name' => $user->first_name,
+                    'middle_name' => $user->middle_name,
                     'last_name' => $user->last_name,
                     'email' => $user->email,
                     'department' => $instructor->department
@@ -112,6 +115,7 @@ class InstructorManagementController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'first_name'     => 'required|string|max:255',
+            'middle_name'    => 'required|string|max:255',
             'last_name'      => 'required|string|max:255',
             'email'          => ['required', 'email', Rule::unique('users', 'email')->ignore($instructor->user_id)],
             'employee_id'    => ['required', 'string', 'max:50', Rule::unique('instructors')->ignore($instructor->id)],
@@ -131,6 +135,7 @@ class InstructorManagementController extends Controller
             // Update User
             $instructor->user->update([
                 'first_name' => $request->first_name,
+                'middle_name' => $request->middle_name,
                 'last_name'  => $request->last_name,
                 'email'      => $request->email,
                 'password'   => $request->filled('password') ? 

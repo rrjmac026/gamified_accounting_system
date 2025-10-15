@@ -51,8 +51,8 @@
         <div class="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-4 sm:p-6 border-b border-gray-200">
                 <p class="text-xs sm:text-sm text-gray-600">
-                    {{ $performanceTask->description ?? 'No instructions provided by your instructor.' }}
-                </p>
+                        {!! $performanceTask->description ?? 'No instructions provided by your instructor.' !!}
+                    </p>
             </div>
 
             <form id="saveForm" method="POST" action="{{ route('students.performance-tasks.save-step', 2) }}">

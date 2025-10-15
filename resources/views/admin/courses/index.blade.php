@@ -1,111 +1,163 @@
 @section('title', 'Course Page')
 <x-app-layout>
-    <div class="flex justify-end px-4 sm:px-8 mt-4">
-        <a href="{{ route('admin.courses.create') }}" 
-           class="w-full sm:w-auto inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#FF92C2] hover:bg-[#ff6fb5] rounded-lg shadow-sm hover:shadow transition-all duration-200">
-            <i class="fas fa-plus mr-2"></i>Add Course
-        </a>
+    {{-- Add Course Header Section --}}
+    <div class="flex flex-col sm:flex-row justify-between items-center px-4 sm:px-8 mt-4 gap-4">
+        <h2 class="text-lg sm:text-xl font-semibold text-[#FF92C2]">Course Management</h2>
+        <div class="w-full sm:w-auto">
+            <a href="{{ route('admin.courses.create') }}" 
+               class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-gradient-to-r from-pink-500 to-pink-600 text-white rounded-lg hover:from-pink-600 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg">
+                <i class="fas fa-plus mr-2"></i>
+                Add Course
+            </a>
+        </div>
     </div>
 
+    {{-- Enhanced Search Form --}}
+    <div class="px-4 sm:px-8 mt-8">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-[#FFC8FB]/30 p-6">
+            <div class="flex items-center mb-4">
+                <div class="w-8 h-8 bg-gradient-to-r from-[#FF92C2] to-[#FFC8FB] rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-search text-white text-sm"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800">Search Courses</h3>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" 
+                           id="course-search"
+                           placeholder="Search by course code, name, or department..." 
+                           class="w-full pl-11 pr-4 py-3 border border-[#FFC8FB]/50 rounded-xl bg-white/70 focus:bg-white focus:border-[#FF92C2] focus:ring-2 focus:ring-[#FF92C2]/20 focus:outline-none transition-all duration-200 text-gray-700 placeholder-gray-400">
+                </div>
+                <div class="flex justify-end">
+                    <span class="text-xs text-gray-500" id="course-counter">
+                        Showing {{ $courses->count() }} courses
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Table Section --}}
     <div class="py-6 sm:py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-[#FFF0FA] overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 rounded-lg sm:rounded-2xl">
+            <div class="bg-[#FFF0FA] overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 sm:rounded-lg">
                 <div class="p-4 sm:p-6 text-gray-700">
-
-                    {{-- ✅ Success message --}}
                     @if (session('success'))
                         <div class="mb-4 px-4 py-2 bg-green-100 border border-green-200 text-green-700 rounded-md">
                             {{ session('success') }}
                         </div>
                     @endif
 
-                    {{-- ✅ Search Bar --}}
-                    <div class="mb-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <form action="{{ route('admin.courses.index') }}" method="GET" class="flex w-full sm:w-1/2">
-                            <div class="relative flex-grow">
-                                <input type="text" 
-                                       name="search" 
-                                       value="{{ request('search') }}" 
-                                       placeholder="Search courses by code, name, or department..."
-                                       class="w-full pl-10 pr-4 py-2 border border-[#FFC8FB] rounded-l-lg focus:ring-2 focus:ring-[#FF92C2] focus:border-[#FF92C2] text-sm sm:text-base">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                                    <i class="fas fa-search"></i>
-                                </span>
+                    {{-- Responsive Table --}}
+                    <div class="relative">
+                        <div class="overflow-x-auto">
+                            <div class="inline-block min-w-full align-middle">
+                                <div class="overflow-hidden shadow-md rounded-lg">
+                                    <table class="min-w-full divide-y divide-[#FFC8FB]">
+                                        <thead class="bg-[#FFC8FB] text-xs uppercase">
+                                            <tr>
+                                                <th scope="col" class="py-3 px-4">
+                                                    Course Code
+                                                </th>
+                                                <th scope="col" class="py-3 px-4">
+                                                    Course Name
+                                                </th>
+                                                <th scope="col" class="hidden md:table-cell py-3 px-4">
+                                                    Department
+                                                </th>
+                                                <th scope="col" class="hidden lg:table-cell py-3 px-4">
+                                                    Duration
+                                                </th>
+                                                <th scope="col" class="py-3 px-4">
+                                                    Status
+                                                </th>
+                                                <th scope="col" class="py-3 px-4">
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="course-table-body">
+                                            @forelse ($courses as $course)
+                                                <tr class="bg-white border-b border-[#FFC8FB] hover:bg-[#FFD9FF] transition-colors duration-150">
+                                                    <td class="py-3 px-4 font-medium">
+                                                        {{ $course->course_code }}
+                                                    </td>
+                                                    <td class="py-3 px-4">
+                                                        {{ $course->course_name }}
+                                                    </td>
+                                                    <td class="hidden md:table-cell py-3 px-4">
+                                                        <span class="text-sm">{{ $course->department }}</span>
+                                                    </td>
+                                                    <td class="hidden lg:table-cell py-3 px-4">
+                                                        <div class="flex items-center gap-2">
+                                                            <i class="fas fa-clock text-xs text-gray-400"></i>
+                                                            <span class="text-sm">{{ $course->duration_years }} years</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="py-3 px-4">
+                                                        @if($course->is_active)
+                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                                <i class="fas fa-check-circle mr-1"></i>
+                                                                Active
+                                                            </span>
+                                                        @else
+                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                                <i class="fas fa-times-circle mr-1"></i>
+                                                                Inactive
+                                                            </span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="py-3 px-4">
+                                                        <div class="flex flex-col sm:flex-row gap-2">
+                                                            <a href="{{ route('admin.courses.show', $course) }}" 
+                                                               class="text-[#FF92C2] hover:text-[#ff6fb5]">
+                                                                <i class="fas fa-eye"></i>
+                                                                <span class="ml-2 sm:hidden">View</span>
+                                                            </a>
+                                                            <a href="{{ route('admin.courses.edit', $course) }}" 
+                                                               class="text-[#FF92C2] hover:text-[#ff6fb5]">
+                                                                <i class="fas fa-edit"></i>
+                                                                <span class="ml-2 sm:hidden">Edit</span>
+                                                            </a>
+                                                            <form action="{{ route('admin.courses.destroy', $course) }}" 
+                                                                  method="POST" 
+                                                                  class="inline-flex" 
+                                                                  onsubmit="return confirm('Are you sure you want to delete this course?');">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="inline-flex items-center text-red-600 hover:text-red-900">
+                                                                    <i class="fas fa-trash"></i>
+                                                                    <span class="ml-2 sm:hidden">Delete</span>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="6" class="py-8 px-4 text-center text-gray-500">
+                                                        <div class="flex flex-col items-center">
+                                                            <i class="fas fa-graduation-cap text-4xl mb-4"></i>
+                                                            <p class="text-lg font-medium text-gray-900 mb-1">No courses found</p>
+                                                            <p class="text-gray-600">Add a new course to get started</p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                            <button type="submit" 
-                                    class="px-4 py-2 bg-[#FF92C2] text-white rounded-r-lg hover:bg-[#ff6fb5] focus:outline-none focus:ring-2 focus:ring-[#FF92C2]">
-                                Search
-                            </button>
-                        </form>
-
-                        {{-- ✅ Clear Filter --}}
-                        @if(request('search'))
-                            <a href="{{ route('admin.courses.index') }}" 
-                               class="text-sm text-[#FF92C2] hover:text-[#ff6fb5]">
-                                <i class="fas fa-times"></i> Clear
-                            </a>
-                        @endif
+                        </div>
                     </div>
 
-                    {{-- ✅ Table --}}
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full table-auto">
-                            <thead class="bg-[#FFC8FB]">
-                                <tr>
-                                    <th class="py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Course Code</th>
-                                    <th class="py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Name</th>
-                                    <th class="hidden md:table-cell py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Department</th>
-                                    <th class="hidden lg:table-cell py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Duration</th>
-                                    <th class="py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Status</th>
-                                    <th class="py-2 sm:py-3 px-3 sm:px-6 text-left text-xs sm:text-sm font-medium text-pink-900">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-[#FFF6FD] divide-y divide-[#FFC8FB]">
-                                @forelse ($courses as $course)
-                                    <tr class="hover:bg-[#FFD9FF] transition-colors duration-150">
-                                        <td class="py-4 px-3 sm:px-6 text-sm text-gray-700">{{ $course->course_code }}</td>
-                                        <td class="py-4 px-3 sm:px-6 text-sm text-gray-700">{{ $course->course_name }}</td>
-                                        <td class="hidden md:table-cell py-4 px-3 sm:px-6 text-sm text-gray-700">{{ $course->department }}</td>
-                                        <td class="hidden lg:table-cell py-4 px-3 sm:px-6 text-sm text-gray-700">{{ $course->duration_years }} years</td>
-                                        <td class="py-4 px-3 sm:px-6 text-sm">
-                                            @if($course->is_active)
-                                                <span class="text-green-600 font-medium">Active</span>
-                                            @else
-                                                <span class="text-red-600 font-medium">Inactive</span>
-                                            @endif
-                                        </td>
-                                        <td class="py-4 px-3 sm:px-6 text-sm space-x-2">
-                                            <a href="{{ route('admin.courses.show', $course) }}" class="text-[#FF6FB5] hover:text-[#e8559d]">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('admin.courses.edit', $course) }}" class="text-[#FF6FB5] hover:text-[#e8559d]">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <button type="button" 
-                                                onclick="return confirmAction('Are you sure you want to delete this course?', 'delete-course-{{ $course->id }}')"
-                                                class="text-red-500 hover:text-red-700 transition-colors duration-150">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                            <form id="delete-course-{{ $course->id }}" action="{{ route('admin.courses.destroy', $course) }}" method="POST" class="hidden">
-                                                @csrf
-                                                @method('DELETE')
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6" class="py-4 px-3 sm:px-6 text-sm text-center text-gray-600">
-                                            No courses found
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    
                     {{-- Pagination --}}
                     @if($courses->hasPages())
-                        <div class="mt-6 p-4">
+                        <div class="mt-4 sm:mt-6">
                             {{ $courses->links() }}
                         </div>
                     @endif
@@ -114,12 +166,27 @@
         </div>
     </div>
 
+    {{-- Client-side Search Script --}}
     <script>
-        function confirmAction(message, formId) {
-            if (confirm(message)) {
-                document.getElementById(formId).submit();
+        const courseSearch = document.getElementById("course-search");
+        const courseTableBody = document.getElementById("course-table-body");
+        const courseRows = courseTableBody.getElementsByTagName("tr");
+        const courseCounter = document.getElementById("course-counter");
+
+        courseSearch.addEventListener("keyup", function() {
+            let searchValue = this.value.toLowerCase();
+            let visibleCount = 0;
+
+            for (let i = 0; i < courseRows.length; i++) {
+                let rowText = courseRows[i].textContent.toLowerCase();
+                if (rowText.includes(searchValue)) {
+                    courseRows[i].style.display = "";
+                    visibleCount++;
+                } else {
+                    courseRows[i].style.display = "none";
+                }
             }
-            return false;
-        }
+            courseCounter.textContent = `Showing ${visibleCount} course${visibleCount !== 1 ? 's' : ''}`;
+        });
     </script>
 </x-app-layout>

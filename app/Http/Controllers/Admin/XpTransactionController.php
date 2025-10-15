@@ -16,9 +16,13 @@ class XpTransactionController extends Controller
 
     public function index()
     {
-        $transactions = XpTransaction::with('student')->latest('processed_at')->get();
+        $transactions = XpTransaction::with('student')
+            ->latest('processed_at')
+            ->paginate(10); // 👈 shows 10 records per page
+
         return view('admin.xp-transactions.index', compact('transactions'));
     }
+
 
     public function create()
     {

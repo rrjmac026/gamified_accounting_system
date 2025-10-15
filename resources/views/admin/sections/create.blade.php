@@ -140,9 +140,11 @@
                             <div class="relative">
                                 <input type="text" id="student-search" 
                                        placeholder="Search students by name or email..." 
-                                       class="w-full pl-10 pr-4 py-2 rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
+                                       class="w-full rounded-lg shadow-sm bg-white 
+                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                                text-gray-800 px-4 py-2 transition-all duration-200">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-search text-gray-400"></i>
+                                    <i class="text-gray-400"></i>
                                 </div>
                             </div>
                         </div>

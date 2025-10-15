@@ -18,6 +18,14 @@
                                    required>
                         </div>
                         <div>
+                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Middle Name</label>
+                            <input type="text" name="middle_name" value="{{ old('middle_name') }}"
+                                   class="w-full rounded-lg shadow-sm bg-white 
+                                          border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                          text-gray-800 px-4 py-2 transition-all duration-200"
+                                   required>
+                        </div>
+                        <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Last Name</label>
                             <input type="text" name="last_name" value="{{ old('last_name') }}"
                                    class="w-full rounded-lg shadow-sm bg-white 

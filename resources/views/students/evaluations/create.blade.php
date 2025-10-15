@@ -32,7 +32,7 @@
         }
 
         .star.selected svg {
-            fill: #FF6B35;
+            fill: #FF92C2;
         }
 
         .star:active {
@@ -91,36 +91,58 @@
 
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-[#FFF0FA] dark:bg-[#595758] overflow-hidden shadow-xl sm:rounded-2xl">
-                <!-- Header Section -->
-                <div class="bg-gradient-to-r from-[#FF92C2] to-[#ff6fb5] p-6 text-white">
-                    <div class="flex items-center justify-between">
+            {{-- Back Button --}}
+            <div class="mb-6">
+                <a href="{{ route('evaluations.index') }}" 
+                   class="inline-flex items-center text-gray-600 hover:text-[#FF92C2] transition-colors duration-200 group">
+                    <svg class="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    <span class="font-medium">Back to Evaluations</span>
+                </a>
+            </div>
+
+            <div class="bg-[#FFF0FA] overflow-hidden shadow-2xl sm:rounded-2xl border border-[#FFC8FB]/30">
+                {{-- Header Section --}}
+                <div class="bg-gradient-to-r from-[#FF92C2] to-[#ff6fb5] p-8 relative overflow-hidden">
+                    {{-- Decorative elements --}}
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
+                    <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24"></div>
+                    
+                    <div class="relative flex items-center justify-between">
                         <div>
-                            <h2 class="text-3xl font-bold mb-2">Course Evaluation</h2>
-                            <p class="text-pink-100">Share your feedback to help improve the learning experience</p>
+                            <h2 class="text-3xl font-bold text-white mb-2">Course Evaluation</h2>
+                            <p class="text-pink-100 text-lg">Share your feedback to help improve the learning experience</p>
                         </div>
                         <div class="hidden md:block">
-                            <svg class="w-16 h-16 text-pink-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
+                            <div class="w-20 h-20 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Form Content -->
+                {{-- Form Content --}}
                 <div class="p-8">
-                    <!-- Error Messages -->
+                    {{-- Error Messages --}}
                     @if($errors->any())
-                        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-400 rounded-lg">
+                        <div class="mb-8 p-5 bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-400 rounded-xl shadow-sm">
                             <div class="flex">
-                                <svg class="w-5 h-5 text-red-400 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                </svg>
-                                <div>
-                                    <h3 class="text-sm font-medium text-red-800">Please correct the following errors:</h3>
-                                    <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+                                <div class="flex-shrink-0">
+                                    <svg class="w-6 h-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-base font-semibold text-red-800 mb-2">Please correct the following errors:</h3>
+                                    <ul class="text-sm text-red-700 space-y-1">
                                         @foreach($errors->all() as $error)
-                                            <li>{{ $error }}</li>
+                                            <li class="flex items-center">
+                                                <span class="w-1.5 h-1.5 bg-red-400 rounded-full mr-2"></span>
+                                                {{ $error }}
+                                            </li>
                                         @endforeach
                                     </ul>
                                 </div>
@@ -131,80 +153,110 @@
                     <form action="{{ route('evaluations.store') }}" method="POST" class="space-y-8">
                         @csrf
 
-                        <!-- Course and Instructor Selection -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-2">
-                                <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FFC8FB]">
-                                    Select Instructor <span class="text-red-500">*</span>
-                                </label>
-                                <div class="relative">
-                                    <select name="instructor_id" 
-                                            class="w-full rounded-xl bg-white dark:bg-[#4a4949] border-2 border-[#FFC8FB] focus:border-[#FF92C2] focus:ring-2 focus:ring-[#FF92C2]/20 transition-all duration-200 text-gray-900 dark:text-[#FFC8FB] py-3 px-4" 
-                                            required>
-                                        <option value="">Choose an instructor</option>
-                                        @forelse($instructors as $instructor)
-                                            <option value="{{ $instructor->id }}" {{ old('instructor_id') == $instructor->id ? 'selected' : '' }}>
-                                                {{ $instructor->user->name }}
-                                            </option>
-                                        @empty
-                                            <option value="" disabled>No instructors available</option>
-                                        @endforelse
-                                    </select>
-                                    <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
-                                        <svg class="w-5 h-5 text-[#FF92C2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                    </div>
+                        {{-- Course and Instructor Selection --}}
+                        <div class="bg-white rounded-xl shadow-md border border-[#FFC8FB]/30 p-6">
+                            <h3 class="text-lg font-bold text-[#FF92C2] mb-6 flex items-center">
+                                <div class="w-8 h-8 bg-gradient-to-br from-[#FF92C2]/20 to-[#FFC8FB]/20 rounded-lg flex items-center justify-center mr-3">
+                                    <svg class="w-5 h-5 text-[#FF92C2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                    </svg>
                                 </div>
-                                @error('instructor_id')
-                                    <p class="text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
+                                Course & Instructor Details
+                            </h3>
 
-                            <div class="space-y-2">
-                                <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FFC8FB]">
-                                    Select Course <span class="text-red-500">*</span>
-                                </label>
-                                <div class="relative">
-                                    <select name="course_id" 
-                                            class="w-full rounded-xl bg-white dark:bg-[#4a4949] border-2 border-[#FFC8FB] focus:border-[#FF92C2] focus:ring-2 focus:ring-[#FF92C2]/20 transition-all duration-200 text-gray-900 dark:text-[#FFC8FB] py-3 px-4" 
-                                            required>
-                                        <option value="">Choose a course</option>
-                                        @forelse($courses as $course)
-                                            <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
-                                                {{ $course->course_name }}
-                                            </option>
-                                        @empty
-                                            <option value="" disabled>No courses available</option>
-                                        @endforelse
-                                    </select>
-                                    <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
-                                        <svg class="w-5 h-5 text-[#FF92C2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        </svg>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-semibold text-gray-700">
+                                        Select Instructor <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <select name="instructor_id" 
+                                                class="w-full rounded-xl bg-white border-2 border-gray-200 focus:border-[#FF92C2] focus:ring-4 focus:ring-[#FF92C2]/10 transition-all duration-200 text-gray-900 py-3 px-4 appearance-none" 
+                                                required>
+                                            <option value="">Choose an instructor</option>
+                                            @forelse($instructors as $instructor)
+                                                <option value="{{ $instructor->id }}" {{ old('instructor_id') == $instructor->id ? 'selected' : '' }}>
+                                                    {{ $instructor->user->name }}
+                                                </option>
+                                            @empty
+                                                <option value="" disabled>No instructors available</option>
+                                            @endforelse
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                                            <svg class="w-5 h-5 text-[#FF92C2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </div>
                                     </div>
+                                    @error('instructor_id')
+                                        <p class="text-sm text-red-600 flex items-center mt-1">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
                                 </div>
-                                @error('course_id')
-                                    <p class="text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-semibold text-gray-700">
+                                        Select Course <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <select name="course_id" 
+                                                class="w-full rounded-xl bg-white border-2 border-gray-200 focus:border-[#FF92C2] focus:ring-4 focus:ring-[#FF92C2]/10 transition-all duration-200 text-gray-900 py-3 px-4 appearance-none" 
+                                                required>
+                                            <option value="">Choose a course</option>
+                                            @forelse($courses as $course)
+                                                <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
+                                                    {{ $course->course_name }}
+                                                </option>
+                                            @empty
+                                                <option value="" disabled>No courses available</option>
+                                            @endforelse
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                                            <svg class="w-5 h-5 text-[#FF92C2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    @error('course_id')
+                                        <p class="text-sm text-red-600 flex items-center mt-1">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            {{ $message }}
+                                        </p>
+                                    @enderror
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Evaluation Criteria -->
+                        {{-- Evaluation Criteria --}}
                         <div class="space-y-6">
-                            <div class="border-b border-[#FFC8FB]/30 pb-4">
-                                <h3 class="text-xl font-bold text-[#FF92C2] dark:text-[#FFC8FB] flex items-center">
-                                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                    </svg>
+                            <div class="bg-white rounded-xl shadow-md border border-[#FFC8FB]/30 p-6">
+                                <h3 class="text-lg font-bold text-[#FF92C2] flex items-center mb-2">
+                                    <div class="w-8 h-8 bg-gradient-to-br from-[#FF92C2]/20 to-[#FFC8FB]/20 rounded-lg flex items-center justify-center mr-3">
+                                        <svg class="w-5 h-5 text-[#FF92C2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                    </div>
                                     Evaluation Criteria
                                 </h3>
-                                <p class="text-sm text-gray-600 dark:text-[#FFC8FB]/80 mt-2">Please rate each aspect by clicking the stars (1 = Poor, 5 = Excellent)</p>
+                                <p class="text-sm text-gray-600 ml-11">Please rate each aspect by clicking the stars (1 = Poor, 5 = Excellent)</p>
                             </div>
 
                             @foreach($criteria as $key => $criterion)
-                                <div class="bg-white dark:bg-[#4a4949] p-6 rounded-xl border border-[#FFC8FB]/30 shadow-sm">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-[#FFC8FB] mb-4">{{ $criterion }}</label>
+                                <div class="group bg-white rounded-xl shadow-md border border-[#FFC8FB]/30 p-6 hover:shadow-lg hover:border-[#FF92C2]/40 transition-all duration-300">
+                                    <label class="block text-base font-semibold text-gray-700 mb-4">
+                                        <div class="flex items-center">
+                                            <span class="w-6 h-6 bg-gradient-to-br from-[#FF92C2]/10 to-[#FFC8FB]/10 rounded-md flex items-center justify-center text-[#FF92C2] text-sm font-bold mr-3">
+                                                {{ $loop->iteration }}
+                                            </span>
+                                            {{ $criterion }}
+                                        </div>
+                                    </label>
                                     
                                     <div class="star-rating" data-rating-name="criterion_{{ $key }}">
                                         @for($i = 1; $i <= 5; $i++)
@@ -232,39 +284,56 @@
                                     </div>
 
                                     @error("responses.{$key}")
-                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                        <p class="mt-3 text-sm text-red-600 flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            {{ $message }}
+                                        </p>
                                     @enderror
                                 </div>
                             @endforeach
                         </div>
 
-                        <!-- Comments Section -->
-                        <div class="space-y-2">
-                            <label class="block text-sm font-semibold text-[#FF92C2] dark:text-[#FFC8FB]">
-                                Additional Comments <span class="text-red-500">*</span>
-                            </label>
-                            <p class="text-sm text-gray-600 dark:text-[#FFC8FB]/80">Share any specific feedback, suggestions, or experiences</p>
-                            <textarea name="comments" 
-                                      rows="6" 
-                                      class="w-full rounded-xl bg-white dark:bg-[#4a4949] border-2 border-[#FFC8FB] focus:border-[#FF92C2] focus:ring-2 focus:ring-[#FF92C2]/20 transition-all duration-200 text-gray-900 dark:text-[#FFC8FB] p-4" 
-                                      placeholder="Please share your detailed feedback about the course and instructor..."
-                                      required>{{ old('comments') }}</textarea>
-                            @error('comments')
-                                <p class="text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                        {{-- Comments Section --}}
+                        <div class="bg-white rounded-xl shadow-md border border-[#FFC8FB]/30 p-6">
+                            <div class="space-y-3">
+                                <label class="block text-base font-semibold text-gray-700 flex items-center">
+                                    <div class="w-8 h-8 bg-gradient-to-br from-[#FF92C2]/20 to-[#FFC8FB]/20 rounded-lg flex items-center justify-center mr-3">
+                                        <svg class="w-5 h-5 text-[#FF92C2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                                        </svg>
+                                    </div>
+                                    Additional Comments <span class="text-red-500 ml-1">*</span>
+                                </label>
+                                <p class="text-sm text-gray-600 ml-11">Share any specific feedback, suggestions, or experiences</p>
+                                <textarea name="comments" 
+                                          rows="6" 
+                                          class="w-full rounded-xl bg-white border-2 border-gray-200 focus:border-[#FF92C2] focus:ring-4 focus:ring-[#FF92C2]/10 transition-all duration-200 text-gray-900 p-4" 
+                                          placeholder="Please share your detailed feedback about the course and instructor..."
+                                          required>{{ old('comments') }}</textarea>
+                                @error('comments')
+                                    <p class="text-sm text-red-600 flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
                         </div>
 
-                        <!-- Action Buttons -->
-                        <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-[#FFC8FB]/30">
+                        {{-- Action Buttons --}}
+                        <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6">
                             <a href="{{ route('evaluations.index') }}" 
-                               class="inline-flex items-center justify-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-200">
+                               class="inline-flex items-center justify-center px-8 py-3 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-xl border-2 border-gray-200 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
                                 Cancel
                             </a>
                             <button type="submit" 
-                                    class="inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-[#FF92C2] to-[#ff6fb5] hover:from-[#ff6fb5] hover:to-[#ff4da6] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                                    class="inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-[#FF92C2] to-[#ff6fb5] hover:from-[#ff6fb5] hover:to-[#FF92C2] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                                 </svg>

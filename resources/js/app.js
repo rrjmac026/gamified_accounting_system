@@ -40,6 +40,10 @@ document.addEventListener('alpine:init', () => {
         toggle() {
             this.isOpen = !this.isOpen;
             localStorage.setItem('sidebar', this.isOpen);
+        },
+        close() {
+            this.isOpen = false;
+            localStorage.setItem('sidebar', false);
         }
     });
 });

@@ -17,28 +17,28 @@ class PerformanceTaskController extends Controller
     /**
      * Show list of performance tasks created by this instructor
      */
-    public function index()
-    {
-        $instructorId = Auth::user()->instructor->id;
+    // public function index()
+    // {
+    //     $instructorId = Auth::user()->instructor->id;
 
-        $tasks = PerformanceTask::with(['section', 'instructor', 'subject'])
-            ->where('instructor_id', $instructorId)
-            ->get();
+    //     $tasks = PerformanceTask::with(['section', 'instructor', 'subject'])
+    //         ->where('instructor_id', $instructorId)
+    //         ->get();
 
-        return view('instructors.performance-tasks.index', compact('tasks'));
-    }
+    //     return view('instructors.performance-tasks.index', compact('tasks'));
+    // }
 
     /**
      * Show form to create a new performance task
      */
-    public function create()
-    {
-        $instructor = Auth::user()->instructor;
-        $subjects = $instructor->subjects()->with('sections')->get();
-        $sections = $instructor->sections;
+    // public function create()
+    // {
+    //     $instructor = Auth::user()->instructor;
+    //     $subjects = $instructor->subjects()->with('sections')->get();
+    //     $sections = $instructor->sections;
 
-        return view('instructors.performance-tasks.create', compact('subjects', 'sections'));
-    }
+    //     return view('instructors.performance-tasks.create', compact('subjects', 'sections'));
+    // }
 
     public function store(Request $request)
     {
@@ -76,7 +76,7 @@ class PerformanceTaskController extends Controller
             ]);
         }
 
-        return redirect()->route('instructors.performance-tasks.index')
+        return redirect()->route('instructors.tasks.index')
             ->with('success', 'Performance task created successfully.');
     }
 
@@ -89,8 +89,8 @@ class PerformanceTaskController extends Controller
         $task->load([
             'subject',
             'section',
-            'instructor.user',
-            'students.user'
+            'instructor',  // Remove .user
+            'students'     // Remove .user
         ]);
 
         return view('instructors.performance-tasks.show', compact('task'));
@@ -104,6 +104,9 @@ class PerformanceTaskController extends Controller
         $instructor = Auth::user()->instructor;
         $subjects = $instructor->subjects;
         $sections = $instructor->sections;
+        
+        // Load the relationships needed for display
+        $task->load(['section', 'students']);
 
         return view('instructors.performance-tasks.edit', compact('task', 'subjects', 'sections'));
     }
@@ -134,7 +137,7 @@ class PerformanceTaskController extends Controller
             ]);
         }
 
-        return redirect()->route('instructors.performance-tasks.index')
+        return redirect()->route('instructors.tasks.index')
             ->with('success', 'Performance task updated successfully.');
     }
 
@@ -161,7 +164,7 @@ class PerformanceTaskController extends Controller
             }
         }
 
-        return redirect()->route('instructors.performance-tasks.index')
+        return redirect()->route('instructors.tasks.index')
             ->with('success', 'Performance task deleted successfully.');
     }
 }

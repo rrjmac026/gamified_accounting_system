@@ -25,7 +25,10 @@
         class="top-16 left-0 h-[calc(100vh-4rem)] w-72 max-w-[85vw] sm:max-w-72 border-r shadow-xl z-40 flex flex-col">
         
         <!-- Main content wrapper with scrolling -->
-        <div class="flex-1 overflow-y-auto overflow-x-hidden">
+        <div class="flex-1 overflow-y-auto overflow-x-hidden"
+            @click="if (($event.target.tagName === 'A' || $event.target.closest('a')) && window.innerWidth < 1024) { 
+                $store.sidebar.isOpen = false 
+            }">
             @if(auth()->user()->role === 'student')
                 @include('layouts.sidebar-student')
             @elseif(auth()->user()->role === 'instructor')

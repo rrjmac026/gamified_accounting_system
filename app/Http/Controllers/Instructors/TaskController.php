@@ -10,6 +10,7 @@ use App\Models\Student;
 use App\Models\User;
 use App\Models\Section;
 use Illuminate\Http\Request;
+use App\Models\PerformanceTask;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -48,15 +49,34 @@ class TaskController extends Controller
 
     public function index()
     {
-        // Get current instructor's ID
         $instructorId = Auth::user()->instructor->id;
         
-        // Only fetch tasks belonging to the current instructor
-        $tasks = Task::with(['subject', 'instructor', 'section'])
+        // Fetch regular tasks with all necessary relationships
+        $tasks = Task::with(['subject', 'instructor', 'section', 'submissions', 'students'])
             ->where('instructor_id', $instructorId)
-            ->get();
-
-        return view('instructors.tasks.index', compact('tasks'));
+            ->where('parent_task_id', null) // Only parent tasks
+            ->get()
+            ->map(function ($task) {
+                $task->task_type = 'regular';
+                return $task;
+            });
+        
+        // Fetch performance tasks with necessary relationships
+        $performanceTasks = PerformanceTask::with(['subject', 'instructor', 'section', 'students'])
+            ->where('instructor_id', $instructorId)
+            ->get()
+            ->map(function ($task) {
+                $task->task_type = 'performance';
+                // Add empty submissions collection for consistency
+                $task->submissions = collect();
+                return $task;
+            });
+        
+        // Merge both collections and sort by newest first
+        $allTasks = $tasks->concat($performanceTasks)
+            ->sortByDesc('created_at');
+        
+        return view('instructors.tasks.index', compact('allTasks'));
     }
 
     public function create()

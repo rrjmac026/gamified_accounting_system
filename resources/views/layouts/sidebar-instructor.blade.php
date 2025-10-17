@@ -64,35 +64,36 @@
                 </button>
 
                 <!-- Task Dropdown Content -->
-                <div x-show="taskOpen" class="mt-2 ml-4 space-y-2">
-                    <!-- Regular Tasks -->
+                <div x-show="taskOpen" x-collapse class="ml-4 space-y-1">
+                    <!-- All Tasks -->
                     <a href="{{ route('instructors.tasks.index') }}" 
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-all duration-200 hover:translate-x-1 group
-                    {{ request()->routeIs('instructors.tasks.index') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium border-l-2 border-[#FF92C2]' : 'text-[#595758]/70 dark:text-[#FF92C2]/70 hover:bg-[#FFEEF2]/50' }}">
-                        <i class="fas fa-list w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>
+                       class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
+                       {{ request()->routeIs('instructors.tasks.index') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
+                        <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
+                            <i class="fas fa-list text-xs"></i>
+                        </span>
                         <span>All Tasks</span>
                     </a>
-                    <!-- <a href="{{ route('instructors.performance-tasks.index') }}" 
-                            class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-all duration-200 hover:translate-x-1 group
-                            {{ request()->routeIs('instructors.performance-tasks.index') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium border-l-2 border-[#FF92C2]' : 'text-[#595758]/70 dark:text-[#FF92C2]/70 hover:bg-[#FFEEF2]/50' }}">
-                                <i class="fas fa-list w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>
-                                <span>Performance Tasks</span>
-                    </a> -->
-                        <a href="{{ route('instructors.performance-tasks.answer-sheets.index') }}" 
-                            class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-all duration-200 hover:translate-x-1 group
-                            {{ request()->routeIs('instructors.performance-tasks.answer-sheets.*') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium border-l-2 border-[#FF92C2]' : 'text-[#595758]/70 dark:text-[#FF92C2]/70 hover:bg-[#FFEEF2]/50' }}">
-                                <i class="fas fa-folder-open w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>
-                                <span>Answer Sheets</span>
-                            </a>
-                        <a href="{{ route('instructors.task-submissions.index') }}" 
-                        class="flex items-center gap-3 px-4 py-2.5 text-sm rounded-lg transition-all duration-200 hover:translate-x-1 group
-                        {{ request()->routeIs('instructors.task-submissions.*') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium border-l-2 border-[#FF92C2]' : 'text-[#595758]/70 dark:text-[#FF92C2]/70 hover:bg-[#FFEEF2]/50' }}">
-                            <i class="fas fa-file-alt w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>
-                            <span>Submissions</span>
-                        </a>
 
+                    <!-- Answer Sheets -->
+                    <a href="{{ route('instructors.performance-tasks.answer-sheets.index') }}" 
+                       class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
+                       {{ request()->routeIs('instructors.performance-tasks.answer-sheets.*') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
+                        <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
+                            <i class="fas fa-folder-open text-xs"></i>
+                        </span>
+                        <span>Answer Sheets</span>
+                    </a>
 
-                    </div>
+                    <!-- Task Submissions -->
+                    <a href="{{ route('instructors.task-submissions.index') }}" 
+                       class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
+                       {{ request()->routeIs('instructors.task-submissions.*') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
+                        <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
+                            <i class="fas fa-file-alt text-xs"></i>
+                        </span>
+                        <span>Submissions</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -113,24 +114,3 @@
         </div>
     </div>
 </nav>
-
-<script>
-    function togglePerformanceSteps() {
-        const dropdown = document.getElementById('performance-steps');
-        const icon = document.getElementById('dropdown-icon');
-        
-        dropdown.classList.toggle('hidden');
-        icon.classList.toggle('rotate-180');
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Auto open if we're on performance/answersheet pages
-        const path = window.location.pathname;
-        if (path.includes('performance-tasks') || path.includes('answer-sheets')) {
-            const dropdown = document.getElementById('performance-steps');
-            const icon = document.getElementById('dropdown-icon');
-            dropdown.classList.remove('hidden');
-            icon.classList.add('rotate-180');
-        }
-    });
-</script>

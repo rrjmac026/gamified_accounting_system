@@ -47,6 +47,32 @@
                                                 text-gray-800 px-4 py-2 transition-all duration-200">
                         </div>
 
+
+                        <!-- Course -->
+                            <div>
+                                <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Course</label>
+                                <select name="course_id" required
+                                        class="w-full rounded-lg shadow-sm bg-white 
+                                                    border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                                    text-gray-800 px-4 py-2 transition-all duration-200">
+                                    <option value="">Select Course</option>
+                                    @foreach($courses as $course)
+                                        <option value="{{ $course->id }}" {{ old('course_id', $section->course_id) == $course->id ? 'selected' : '' }}>
+                                            {{ $course->course_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Capacity -->
+                            <div>
+                                <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Capacity (Optional)</label>
+                                <input type="number" name="capacity" min="1" value="{{ old('capacity', $section->capacity) }}"
+                                    class="w-full rounded-lg shadow-sm bg-white 
+                                                    border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                                    text-gray-800 px-4 py-2 transition-all duration-200">
+                            </div>
+
                         <!-- Instructors -->
                         <div class="sm:col-span-2">
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Assign Instructors</label>
@@ -137,30 +163,7 @@
                             </div>
                         </div>
 
-                        <!-- Course -->
-                        <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Course</label>
-                            <select name="course_id" required
-                                    class="w-full rounded-lg shadow-sm bg-white 
-                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
-                                                text-gray-800 px-4 py-2 transition-all duration-200">
-                                <option value="">Select Course</option>
-                                @foreach($courses as $course)
-                                    <option value="{{ $course->id }}" {{ old('course_id', $section->course_id) == $course->id ? 'selected' : '' }}>
-                                        {{ $course->course_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Capacity -->
-                        <div>
-                            <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Capacity (Optional)</label>
-                            <input type="number" name="capacity" min="1" value="{{ old('capacity', $section->capacity) }}"
-                                   class="w-full rounded-lg shadow-sm bg-white 
-                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
-                                                text-gray-800 px-4 py-2 transition-all duration-200">
-                        </div>
+                        
 
                         <!-- Notes -->
                         <div class="sm:col-span-2">

@@ -61,7 +61,7 @@
                             class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
                             {{ request()->routeIs('students.performance-tasks.step') && request()->route('step') == 1 ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
                                 <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">1</span>
-                                <span>Journal Entries</span>
+                                <span>Analyzing Transactions</span>
                             </a>
 
                             <!-- Steps 2-10 -->
@@ -72,7 +72,7 @@
                                     <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">{{ $i }}</span>
                                     <span>
                                         @switch($i)
-                                            @case(2) General Ledger @break
+                                            @case(2) Journal Entries @break
                                             @case(3) Trial Balance @break
                                             @case(4) Adjusting Entries @break
                                             @case(5) Adjusted Trial Balance @break

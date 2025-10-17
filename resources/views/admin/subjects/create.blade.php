@@ -55,7 +55,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-[#FF92C2] mb-1">Semester</label>
                             <select name="semester" class="w-full rounded-lg shadow-sm bg-white border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200 text-gray-800 px-4 py-2 transition-all duration-200" required>
-                                <option value="">-- Select Semester --</option>
+                                <option selected hidden disabled>Select Semester</option>
                                 <option value="1st" {{ old('semester') == '1st' ? 'selected' : '' }}>1st Semester</option>
                                 <option value="2nd" {{ old('semester') == '2nd' ? 'selected' : '' }}>2nd Semester</option>
                             </select>

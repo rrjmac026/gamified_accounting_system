@@ -63,10 +63,10 @@
                 <div class="flex items-start justify-between gap-4">
                     <div class="flex-1">
                         <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
-                            Journal Entries
+                            Analyzing Transactions
                         </h1>
                         <p class="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl">
-                            Record your business transactions chronologically in the journal. Each entry should include the date, accounts affected, and corresponding debit and credit amounts.
+                            Identify which accounts are affected by each transaction and determine whether they should be debited or credited before recording them in the journal.
                         </p>
                         <!-- Add attempts counter -->
                         <div class="mt-2 text-sm text-gray-600">
@@ -142,13 +142,17 @@
             // Get saved data if it exists
             const savedData = @json($submission->submission_data ?? null);
             const initialData = savedData ? JSON.parse(savedData) : Array(15).fill().map(() => Array(14).fill(''));
+            
+            // Get correct answer data and submission status
+            const correctData = @json($answerSheet->correct_data ?? null);
+            const submissionStatus = @json($submission->status ?? null);
+            const isReadOnly = @json(($submission->attempts ?? 0) >= 2);
 
-            // Initialize HyperFormula for Excel-like formulas
+            // Initialize HyperFormula
             const hyperformulaInstance = HyperFormula.buildEmpty({
                 licenseKey: 'internal-use-in-handsontable',
             });
 
-            // Determine responsive dimensions
             const isMobile = window.innerWidth < 640;
             const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
             
@@ -159,6 +163,7 @@
                 width: '100%',
                 height: isMobile ? 350 : (isTablet ? 450 : 500),
                 licenseKey: 'non-commercial-and-evaluation',
+                readOnly: isReadOnly, // Lock spreadsheet after 2 attempts
 
                 nestedHeaders: [
                     [
@@ -177,22 +182,20 @@
                     ]
                 ],
 
-                // Column settings
                 columns: Array(14).fill({ type: 'text' }),
                 colWidths: isMobile ? 100 : (isTablet ? 110 : 120),
 
-                // Features
                 formulas: { engine: hyperformulaInstance },
-                contextMenu: true,
-                undo: true,
+                contextMenu: !isReadOnly,
+                undo: !isReadOnly,
                 manualColumnResize: true,
                 manualRowResize: true,
-                manualColumnMove: true,
-                manualRowMove: true,
-                fillHandle: true,
+                manualColumnMove: !isReadOnly,
+                manualRowMove: !isReadOnly,
+                fillHandle: !isReadOnly,
                 autoColumnSize: false,
                 autoRowSize: false,
-                copyPaste: true,
+                copyPaste: !isReadOnly,
                 minRows: 15,
                 minCols: 15,
                 stretchH: 'none',
@@ -203,6 +206,35 @@
                 mergeCells: true,
                 comments: true,
                 customBorders: true,
+
+                // Add cell renderer for color feedback
+                cells: function(row, col) {
+                    const cellProperties = {};
+                    
+                    // Only apply colors if submission exists and has been graded
+                    if (submissionStatus && correctData && savedData) {
+                        const parsedCorrect = typeof correctData === 'string' ? JSON.parse(correctData) : correctData;
+                        const parsedStudent = typeof savedData === 'string' ? JSON.parse(savedData) : savedData;
+                        
+                        const studentValue = parsedStudent[row]?.[col];
+                        const correctValue = parsedCorrect[row]?.[col];
+                        
+                        // Only compare non-empty cells
+                        if (studentValue !== null && studentValue !== undefined && studentValue !== '') {
+                            // Normalize values for comparison (trim whitespace, case-insensitive)
+                            const normalizedStudent = String(studentValue).trim().toLowerCase();
+                            const normalizedCorrect = String(correctValue || '').trim().toLowerCase();
+                            
+                            if (normalizedStudent === normalizedCorrect) {
+                                cellProperties.className = 'cell-correct';
+                            } else {
+                                cellProperties.className = 'cell-wrong';
+                            }
+                        }
+                    }
+                    
+                    return cellProperties;
+                }
             });
 
             // Handle window resize
@@ -223,33 +255,45 @@
 
             // Capture spreadsheet data on submit
             const taskForm = document.getElementById("taskForm");
-            if (taskForm) {
+            if (taskForm && !isReadOnly) {
                 taskForm.addEventListener("submit", function (e) {
-                    e.preventDefault(); // Prevent default form submission
-                    
-                    // Get the spreadsheet data
+                    e.preventDefault();
                     const data = hot.getData();
-                    
-                    // Set the template data
                     document.getElementById("submissionData").value = JSON.stringify(data);
-                    
-                    // Now submit the form
                     this.submit();
                 });
             }
-
-            // Keyboard shortcuts info
-            console.log('Excel-like shortcuts:');
-            console.log('Ctrl+C: Copy');
-            console.log('Ctrl+V: Paste');
-            console.log('Ctrl+X: Cut');
-            console.log('Ctrl+Z: Undo');
-            console.log('Ctrl+Y: Redo');
-            console.log('Fill Handle: Drag corner of cell to fill down/right');
         });
     </script>
 
     <style>
+
+        .cell-correct {
+            background-color: #dcfce7 !important; /* Light green */
+            border: 2px solid #16a34a !important; /* Green border */
+        }
+
+        .cell-wrong {
+            background-color: #fee2e2 !important; /* Light red */
+            border: 2px solid #dc2626 !important; /* Red border */
+        }
+
+        /* Prevent selected cells from overriding colors */
+        .handsontable td.cell-correct.area,
+        .handsontable td.cell-correct.current {
+            background-color: #bbf7d0 !important; /* Slightly darker green when selected */
+        }
+
+        .handsontable td.cell-wrong.area,
+        .handsontable td.cell-wrong.current {
+            background-color: #fecaca !important; /* Slightly darker red when selected */
+        }
+
+        /* Read-only indicator */
+        .handsontable.readOnly td {
+            background-color: #f9fafb;
+            cursor: not-allowed;
+        }
         /* Prevent body overflow issues */
         body {
             overflow-x: hidden;

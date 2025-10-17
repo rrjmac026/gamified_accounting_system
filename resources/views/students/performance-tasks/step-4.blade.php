@@ -48,9 +48,16 @@
             <p class="mt-2 text-gray-600 text-sm sm:text-base">
                 List all accounts and their debit or credit balances to ensure totals are equal.
             </p>
-            <!-- Add attempts counter -->
-            <div class="mt-2 text-sm text-gray-600">
-                Attempts remaining: {{ 2 - ($submission->attempts ?? 0) }}/2
+            <!-- Add attempts counter and status -->
+            <div class="mt-2 flex items-center gap-4">
+                <span class="text-sm text-gray-600">
+                    Attempts remaining: {{ 2 - ($submission->attempts ?? 0) }}/2
+                </span>
+                @if($submission && $submission->status)
+                    <span class="text-sm font-semibold {{ $submission->status === 'correct' ? 'text-green-600' : 'text-red-600' }}">
+                        Status: {{ ucfirst($submission->status) }}
+                    </span>
+                @endif
             </div>
         </div>
 
@@ -94,6 +101,8 @@
         document.addEventListener('DOMContentLoaded', function () {
             const container = document.getElementById('spreadsheet');
             const savedData = @json($submission->submission_data ?? null);
+            const correctData = @json($answerSheet->correct_data ?? null);
+            const submissionStatus = @json($submission->status ?? null);
 
             // ✅ Load saved or default data
             const initialData = savedData
@@ -117,6 +126,43 @@
                 manualRowResize: true,
                 minSpareRows: 1,
                 className: 'htCenter htMiddle',
+                
+                // ✅ Add cell coloring logic
+                cells: function(row, col) {
+                    const cellProperties = {};
+                    
+                    // Only apply correct/incorrect coloring if submission has been graded
+                    if (submissionStatus && correctData && savedData) {
+                        const parsedCorrect = typeof correctData === 'string' ? JSON.parse(correctData) : correctData;
+                        const parsedStudent = typeof savedData === 'string' ? JSON.parse(savedData) : savedData;
+                        
+                        const studentValue = parsedStudent[row]?.[col];
+                        const correctValue = parsedCorrect[row]?.[col];
+                        
+                        // ONLY color cells where the STUDENT entered something
+                        if (studentValue !== null && studentValue !== undefined && studentValue !== '') {
+                            // Normalize values for comparison
+                            const normalizeValue = (val) => {
+                                if (val === null || val === undefined || val === '') return '';
+                                if (typeof val === 'string') return val.trim().toLowerCase();
+                                if (typeof val === 'number') return val.toFixed(2);
+                                return String(val);
+                            };
+                            
+                            const normalizedStudent = normalizeValue(studentValue);
+                            const normalizedCorrect = normalizeValue(correctValue);
+                            
+                            // Compare student's answer with correct answer
+                            if (normalizedStudent === normalizedCorrect) {
+                                cellProperties.className = 'cell-correct';
+                            } else {
+                                cellProperties.className = 'cell-wrong';
+                            }
+                        }
+                    }
+                    
+                    return cellProperties;
+                }
             });
 
             // ✅ Save data before form submit
@@ -129,9 +175,37 @@
 
     <style>
         body { overflow-x: hidden; }
-        .handsontable td { border-color: #d1d5db; }
+        .handsontable td { 
+            border-color: #d1d5db;
+            background-color: #ffffff;
+        }
         .handsontable .area { background-color: rgba(59, 130, 246, 0.1); }
         #spreadsheet { isolation: isolate; }
+        
+        /* Correct/Incorrect answer styling - consistent with Steps 1, 2, 3 */
+        .handsontable td.cell-correct {
+            background-color: #dcfce7 !important; /* Light green */
+            border: 2px solid #16a34a !important; /* Green border */
+            color: #166534;
+        }
+        
+        .handsontable td.cell-wrong {
+            background-color: #fee2e2 !important; /* Light red */
+            border: 2px solid #dc2626 !important; /* Red border */
+            color: #991b1b;
+        }
+        
+        /* Prevent selected cells from overriding colors */
+        .handsontable td.cell-correct.area,
+        .handsontable td.cell-correct.current {
+            background-color: #bbf7d0 !important;
+        }
+
+        .handsontable td.cell-wrong.area,
+        .handsontable td.cell-wrong.current {
+            background-color: #fecaca !important;
+        }
+        
         @media (max-width: 640px) {
             .handsontable { font-size: 12px; }
         }

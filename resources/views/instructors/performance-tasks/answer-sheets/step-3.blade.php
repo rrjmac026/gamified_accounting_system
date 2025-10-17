@@ -40,10 +40,10 @@
                 </div>
                 <div class="flex-1">
                     <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
-                        Answer Key: Analyzing Transactions
+                        Answer Key: Posting Transactions (T-Accounts)
                     </h1>
                     <p class="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl">
-                        Create the correct answer key for Analyzing Transactions. This will be used to automatically grade student submissions.
+                        Create the correct answer key using T-account format. Each account shows debits on the left and credits on the right.
                     </p>
                     <div class="mt-2 flex items-center gap-2 text-sm text-purple-600">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -66,7 +66,7 @@
                     <div>
                         <h3 class="text-sm font-semibold text-purple-900 mb-1">Instructions for Creating Answer Key</h3>
                         <p class="text-xs sm:text-sm text-purple-800">
-                            Fill in the correct answers below. Students' submissions will be compared against this answer key for grading. Empty cells will be ignored during comparison.
+                            Fill in the T-accounts below. For each account, enter debits in the left column and credits in the right column. Empty cells will be ignored during comparison.
                         </p>
                     </div>
                 </div>
@@ -115,34 +115,76 @@
         document.addEventListener("DOMContentLoaded", function () {
             const container = document.getElementById('spreadsheet');
             const savedData = @json($sheet->correct_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => ['', '', '', '', '', '']);
+            
+            // Account names list
+            const accounts = [
+                'Cash', 'Accounts Receivable', 'Supplies', 'Furniture & Fixture', 
+                'Accumulated Depreciation - F&F', 'Land', 'Equipment', 
+                'Accumulated Depreciation - Equipment', 'Accounts Payable', 
+                'Notes Payable', 'Utilities Payable', 'Capital', 'Withdrawals',
+                'Service Revenue', 'Rent Expense', 'Utilities Expense', 
+                'Salaries Expense', 'Supplies Expense', 'Depreciation Expense', 
+                'Income Summary'
+            ];
+            
+            // Generate columns: Date, Debit, Credit for each account (3 cols per account)
+            const numCols = accounts.length * 3;
+            const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => Array(numCols).fill(''));
+            
+            // Create nested headers
+            const nestedHeaders = [
+                accounts.map(name => ({ label: name, colspan: 3 })),
+                Array(accounts.length).fill(['Date', 'Debit (₱)', 'Credit (₱)']).flat()
+            ];
+            
+            // Create columns config with custom renderer for T-account style
+            const columns = [];
+            for (let i = 0; i < accounts.length; i++) {
+                columns.push(
+                    { type: 'date', dateFormat: 'MM/DD/YYYY', correctFormat: true },
+                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
+                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } }
+                );
+            }
+            
             hot = new Handsontable(container, {
                 data: initialData,
                 rowHeaders: true,
-                colHeaders: [
-                    'Date',
-                    'Transaction Description',
-                    'Account Title',
-                    'Reference',
-                    'Debit (₱)',
-                    'Credit (₱)'
-                ],
-                columns: [
-                    { type: 'date', dateFormat: 'MM/DD/YYYY', correctFormat: true },
-                    { type: 'text' },
-                    { type: 'text' },
-                    { type: 'text' },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } }
-                ],
-                stretchH: 'all',
+                nestedHeaders: nestedHeaders,
+                columns: columns,
+                colWidths: 100,
                 height: 'auto',
                 licenseKey: 'non-commercial-and-evaluation',
                 contextMenu: true,
                 manualColumnResize: true,
                 manualRowResize: true,
                 minSpareRows: 1,
+                cells: function(row, col) {
+                    const cellProperties = {};
+                    const colIndex = col % 3;
+                    
+                    // Apply T-account styling
+                    if (colIndex === 1) {
+                        // Debit column (left side)
+                        cellProperties.className = 't-account-debit';
+                    } else if (colIndex === 2) {
+                        // Credit column (right side)
+                        cellProperties.className = 't-account-credit';
+                    } else {
+                        // Date column
+                        cellProperties.className = 't-account-date';
+                    }
+                    
+                    return cellProperties;
+                },
+                afterGetColHeader: function(col, TH) {
+                    const colIndex = col % 3;
+                    if (colIndex === 1) {
+                        TH.style.borderRight = '2px solid #6b7280';
+                    }
+                }
             });
+
             const answerKeyForm = document.getElementById("answerKeyForm");
             if (answerKeyForm) {
                 answerKeyForm.addEventListener("submit", function (e) {
@@ -160,6 +202,38 @@
         .handsontable { position: relative; z-index: 1; }
         #spreadsheet { isolation: isolate; }
         .overflow-x-auto { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+        
+        /* T-Account Styling */
+        .handsontable td.t-account-date {
+            background-color: #f9fafb;
+            font-size: 0.85em;
+        }
+        
+        .handsontable td.t-account-debit {
+            border-right: 2px solid #6b7280 !important;
+            background-color: #fef3c7;
+        }
+        
+        .handsontable td.t-account-credit {
+            background-color: #dbeafe;
+        }
+        
+        /* Highlight the vertical line between debit and credit */
+        .handsontable th {
+            font-weight: 600;
+        }
+        
+        /* Style the nested headers to look like T-accounts */
+        .handsontable thead th {
+            background-color: #f3f4f6;
+        }
+        
+        .handsontable thead tr:first-child th {
+            background-color: #e5e7eb;
+            font-weight: 700;
+            border-bottom: 2px solid #6b7280;
+        }
+        
         @media (max-width: 640px) {
             .handsontable { font-size: 12px; }
             .handsontable th, .handsontable td { padding: 4px; }

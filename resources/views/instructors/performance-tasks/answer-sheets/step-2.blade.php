@@ -38,10 +38,10 @@
                 </div>
                 <div class="flex-1">
                     <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
-                        Answer Key: Chart of Accounts
+                        Answer Key: Journalizing Entries
                     </h1>
                     <p class="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl">
-                        Create the correct answer key for Chart of Accounts. This will be used to automatically grade student submissions.
+                        Create the correct answer key for Journalizing Entries. This will be used to automatically grade student submissions.
                     </p>
                     <div class="mt-2 flex items-center gap-2 text-sm text-purple-600">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -113,14 +113,53 @@
         document.addEventListener("DOMContentLoaded", function () {
             const container = document.getElementById('spreadsheet');
             const savedData = @json($sheet->correct_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => ['', '']);
+            const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => Array(19).fill(''));
+            
             hot = new Handsontable(container, {
                 data: initialData,
                 rowHeaders: true,
-                colHeaders: ['Account Name', 'Account Number'],
+                colHeaders: [
+                    'Date', 
+                    'Account Titles and Explanation', 
+                    'Account Number', 
+                    'Debit (₱)', 
+                    'Credit (₱)',
+                    '',
+                    'Cash', 
+                    'Accounts Receivable', 
+                    'Supplies', 
+                    'Furniture & Fixtures', 
+                    'Land', 
+                    'Equipment', 
+                    'Accounts Payable', 
+                    'Notes Payable', 
+                    'Capital', 
+                    'Withdrawal', 
+                    'Service Revenue', 
+                    'Rent Expense', 
+                    'Paid Licenses', 
+                    'Salaries Expense'
+                ],
                 columns: [
-                    { type: 'text', width: 300 },
-                    { type: 'numeric', width: 150 }
+                    { type: 'date', dateFormat: 'MM/DD/YYYY', correctFormat: true, width: 120 },
+                    { type: 'text', width: 400 },
+                    { type: 'text', width: 100 },
+                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
+                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
+                    { type: 'text', width: 100 }, // Cash
+                    { type: 'text', width: 120 }, // Accounts Receivable
+                    { type: 'text', width: 100 }, // Supplies
+                    { type: 'text', width: 120 }, // Furniture & Fixtures
+                    { type: 'text', width: 100 }, // Land
+                    { type: 'text', width: 100 }, // Equipment
+                    { type: 'text', width: 120 }, // Accounts Payable
+                    { type: 'text', width: 120 }, // Notes Payable
+                    { type: 'text', width: 100 }, // Capital
+                    { type: 'text', width: 100 }, // Withdrawal
+                    { type: 'text', width: 120 }, // Service Revenue
+                    { type: 'text', width: 120 }, // Rent Expense
+                    { type: 'text', width: 100 }, // Paid Licenses
+                    { type: 'text', width: 120 }, // Salaries Expense
                 ],
                 stretchH: 'all',
                 height: 'auto',
@@ -130,6 +169,7 @@
                 manualRowResize: true,
                 minSpareRows: 1,
             });
+            
             const answerKeyForm = document.getElementById("answerKeyForm");
             if (answerKeyForm) {
                 answerKeyForm.addEventListener("submit", function (e) {

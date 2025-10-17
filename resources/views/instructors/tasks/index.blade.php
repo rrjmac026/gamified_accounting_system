@@ -1,10 +1,10 @@
 <x-app-layout>
     <div class="flex justify-end px-4 sm:px-8 mt-4">
         <div class="flex gap-4">
-            <a href="{{ route('instructors.tasks.create') }}" 
+            <!-- <a href="{{ route('instructors.tasks.create') }}" 
                class="w-full sm:w-auto inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#FF92C2] hover:bg-[#ff6fb5] rounded-lg shadow-sm hover:shadow">
                 <i class="fas fa-plus mr-2"></i>Create New Task
-            </a>
+            </a> -->
 
             <a href="{{ route('instructors.performance-tasks.create') }}" 
                class="w-full sm:w-auto inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#9B59B6] hover:bg-[#8E44AD] rounded-lg shadow-sm hover:shadow">

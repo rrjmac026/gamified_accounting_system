@@ -64,10 +64,10 @@
                 <div class="flex items-start justify-between gap-4">
                     <div class="flex-1">
                         <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
-                            Answer Key: Income Statement
+                            Answer Key: Financial Statements
                         </h1>
                         <p class="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl">
-                            Create the correct answer key for the Income Statement. This will be used to automatically grade student submissions.
+                            Create the correct answer key for the Financial Statements following McGraw Hill format. This will be used to automatically grade student submissions.
                         </p>
                         <div class="mt-2 flex items-center gap-2 text-sm text-purple-600">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -91,7 +91,7 @@
                     <div>
                         <h3 class="text-sm font-semibold text-purple-900 mb-1">Instructions for Creating Answer Key</h3>
                         <p class="text-xs sm:text-sm text-purple-800">
-                            Fill in the correct answers below. Students' submissions will be compared against this answer key for grading. Empty cells will be ignored during comparison.
+                            Fill in the correct answers below following McGraw Hill financial statement format. Students' submissions will be compared against this answer key for grading. Empty cells will be ignored during comparison.
                         </p>
                     </div>
                 </div>
@@ -141,7 +141,7 @@
         </div>
     </div>
 
-    <script>
+<script>
         let hot;
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -149,35 +149,237 @@
             
             // Get saved answer key data if it exists
             const savedData = @json($sheet->correct_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array(15).fill().map(() => Array(4).fill(''));
+            
+            // Initialize with McGraw Hill financial statement structure
+            const initialData = savedData ? JSON.parse(savedData) : [
+                // INCOME STATEMENT - McGraw Hill Format
+                ['', 'Durano Enterprise', '', ''],
+                ['', 'Income Statement', '', ''],
+                ['', 'For the Month Ended February 29, 2024', '', ''],
+                ['', '', '', ''],
+                ['Revenues', '', '', ''],
+                ['Service revenue', '', '', ''],
+                ['Total revenues', '', '', ''],
+                ['', '', '', ''],
+                ['Expenses', '', '', ''],
+                ['Rent expense', '', '', ''],
+                ['Utilities expense', '', '', ''],
+                ['Salaries expense', '', '', ''],
+                ['Supplies expense', '', '', ''],
+                ['Depreciation expense', '', '', ''],
+                ['Total expenses', '', '', ''],
+                ['', '', '', ''],
+                ['Net income', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                
+                // STATEMENT OF OWNER'S EQUITY - McGraw Hill Format
+                ['', 'Durano Enterprise', '', ''],
+                ['', 'Statement of Owner\'s Equity', '', ''],
+                ['', 'For the Month Ended February 29, 2024', '', ''],
+                ['', '', '', ''],
+                ['Durano, Capital, February 1, 2024', '', '', ''],
+                ['Add: Investments by owner', '', '', ''],
+                ['Net income for the month', '', '', ''],
+                ['', '', '', ''],
+                ['Less: Withdrawals by owner', '', '', ''],
+                ['Increase in capital', '', '', ''],
+                ['Durano, Capital, February 29, 2024', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                
+                // BALANCE SHEET - McGraw Hill Format
+                ['', 'Durano Enterprise', '', ''],
+                ['', 'Balance Sheet', '', ''],
+                ['', 'February 29, 2024', '', ''],
+                ['', '', '', ''],
+                ['Assets', '', '', ''],
+                ['Cash', '', '', ''],
+                ['Accounts receivable', '', '', ''],
+                ['Supplies', '', '', ''],
+                ['Total current assets', '', '', ''],
+                ['', '', '', ''],
+                ['Equipment', '', '', ''],
+                ['Less: Accumulated depreciation—Equipment', '', '', ''],
+                ['', '', '', ''],
+                ['Furniture and fixtures', '', '', ''],
+                ['Less: Accumulated depreciation—Furniture and fixtures', '', '', ''],
+                ['', '', '', ''],
+                ['Land', '', '', ''],
+                ['Total property, plant and equipment', '', '', ''],
+                ['Total assets', '', '', ''],
+                ['', '', '', ''],
+                ['Liabilities', '', '', ''],
+                ['Accounts payable', '', '', ''],
+                ['Utilities payable', '', '', ''],
+                ['Notes payable', '', '', ''],
+                ['Total liabilities', '', '', ''],
+                ['', '', '', ''],
+                ['Owner\'s Equity', '', '', ''],
+                ['Durano, Capital', '', '', ''],
+                ['Total liabilities and owner\'s equity', '', '', '']
+            ];
 
             // Initialize HyperFormula for Excel-like formulas
             const hyperformulaInstance = HyperFormula.buildEmpty({
                 licenseKey: 'internal-use-in-handsontable',
             });
 
-            // Determine responsive dimensions
-            const isMobile = window.innerWidth < 640;
-            const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
-            
+            // Determine responsive dimensions with better calculations
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const isMobile = viewportWidth < 640;
+            const isTablet = viewportWidth >= 640 && viewportWidth < 1024;
+            const isDesktop = viewportWidth >= 1024;
+
+            // Calculate optimal table height based on viewport
+            let tableHeight;
+            if (isMobile) {
+                tableHeight = Math.min(Math.max(viewportHeight * 0.5, 350), 500);
+            } else if (isTablet) {
+                tableHeight = Math.min(Math.max(viewportHeight * 0.6, 450), 600);
+            } else {
+                tableHeight = Math.min(Math.max(viewportHeight * 0.65, 550), 700);
+            }
+
+            // Calculate optimal column widths
+            let colWidths;
+            if (isMobile) {
+                const availableWidth = Math.min(viewportWidth - 60, 440);
+                colWidths = [
+                    Math.floor(availableWidth * 0.30),  // Account Title: 30%
+                    Math.floor(availableWidth * 0.35),  // Description: 35%
+                    Math.floor(availableWidth * 0.175), // Debit: 17.5%
+                    Math.floor(availableWidth * 0.175)  // Credit: 17.5%
+                ];
+            } else if (isTablet) {
+                colWidths = [180, 200, 120, 120];
+            } else {
+                colWidths = [220, 260, 140, 140];
+            }
+                
             hot = new Handsontable(container, {
                 data: initialData,
                 rowHeaders: true,
                 colHeaders: [
-                    'Category',
                     'Account Title',
-                    'Amount (₱)',
-                    'Total (₱)'
+                    'Description',
+                    'Debit (₱)',
+                    'Credit (₱)'
                 ],
                 columns: [
-                    { type: 'dropdown', source: ['Revenues', 'Expenses', 'Net Income/Loss'] },
-                    { type: 'text' },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, readOnly: true }
+                    { 
+                        type: 'text',
+                        renderer: function(instance, td, row, col, prop, value, cellProperties) {
+                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+                            
+                            // Style statement titles
+                            if (value && value.includes('Durano Enterprise')) {
+                                td.style.fontWeight = 'bold';
+                                td.style.fontSize = '14px';
+                                td.style.textAlign = 'center';
+                            }
+                            
+                            // Style main statement headers
+                            if (value && (
+                                value.includes('Income Statement') ||
+                                value.includes('Statement of Owner\'s Equity') ||
+                                value.includes('Balance Sheet') ||
+                                value.includes('For the Month Ended') ||
+                                value.includes('February 29, 2024')
+                            )) {
+                                td.style.fontWeight = 'bold';
+                                td.style.textAlign = 'center';
+                            }
+                            
+                            // Style major categories
+                            if (value && (
+                                value === 'Revenues' ||
+                                value === 'Expenses' ||
+                                value === 'Assets' ||
+                                value === 'Liabilities' ||
+                                value === 'Owner\'s Equity' ||
+                                value === 'Total current assets' ||
+                                value === 'Total property, plant and equipment'
+                            )) {
+                                td.style.fontWeight = 'bold';
+                                td.style.backgroundColor = '#f8fafc';
+                            }
+                            
+                            // Style total rows
+                            if (value && (
+                                value.includes('Total revenues') ||
+                                value.includes('Total expenses') ||
+                                value.includes('Net income') ||
+                                value.includes('Total assets') ||
+                                value.includes('Total liabilities') ||
+                                value.includes('Total liabilities and owner\'s equity') ||
+                                value.includes('Durano, Capital, February 29, 2024')
+                            )) {
+                                td.style.fontWeight = 'bold';
+                                td.style.borderTop = '2px solid #4b5563';
+                            }
+                            
+                            // Indent sub-accounts
+                            if (value && !value.includes('Durano') && !value.includes('Total') && 
+                                !value.includes('Revenues') && !value.includes('Expenses') && 
+                                !value.includes('Assets') && !value.includes('Liabilities') && 
+                                !value.includes('Owner\'s Equity') && value !== 'Net income' &&
+                                value !== 'Add: Investments by owner' && value !== 'Less: Withdrawals by owner' &&
+                                value !== 'Increase in capital') {
+                                td.style.paddingLeft = '20px';
+                            }
+                        }
+                    },
+                    { 
+                        type: 'text',
+                        renderer: function(instance, td, row, col, prop, value, cellProperties) {
+                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+                            td.style.textAlign = 'center';
+                        }
+                    },
+                    { 
+                        type: 'numeric', 
+                        numericFormat: { pattern: '₱0,0.00' },
+                        renderer: function(instance, td, row, col, prop, value, cellProperties) {
+                            Handsontable.renderers.NumericRenderer.apply(this, arguments);
+                            if (instance.getDataAtCell(row, 0) && (
+                                instance.getDataAtCell(row, 0).includes('Total revenues') ||
+                                instance.getDataAtCell(row, 0).includes('Total expenses') ||
+                                instance.getDataAtCell(row, 0).includes('Net income') ||
+                                instance.getDataAtCell(row, 0).includes('Total assets') ||
+                                instance.getDataAtCell(row, 0).includes('Total liabilities') ||
+                                instance.getDataAtCell(row, 0).includes('Total liabilities and owner\'s equity') ||
+                                instance.getDataAtCell(row, 0).includes('Durano, Capital, February 29, 2024')
+                            )) {
+                                td.style.fontWeight = 'bold';
+                                td.style.borderTop = '2px solid #4b5563';
+                            }
+                        }
+                    },
+                    { 
+                        type: 'numeric', 
+                        numericFormat: { pattern: '₱0,0.00' },
+                        renderer: function(instance, td, row, col, prop, value, cellProperties) {
+                            Handsontable.renderers.NumericRenderer.apply(this, arguments);
+                            if (instance.getDataAtCell(row, 0) && (
+                                instance.getDataAtCell(row, 0).includes('Total revenues') ||
+                                instance.getDataAtCell(row, 0).includes('Total expenses') ||
+                                instance.getDataAtCell(row, 0).includes('Net income') ||
+                                instance.getDataAtCell(row, 0).includes('Total assets') ||
+                                instance.getDataAtCell(row, 0).includes('Total liabilities') ||
+                                instance.getDataAtCell(row, 0).includes('Total liabilities and owner\'s equity') ||
+                                instance.getDataAtCell(row, 0).includes('Durano, Capital, February 29, 2024')
+                            )) {
+                                td.style.fontWeight = 'bold';
+                                td.style.borderTop = '2px solid #4b5563';
+                            }
+                        }
+                    }
                 ],
                 width: '100%',
-                height: isMobile ? 350 : (isTablet ? 450 : 500),
-                colWidths: isMobile ? 120 : (isTablet ? 150 : 180),
+                height: tableHeight,
+                colWidths: colWidths,
                 licenseKey: 'non-commercial-and-evaluation',
                 formulas: { engine: hyperformulaInstance },
                 contextMenu: true,
@@ -188,28 +390,67 @@
                 autoColumnSize: false,
                 autoRowSize: false,
                 copyPaste: true,
-                minRows: 15,
+                minRows: 45,
                 minSpareRows: 1,
                 stretchH: 'all',
                 enterMoves: { row: 1, col: 0 },
                 tabMoves: { row: 0, col: 1 },
                 outsideClickDeselects: false,
                 selectionMode: 'multiple',
-                className: 'htCenter htMiddle',
+                className: 'htLeft htMiddle',
+                mergeCells: [
+                    { row: 0, col: 1, rowspan: 1, colspan: 3 },
+                    { row: 1, col: 1, rowspan: 1, colspan: 3 },
+                    { row: 2, col: 1, rowspan: 1, colspan: 3 },
+                    { row: 19, col: 1, rowspan: 1, colspan: 3 },
+                    { row: 20, col: 1, rowspan: 1, colspan: 3 },
+                    { row: 21, col: 1, rowspan: 1, colspan: 3 },
+                    { row: 32, col: 1, rowspan: 1, colspan: 3 },
+                    { row: 33, col: 1, rowspan: 1, colspan: 3 },
+                    { row: 34, col: 1, rowspan: 1, colspan: 3 }
+                ],
             });
 
-            // Handle window resize
+            // Improved window resize handler with debouncing
             let resizeTimer;
             window.addEventListener('resize', function() {
                 clearTimeout(resizeTimer);
                 resizeTimer = setTimeout(function() {
-                    const newIsMobile = window.innerWidth < 640;
-                    const newIsTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
-                    const newHeight = newIsMobile ? 350 : (newIsTablet ? 450 : 500);
+                    const newViewportWidth = window.innerWidth;
+                    const newViewportHeight = window.innerHeight;
+                    const newIsMobile = newViewportWidth < 640;
+                    const newIsTablet = newViewportWidth >= 640 && newViewportWidth < 1024;
+                    const newIsDesktop = newViewportWidth >= 1024;
+                    
+                    // Recalculate height
+                    let newHeight;
+                    if (newIsMobile) {
+                        newHeight = Math.min(Math.max(newViewportHeight * 0.5, 350), 500);
+                    } else if (newIsTablet) {
+                        newHeight = Math.min(Math.max(newViewportHeight * 0.6, 450), 600);
+                    } else {
+                        newHeight = Math.min(Math.max(newViewportHeight * 0.65, 550), 700);
+                    }
+                    
+                    // Recalculate column widths
+                    let newColWidths;
+                    if (newIsMobile) {
+                        const availableWidth = Math.min(newViewportWidth - 60, 440);
+                        newColWidths = [
+                            Math.floor(availableWidth * 0.30),
+                            Math.floor(availableWidth * 0.35),
+                            Math.floor(availableWidth * 0.175),
+                            Math.floor(availableWidth * 0.175)
+                        ];
+                    } else if (newIsTablet) {
+                        newColWidths = [180, 200, 120, 120];
+                    } else {
+                        newColWidths = [220, 260, 140, 140];
+                    }
                     
                     hot.updateSettings({
                         height: newHeight,
-                        colWidths: newIsMobile ? 120 : (newIsTablet ? 150 : 180)
+                        colWidths: newColWidths
                     });
                 }, 250);
             });
@@ -237,14 +478,26 @@
         .handsontable { position: relative; z-index: 1; }
         #spreadsheet { isolation: isolate; }
         .overflow-x-auto { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+        .handsontable .htMerge { background-color: #f8fafc; }
+
+        /* McGraw Hill style formatting */
+        .handsontable th {
+            background-color: #e5e7eb;
+            font-weight: 600;
+        }
+
+        .handsontable .total-row {
+            background-color: #f3f4f6;
+            font-weight: bold;
+        }
 
         @media (max-width: 640px) {
-            .handsontable { font-size: 12px; }
-            .handsontable th, .handsontable td { padding: 4px; }
+            .handsontable { font-size: 11px; }
+            .handsontable th, .handsontable td { padding: 3px; }
         }
 
         @media (min-width: 640px) and (max-width: 1024px) {
-            .handsontable { font-size: 13px; }
+            .handsontable { font-size: 12px; }
         }
     </style>
 </x-app-layout>

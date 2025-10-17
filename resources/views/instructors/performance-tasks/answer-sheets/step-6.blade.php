@@ -165,14 +165,27 @@
                 rowHeaders: true,
                 colHeaders: [
                     'Account Title',
-                    'Trial Balance (Dr)', 'Trial Balance (Cr)',
-                    'Adjustments (Dr)', 'Adjustments (Cr)',
-                    'Adjusted Trial Balance (Dr)', 'Adjusted Trial Balance (Cr)',
-                    'Income Statement (Dr)', 'Income Statement (Cr)',
-                    'Balance Sheet (Dr)', 'Balance Sheet (Cr)'
+                    'Unadjusted Trial Balance (Debit)', 'Unadjusted Trial Balance (Credit)',
+                    'Adjustments (Debit)', 'Adjustments (Credit)',
+                    'Adjusted Trial Balance (Debit)', 'Adjusted Trial Balance (Credit)',
+                    'Income Statement (Debit)', 'Income Statement (Credit)',
+                    'Balance Sheet (Debit)', 'Balance Sheet (Credit)'
+                ],
+                nestedHeaders: [
+                    [
+                        { label: 'Account Title', colspan: 1 },
+                        { label: 'Unadjusted Trial Balance', colspan: 2 },
+                        { label: 'Adjustments', colspan: 2 },
+                        { label: 'Adjusted Trial Balance', colspan: 2 },
+                        { label: 'Income Statement', colspan: 2 },
+                        { label: 'Balance Sheet', colspan: 2 },
+                    ],
+                    [
+                        '', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit'
+                    ]
                 ],
                 columns: [
-                    { type: 'text' },
+                    { type: 'text', width: 200 },
                     { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
                     { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
                     { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
@@ -186,7 +199,9 @@
                 ],
                 width: '100%',
                 height: isMobile ? 350 : (isTablet ? 450 : 500),
-                colWidths: isMobile ? 100 : (isTablet ? 110 : 120),
+                colWidths: [220, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120],
+                minCols: 11, // ensure 11 columns total
+                stretchH: 'all', // ensure columns expand to container width
                 licenseKey: 'non-commercial-and-evaluation',
                 formulas: { engine: hyperformulaInstance },
                 contextMenu: true,
@@ -200,17 +215,17 @@
                 autoRowSize: false,
                 copyPaste: true,
                 minRows: 15,
-                minCols: 11,
-                stretchH: 'none',
                 enterMoves: { row: 1, col: 0 },
                 tabMoves: { row: 0, col: 1 },
                 outsideClickDeselects: false,
                 selectionMode: 'multiple',
-                mergeCells: true,
+                mergeCells: false,
                 comments: true,
                 customBorders: true,
                 className: 'htCenter htMiddle',
+                headerTooltips: true
             });
+
 
             // Handle window resize
             let resizeTimer;

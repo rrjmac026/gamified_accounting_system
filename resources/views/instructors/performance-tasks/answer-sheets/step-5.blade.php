@@ -149,30 +149,64 @@
             
             // Get saved answer key data if it exists
             const savedData = @json($sheet->correct_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array(15).fill().map(() => Array(4).fill(''));
+            const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => Array(19).fill(''));
 
             // Initialize HyperFormula for Excel-like formulas
             const hyperformulaInstance = HyperFormula.buildEmpty({
                 licenseKey: 'internal-use-in-handsontable',
             });
 
-            // Determine responsive dimensions
-            const isMobile = window.innerWidth < 640;
-            const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
+            // Create columns config - same as Step 2
+            const columnsConfig = [
+                { type: 'date', dateFormat: 'MM/DD/YYYY', correctFormat: true, width: 120 },
+                { type: 'text', width: 400 },
+                { type: 'text', width: 100 },
+                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
+                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
+                { type: 'text', width: 100 }, // Cash
+                { type: 'text', width: 120 }, // Accounts Receivable
+                { type: 'text', width: 100 }, // Supplies
+                { type: 'text', width: 120 }, // Furniture & Fixtures
+                { type: 'text', width: 100 }, // Land
+                { type: 'text', width: 100 }, // Equipment
+                { type: 'text', width: 120 }, // Accounts Payable
+                { type: 'text', width: 120 }, // Notes Payable
+                { type: 'text', width: 100 }, // Capital
+                { type: 'text', width: 100 }, // Withdrawal
+                { type: 'text', width: 120 }, // Service Revenue
+                { type: 'text', width: 120 }, // Rent Expense
+                { type: 'text', width: 100 }, // Paid Licenses
+                { type: 'text', width: 120 }, // Salaries Expense
+            ];
             
             hot = new Handsontable(container, {
                 data: initialData,
+                columns: columnsConfig,
                 rowHeaders: true,
-                colHeaders: ['Account Title', 'Reference', 'Debit (₱)', 'Credit (₱)'],
-                columns: [
-                    { type: 'text' },
-                    { type: 'text' },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
+                colHeaders: [
+                    'Date', 
+                    'Account Titles and Explanation', 
+                    'Account Number', 
+                    'Debit (₱)', 
+                    'Credit (₱)',
+                    '',
+                    'Cash', 
+                    'Accounts Receivable', 
+                    'Supplies', 
+                    'Furniture & Fixtures', 
+                    'Land', 
+                    'Equipment', 
+                    'Accounts Payable', 
+                    'Notes Payable', 
+                    'Capital', 
+                    'Withdrawal', 
+                    'Service Revenue', 
+                    'Rent Expense', 
+                    'Paid Licenses', 
+                    'Salaries Expense'
                 ],
-                width: '100%',
-                height: isMobile ? 350 : (isTablet ? 450 : 500),
-                colWidths: isMobile ? 120 : (isTablet ? 140 : 160),
+                stretchH: 'all',
+                height: 'auto',
                 licenseKey: 'non-commercial-and-evaluation',
                 formulas: { engine: hyperformulaInstance },
                 contextMenu: true,
@@ -185,12 +219,10 @@
                 copyPaste: true,
                 minRows: 15,
                 minSpareRows: 1,
-                stretchH: 'all',
                 enterMoves: { row: 1, col: 0 },
                 tabMoves: { row: 0, col: 1 },
                 outsideClickDeselects: false,
                 selectionMode: 'multiple',
-                className: 'htCenter htMiddle',
             });
 
             // Handle window resize
@@ -198,14 +230,7 @@
             window.addEventListener('resize', function() {
                 clearTimeout(resizeTimer);
                 resizeTimer = setTimeout(function() {
-                    const newIsMobile = window.innerWidth < 640;
-                    const newIsTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
-                    const newHeight = newIsMobile ? 350 : (newIsTablet ? 450 : 500);
-                    
-                    hot.updateSettings({
-                        height: newHeight,
-                        colWidths: newIsMobile ? 120 : (newIsTablet ? 140 : 160)
-                    });
+                    hot.render();
                 }, 250);
             });
 
@@ -224,10 +249,10 @@
 
     <style>
         body { overflow-x: hidden; }
-        .handsontable .font-bold { font-weight: bold; }
-        .handsontable .bg-gray-100 { background-color: #f3f4f6 !important; }
-        .handsontable .bg-blue-50 { background-color: #eff6ff !important; }
-        .handsontable td { border-color: #d1d5db; }
+        .handsontable td { 
+            border-color: #d1d5db;
+            background-color: #ffffff;
+        }
         .handsontable .area { background-color: rgba(147, 51, 234, 0.1); }
         .handsontable { position: relative; z-index: 1; }
         #spreadsheet { isolation: isolate; }

@@ -31,20 +31,23 @@ class StudentPerformanceTaskController extends Controller
                 ->with('error', 'No active performance task found.');
         }
 
-        // Get the current submission for this step
         $submission = PerformanceTaskSubmission::where([
             'task_id' => $performanceTask->id,
             'student_id' => $user->student->id,
             'step' => $step
         ])->first();
 
-        // Get all submissions to check progress
+        // Fetch answer sheet for comparison
+        $answerSheet = PerformanceTaskAnswerSheet::where([
+            'performance_task_id' => $performanceTask->id,
+            'step' => $step
+        ])->first();
+
         $submissions = PerformanceTaskSubmission::where([
             'task_id' => $performanceTask->id,
             'student_id' => $user->student->id,
         ])->pluck('step')->toArray();
 
-        // Only check for previous step completion if not step 1
         if ($step > 1 && !in_array($step - 1, $submissions)) {
             return redirect()->route('students.performance-tasks.step', $step - 1)
                 ->with('error', "You must complete Step " . ($step - 1) . " first.");
@@ -53,6 +56,7 @@ class StudentPerformanceTaskController extends Controller
         return view("students.performance-tasks.step-$step", [
             'performanceTask' => $performanceTask,
             'submission' => $submission,
+            'answerSheet' => $answerSheet,
             'completedSteps' => $submissions
         ]);
     }
@@ -72,19 +76,19 @@ class StudentPerformanceTaskController extends Controller
         }
 
         try {
-            // 🔍 Check existing submission
+            // Check existing submission
             $submission = PerformanceTaskSubmission::firstOrNew([
                 'task_id' => $task->id,
                 'student_id' => $user->student->id,
                 'step' => $step,
             ]);
 
-            // 🚫 Stop if already reached 2 attempts
+            // Stop if already reached 2 attempts
             if ($submission->exists && $submission->attempts >= 2) {
                 return back()->with('error', 'You have reached the maximum of 2 attempts for this step.');
             }
 
-            // 📝 Save student's data
+            // Save student's data
             $studentData = $request->input('submission_data');
             
             // Decode and validate JSON
@@ -96,7 +100,7 @@ class StudentPerformanceTaskController extends Controller
             $submission->submission_data = $studentData;
             $submission->attempts = ($submission->attempts ?? 0) + 1;
 
-            // 🔍 Fetch the correct answer sheet
+            // Fetch the correct answer sheet
             $answerSheet = PerformanceTaskAnswerSheet::where([
                 'performance_task_id' => $task->id,
                 'step' => $step
@@ -105,17 +109,15 @@ class StudentPerformanceTaskController extends Controller
             if ($answerSheet && $answerSheet->correct_data) {
                 $correctData = $answerSheet->correct_data;
                 
-                // 🔧 FIXED: Handle if correct_data is still a string
+                // Handle if correct_data is a string
                 if (is_string($correctData)) {
                     $correctData = json_decode($correctData, true);
                 }
                 
-                // Normalize both arrays for comparison (sort keys recursively)
-                $normalizedStudent = $this->normalizeArray($studentDataArray);
-                $normalizedCorrect = $this->normalizeArray($correctData);
+                // Compare cell by cell
+                $isCorrect = $this->compareAnswers($studentDataArray, $correctData);
                 
-                // 🔍 Compare normalized arrays
-                if ($normalizedStudent === $normalizedCorrect) {
+                if ($isCorrect) {
                     $submission->status = 'correct';
                     $submission->score = 100;
                     $submission->remarks = 'Perfect! Your entry is correct.';
@@ -131,10 +133,10 @@ class StudentPerformanceTaskController extends Controller
 
             $submission->save();
 
-            // ✅ Feedback message
-            $message = "Step $step saved successfully! (Attempt {$submission->attempts}/2)";
+            // Feedback message
+            $message = "Step $step saved successfully! (Attempt {$submission->attempts}/2) - Status: " . ucfirst($submission->status);
 
-            // 🧭 If last step, go to dashboard
+            // If last step, go to dashboard
             if ($step >= 10) {
                 return redirect()->route('students.dashboard')
                     ->with('success', 'You have successfully completed all 10 steps of the performance task!');
@@ -151,23 +153,74 @@ class StudentPerformanceTaskController extends Controller
     }
 
     /**
-     * Normalize array for comparison (recursive ksort)
+     * Compare student answers with correct answers cell by cell
      */
-    private function normalizeArray($array)
+    private function compareAnswers($studentData, $correctData)
     {
-        if (!is_array($array)) {
-            return $array;
+        if (!is_array($studentData) || !is_array($correctData)) {
+            return false;
         }
-        
-        ksort($array);
-        
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $array[$key] = $this->normalizeArray($value);
+
+        // Compare each row
+        foreach ($correctData as $rowIndex => $correctRow) {
+            if (!isset($studentData[$rowIndex])) {
+                return false;
+            }
+
+            $studentRow = $studentData[$rowIndex];
+
+            // Compare each cell in the row
+            foreach ($correctRow as $colIndex => $correctValue) {
+                // Skip empty cells in answer key
+                if ($correctValue === null || $correctValue === '' || $correctValue === 0) {
+                    continue;
+                }
+
+                $studentValue = $studentRow[$colIndex] ?? null;
+
+                // Normalize and compare
+                if (!$this->valuesMatch($studentValue, $correctValue)) {
+                    return false;
+                }
             }
         }
-        
-        return $array;
+
+        return true;
+    }
+
+    /**
+     * Check if two values match after normalization
+     */
+    private function valuesMatch($value1, $value2)
+    {
+        // Normalize both values
+        $normalized1 = $this->normalizeValue($value1);
+        $normalized2 = $this->normalizeValue($value2);
+
+        return $normalized1 === $normalized2;
+    }
+
+    /**
+     * Normalize a single value for comparison
+     */
+    private function normalizeValue($value)
+    {
+        // Handle null, empty, or zero
+        if ($value === null || $value === '' || $value === 0) {
+            return '';
+        }
+
+        // Handle numbers - format to 2 decimal places
+        if (is_numeric($value)) {
+            return number_format((float)$value, 2, '.', '');
+        }
+
+        // Handle strings - trim and lowercase
+        if (is_string($value)) {
+            return strtolower(trim($value));
+        }
+
+        return (string)$value;
     }
 
     public function submit()

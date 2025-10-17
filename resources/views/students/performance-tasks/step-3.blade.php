@@ -2,11 +2,9 @@
     <!-- Handsontable -->
     <script src="https://cdn.jsdelivr.net/npm/handsontable@14.1.0/dist/handsontable.full.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@14.1.0/dist/handsontable.full.min.css" />
-    <!-- Formula Parser (HyperFormula) -->
-    <script src="https://cdn.jsdelivr.net/npm/hyperformula@2.6.2/dist/hyperformula.full.min.js"></script>
 
     <div class="py-4 sm:py-6 lg:py-8">
-        {{-- Flash Error --}}
+        {{-- Flash Messages --}}
         @if (session('error'))
             <div class="mb-6 animate-slideDown">
                 <div class="flex items-start gap-3 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm">
@@ -18,16 +16,31 @@
             </div>
         @endif
 
-        {{-- Header --}}
+        @if (session('success'))
+            <div class="mb-6 animate-slideDown">
+                <div class="flex items-start gap-3 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow-sm">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-semibold text-green-800 mb-1">Success</h3>
+                        <p class="text-sm text-green-700 leading-relaxed">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Step Header -->
         <div class="mb-6 sm:mb-8">
             <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs sm:text-sm font-semibold mb-3">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                    <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                </svg>
                 <span>Step 3 of 10</span>
             </div>
             <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
-                Analyzing Transactions
+                Posting to the Ledger
             </h1>
             <p class="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed max-w-3xl">
-                Identify which accounts are affected by each transaction and determine whether they should be debited or credited.
+                Transfer journalized entries into their respective ledger accounts to update balances.
             </p>
             <!-- Add attempts counter -->
             <div class="mt-2 text-sm text-gray-600">
@@ -35,16 +48,27 @@
             </div>
         </div>
 
-        {{-- Spreadsheet Container --}}
+        <!-- Main Content -->
         <div class="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="p-4 sm:p-6 border-b border-gray-200">
-                <p class="text-xs sm:text-sm text-gray-600">
-                    {!! $performanceTask->description ?? 'Analyze the transactions below and fill in the affected accounts and amounts.' !!}
-                </p>
+            <!-- Instructions Section -->
+            <div class="p-4 sm:p-6 bg-blue-50 border-b border-blue-100">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    <div>
+                        <h3 class="text-sm font-semibold text-blue-900 mb-1">Journal Entry Instructions</h3>
+                        <p class="text-xs sm:text-sm text-blue-800">
+                            {!! $performanceTask->description ?? 'Record each transaction with the date, account titles, account numbers, and the corresponding debit and credit amounts.' !!}
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            <form id="saveForm" method="POST" action="{{ route('students.performance-tasks.save-step', 3) }}">
+            <form id="saveForm" method="POST" action="{{ route('students.performance-tasks.save-step', 2) }}">
                 @csrf
+
+                <!-- Spreadsheet -->
                 <div class="p-3 sm:p-4 lg:p-6">
                     <div class="border rounded-lg shadow-inner bg-gray-50 overflow-hidden">
                         <div class="overflow-x-auto overflow-y-auto" style="max-height: calc(100vh - 400px); min-height: 400px;">
@@ -57,22 +81,28 @@
                         <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
                         </svg>
-                        Swipe horizontally to scroll table
+                        Swipe to scroll spreadsheet
                     </div>
                 </div>
 
-                {{-- Buttons --}}
+                <!-- Buttons -->
                 <div class="p-4 sm:p-6 bg-gray-50 border-t border-gray-200">
                     <div class="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
-                        <button type="button" onclick="window.history.back()"
-                            class="inline-flex items-center justify-center px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition text-sm sm:text-base">
-                            ← Back
+                        <button type="button" onclick="window.history.back()" 
+                            class="inline-flex items-center justify-center px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors text-sm sm:text-base">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                            </svg>
+                            Back
                         </button>
 
-                        <button type="submit"
+                        <button type="submit" id="submitButton" 
                             class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 transition-colors text-sm sm:text-base"
                             {{ ($submission->attempts ?? 0) >= 2 ? 'disabled' : '' }}>
-                            💾 Save and Continue
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Save and Continue
                         </button>
                     </div>
                 </div>
@@ -81,33 +111,66 @@
     </div>
 
     <script>
+        let hot;
         document.addEventListener('DOMContentLoaded', function() {
             const container = document.getElementById('spreadsheet');
+
+            // Student's saved answers
             const savedData = @json($submission->submission_data ?? null);
+            const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => Array(19).fill(''));
 
-            // ✅ FIXED: no shared array references
-            const initialData = savedData 
-                ? JSON.parse(savedData) 
-                : Array.from({ length: 15 }, () => ['', '', '', '', '', '']);
+            // Instructor's correct data
+            const correctData = @json($answerSheet->correct_data ?? null);
+            const submissionStatus = @json($submission->status ?? null);
 
-            const hot = new Handsontable(container, {
+            // Create columns config
+            const columnsConfig = [
+                { type: 'date', dateFormat: 'MM/DD/YYYY', correctFormat: true, width: 120 },
+                { type: 'text', width: 400 },
+                { type: 'text', width: 100 },
+                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
+                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
+                { type: 'text', width: 100 }, // Cash
+                { type: 'text', width: 120 }, // Accounts Receivable
+                { type: 'text', width: 100 }, // Supplies
+                { type: 'text', width: 120 }, // Furniture & Fixtures
+                { type: 'text', width: 100 }, // Land
+                { type: 'text', width: 100 }, // Equipment
+                { type: 'text', width: 120 }, // Accounts Payable
+                { type: 'text', width: 120 }, // Notes Payable
+                { type: 'text', width: 100 }, // Capital
+                { type: 'text', width: 100 }, // Withdrawal
+                { type: 'text', width: 120 }, // Service Revenue
+                { type: 'text', width: 120 }, // Rent Expense
+                { type: 'text', width: 100 }, // Paid Licenses
+                { type: 'text', width: 120 }, // Salaries Expense
+            ];
+
+            // Initialize Handsontable
+            hot = new Handsontable(container, {
                 data: initialData,
+                columns: columnsConfig,
                 rowHeaders: true,
                 colHeaders: [
-                    'Date',
-                    'Transaction Description',
-                    'Account Title',
-                    'Reference',
-                    'Debit (₱)',
-                    'Credit (₱)'
-                ],
-                columns: [
-                    { type: 'date', dateFormat: 'MM/DD/YYYY', correctFormat: true },
-                    { type: 'text' },
-                    { type: 'text' },
-                    { type: 'text' },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } }
+                    'Date', 
+                    'Account Titles and Explanation', 
+                    'Account Number', 
+                    'Debit (₱)', 
+                    'Credit (₱)',
+                    'Cash', 
+                    'Accounts Receivable', 
+                    'Supplies', 
+                    'Furniture & Fixtures', 
+                    'Land', 
+                    'Equipment', 
+                    'Accounts Payable', 
+                    'Notes Payable', 
+                    'Capital', 
+                    'Withdrawal', 
+                    'Service Revenue', 
+                    'Rent Expense', 
+                    'Paid Licenses', 
+                    'Salaries Expense'
                 ],
                 stretchH: 'all',
                 height: 'auto',
@@ -116,25 +179,130 @@
                 manualColumnResize: true,
                 manualRowResize: true,
                 minSpareRows: 1,
+                cells: function(row, col) {
+                    const cellProperties = {};
+                    const colIndex = col % 3;
+                    
+                    // Apply T-account border only for debit columns
+                    if (colIndex === 1) {
+                        cellProperties.className = 't-account-debit-border';
+                    }
+                    
+                    // Only apply correct/incorrect coloring if submission has been graded
+                    if (submissionStatus && correctData && savedData) {
+                        const parsedCorrect = typeof correctData === 'string' ? JSON.parse(correctData) : correctData;
+                        const parsedStudent = typeof savedData === 'string' ? JSON.parse(savedData) : savedData;
+                        
+                        const studentValue = parsedStudent[row]?.[col];
+                        const correctValue = parsedCorrect[row]?.[col];
+                        
+                        // ONLY color cells where the STUDENT entered something
+                        if (studentValue !== null && studentValue !== undefined && studentValue !== '') {
+                            // Normalize values for comparison
+                            const normalizeValue = (val) => {
+                                if (val === null || val === undefined || val === '') return '';
+                                if (typeof val === 'string') return val.trim().toLowerCase();
+                                if (typeof val === 'number') return val.toFixed(2);
+                                return String(val);
+                            };
+                            
+                            const normalizedStudent = normalizeValue(studentValue);
+                            const normalizedCorrect = normalizeValue(correctValue);
+                            
+                            // Compare student's answer with correct answer
+                            if (normalizedStudent === normalizedCorrect) {
+                                cellProperties.className = (cellProperties.className || '') + ' cell-correct';
+                            } else {
+                                cellProperties.className = (cellProperties.className || '') + ' cell-wrong';
+                            }
+                        }
+                    }
+                    
+                    return cellProperties;
+                }
             });
 
-            // Save data on submit
-            document.getElementById('saveForm').addEventListener('submit', function(e) {
+            // Save submission data
+            const form = document.getElementById('saveForm');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
                 document.getElementById('submission_data').value = JSON.stringify(hot.getData());
+                this.submit();
             });
         });
     </script>
 
-    <style>
-        .handsontable td { border-color: #d1d5db; }
-        .handsontable .area { background-color: rgba(59,130,246,0.1); }
-        .overflow-x-auto { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+<style>
+    body { overflow-x: hidden; }
+    .handsontable td { 
+        border-color: #d1d5db;
+        background-color: #ffffff; /* Default white background */
+    }
+    .handsontable .area { background-color: rgba(59, 130, 246, 0.1); }
+    .handsontable { position: relative; z-index: 1; }
+    #spreadsheet { isolation: isolate; }
+    .overflow-x-auto { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
 
-        @media (max-width: 640px) {
-            .handsontable { font-size: 12px; }
-        }
-        @media (min-width: 640px) and (max-width: 1024px) {
-            .handsontable { font-size: 13px; }
-        }
-    </style>
+    /* T-Account border - only add the vertical line */
+    .handsontable td.t-account-debit-border {
+        border-right: 2px solid #6b7280 !important;
+    }
+    
+    /* Highlight the vertical line between debit and credit in headers */
+    .handsontable th {
+        font-weight: 600;
+    }
+    
+    /* Style the nested headers */
+    .handsontable thead th {
+        background-color: #f3f4f6;
+    }
+    
+    .handsontable thead tr:first-child th {
+        background-color: #e5e7eb;
+        font-weight: 700;
+        border-bottom: 2px solid #6b7280;
+    }
+
+    /* Correct/Incorrect answer styling - matches Step 1 & 2 */
+    .handsontable td.cell-correct {
+        background-color: #dcfce7 !important; /* Light green */
+        border: 2px solid #16a34a !important; /* Green border */
+        color: #166534;
+    }
+    
+    .handsontable td.cell-wrong {
+        background-color: #fee2e2 !important; /* Light red */
+        border: 2px solid #dc2626 !important; /* Red border */
+        color: #991b1b;
+    }
+    
+    /* Maintain T-account border even when colored - override with thicker border */
+    .handsontable td.t-account-debit-border.cell-correct {
+        border-right: 2px solid #16a34a !important;
+    }
+    
+    .handsontable td.t-account-debit-border.cell-wrong {
+        border-right: 2px solid #dc2626 !important;
+    }
+    
+    /* Prevent selected cells from overriding colors */
+    .handsontable td.cell-correct.area,
+    .handsontable td.cell-correct.current {
+        background-color: #bbf7d0 !important; /* Slightly darker green when selected */
+    }
+
+    .handsontable td.cell-wrong.area,
+    .handsontable td.cell-wrong.current {
+        background-color: #fecaca !important; /* Slightly darker red when selected */
+    }
+
+    @media (max-width: 640px) {
+        .handsontable { font-size: 12px; }
+        .handsontable th, .handsontable td { padding: 4px; }
+    }
+    @media (min-width: 640px) and (max-width: 1024px) {
+        .handsontable { font-size: 13px; }
+    }
+</style>
 </x-app-layout>

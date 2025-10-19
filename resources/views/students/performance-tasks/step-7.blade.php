@@ -251,6 +251,28 @@
                 '51-0', '52-0', '53-0', '54-0', '56-0', '57-0', '58-0'
             ]);
 
+            // Define table boundaries for visual separation
+            const tableBoundaries = {
+                incomeStatement: {
+                    startRow: 0,
+                    endRow: 18,
+                    color: '#e6f3ff', // Light blue
+                    borderColor: '#3b82f6' // Blue border
+                },
+                ownersEquity: {
+                    startRow: 19,
+                    endRow: 31,
+                    color: '#f0f9ff', // Very light blue
+                    borderColor: '#0ea5e9' // Sky blue border
+                },
+                balanceSheet: {
+                    startRow: 32,
+                    endRow: 58,
+                    color: '#eff6ff', // Very light indigo
+                    borderColor: '#6366f1' // Indigo border
+                }
+            };
+
             // Function to check if a cell is a template cell (should not be graded)
             function isTemplateCell(row, col) {
                 return templateCells.has(`${row}-${col}`);
@@ -270,6 +292,18 @@
                        studentValue !== undefined && 
                        studentValue !== '' && 
                        studentValue !== initialValue;
+            }
+
+            // Function to determine which table a row belongs to
+            function getTableForRow(row) {
+                if (row >= tableBoundaries.incomeStatement.startRow && row <= tableBoundaries.incomeStatement.endRow) {
+                    return 'incomeStatement';
+                } else if (row >= tableBoundaries.ownersEquity.startRow && row <= tableBoundaries.ownersEquity.endRow) {
+                    return 'ownersEquity';
+                } else if (row >= tableBoundaries.balanceSheet.startRow && row <= tableBoundaries.balanceSheet.endRow) {
+                    return 'balanceSheet';
+                }
+                return null;
             }
 
             // Initialize HyperFormula for Excel-like formulas
@@ -324,7 +358,14 @@
                         type: 'text',
                         renderer: function(instance, td, row, col, prop, value, cellProperties) {
                             Handsontable.renderers.TextRenderer.apply(this, arguments);
-                            // --- BEGIN: Coloring logic copied from step 6 ---
+                            
+                            // Apply table-specific background colors
+                            const table = getTableForRow(row);
+                            if (table) {
+                                td.style.backgroundColor = tableBoundaries[table].color;
+                            }
+                            
+                            // Apply grading colors
                             if (submissionStatus && parsedCorrect && studentModifiedCell(row, col) && !isTemplateCell(row, col)) {
                                 const studentValue = parsedSaved[row][col];
                                 const correctValue = parsedCorrect[row] ? parsedCorrect[row][col] : '';
@@ -340,7 +381,6 @@
                                     td.classList.add('cell-wrong');
                                 }
                             }
-                            // --- END: Coloring logic ---
 
                             // Style statement titles
                             if (value && value.includes('Durano Enterprise')) {
@@ -373,7 +413,11 @@
                             )) {
                                 td.style.fontWeight = 'bold';
                                 if (!submissionStatus || !td.style.backgroundColor || td.style.backgroundColor === '' || td.style.backgroundColor === 'transparent') {
-                                    td.style.backgroundColor = '#f8fafc';
+                                    // Keep the table-specific background color
+                                    const table = getTableForRow(row);
+                                    if (table) {
+                                        td.style.backgroundColor = tableBoundaries[table].color;
+                                    }
                                 }
                             }
                             
@@ -407,7 +451,14 @@
                         renderer: function(instance, td, row, col, prop, value, cellProperties) {
                             Handsontable.renderers.TextRenderer.apply(this, arguments);
                             td.style.textAlign = 'center';
-                            // --- BEGIN: Coloring logic copied from step 6 ---
+                            
+                            // Apply table-specific background colors
+                            const table = getTableForRow(row);
+                            if (table) {
+                                td.style.backgroundColor = tableBoundaries[table].color;
+                            }
+                            
+                            // Apply grading colors
                             if (submissionStatus && parsedCorrect && studentModifiedCell(row, col) && !isTemplateCell(row, col)) {
                                 const studentValue = parsedSaved[row][col];
                                 const correctValue = parsedCorrect[row] ? parsedCorrect[row][col] : '';
@@ -423,7 +474,6 @@
                                     td.classList.add('cell-wrong');
                                 }
                             }
-                            // --- END: Coloring logic ---
                         }
                     },
                     { 
@@ -431,7 +481,14 @@
                         numericFormat: { pattern: '₱0,0.00' },
                         renderer: function(instance, td, row, col, prop, value, cellProperties) {
                             Handsontable.renderers.NumericRenderer.apply(this, arguments);
-                            // --- BEGIN: Coloring logic copied from step 6 ---
+                            
+                            // Apply table-specific background colors
+                            const table = getTableForRow(row);
+                            if (table) {
+                                td.style.backgroundColor = tableBoundaries[table].color;
+                            }
+                            
+                            // Apply grading colors
                             if (submissionStatus && parsedCorrect && studentModifiedCell(row, col) && !isTemplateCell(row, col)) {
                                 const studentValue = parsedSaved[row][col];
                                 const correctValue = parsedCorrect[row] ? parsedCorrect[row][col] : '';
@@ -450,7 +507,6 @@
                                     td.classList.add('cell-wrong');
                                 }
                             }
-                            // --- END: Coloring logic ---
 
                             if (instance.getDataAtCell(row, 0) && (
                                 instance.getDataAtCell(row, 0).includes('Total revenues') ||
@@ -471,7 +527,14 @@
                         numericFormat: { pattern: '₱0,0.00' },
                         renderer: function(instance, td, row, col, prop, value, cellProperties) {
                             Handsontable.renderers.NumericRenderer.apply(this, arguments);
-                            // --- BEGIN: Coloring logic copied from step 6 ---
+                            
+                            // Apply table-specific background colors
+                            const table = getTableForRow(row);
+                            if (table) {
+                                td.style.backgroundColor = tableBoundaries[table].color;
+                            }
+                            
+                            // Apply grading colors
                             if (submissionStatus && parsedCorrect && studentModifiedCell(row, col) && !isTemplateCell(row, col)) {
                                 const studentValue = parsedSaved[row][col];
                                 const correctValue = parsedCorrect[row] ? parsedCorrect[row][col] : '';
@@ -490,7 +553,6 @@
                                     td.classList.add('cell-wrong');
                                 }
                             }
-                            // --- END: Coloring logic ---
 
                             if (instance.getDataAtCell(row, 0) && (
                                 instance.getDataAtCell(row, 0).includes('Total revenues') ||
@@ -538,6 +600,42 @@
                     { row: 32, col: 1, rowspan: 1, colspan: 3 },
                     { row: 33, col: 1, rowspan: 1, colspan: 3 },
                     { row: 34, col: 1, rowspan: 1, colspan: 3 }
+                ],
+                // Add custom borders for table separation
+                customBorders: [
+                    // Income Statement bottom border
+                    {
+                        range: {
+                            from: { row: tableBoundaries.incomeStatement.endRow, col: 0 },
+                            to: { row: tableBoundaries.incomeStatement.endRow, col: 3 }
+                        },
+                        bottom: {
+                            width: 3,
+                            color: tableBoundaries.incomeStatement.borderColor
+                        }
+                    },
+                    // Statement of Owner's Equity bottom border
+                    {
+                        range: {
+                            from: { row: tableBoundaries.ownersEquity.endRow, col: 0 },
+                            to: { row: tableBoundaries.ownersEquity.endRow, col: 3 }
+                        },
+                        bottom: {
+                            width: 3,
+                            color: tableBoundaries.ownersEquity.borderColor
+                        }
+                    },
+                    // Balance Sheet bottom border
+                    {
+                        range: {
+                            from: { row: tableBoundaries.balanceSheet.endRow, col: 0 },
+                            to: { row: tableBoundaries.balanceSheet.endRow, col: 3 }
+                        },
+                        bottom: {
+                            width: 3,
+                            color: tableBoundaries.balanceSheet.borderColor
+                        }
+                    }
                 ]
             });
 
@@ -643,6 +741,11 @@
         .handsontable td.cell-wrong.area,
         .handsontable td.cell-wrong.current {
             background-color: #fecaca !important; /* Slightly darker red when selected */
+        }
+
+        /* Table separation styling */
+        .handsontable .table-divider {
+            border-bottom: 3px solid #3b82f6;
         }
 
         @media (max-width: 640px) {

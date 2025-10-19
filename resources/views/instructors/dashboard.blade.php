@@ -150,7 +150,7 @@
                             </h2>
                         </div>
                         <div class="p-6 space-y-3">
-                            <a href="{{ route('instructors.tasks.create') }}" 
+                            <a href="{{ route('instructors.performance-tasks.create') }}" 
                                class="block w-full text-center bg-gradient-to-r from-[#FF92C2] to-[#FFC8FB] hover:from-[#ff6fb5] hover:to-[#ffb8f0] text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105">
                                 <i class="fas fa-plus-circle mr-2"></i>
                                 Create New Task

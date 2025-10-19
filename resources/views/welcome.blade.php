@@ -131,22 +131,6 @@
                             Explore Features
                         </a>
                     </div>
-
-                    <!-- Stats Preview -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-                        <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
-                            <div class="text-3xl font-bold text-[#D5006D] mb-2">10K+</div>
-                            <div class="text-gray-600 dark:text-gray-300">Happy Students</div>
-                        </div>
-                        <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
-                            <div class="text-3xl font-bold text-[#D5006D] mb-2">500+</div>
-                            <div class="text-gray-600 dark:text-gray-300">Interactive Lessons</div>
-                        </div>
-                        <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg">
-                            <div class="text-3xl font-bold text-[#D5006D] mb-2">98%</div>
-                            <div class="text-gray-600 dark:text-gray-300">Success Rate</div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

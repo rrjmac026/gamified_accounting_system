@@ -149,7 +149,7 @@
             
             // Get saved answer key data if it exists
             const savedData = @json($sheet->correct_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array(15).fill().map(() => Array(4).fill(''));
+            const initialData = savedData ? JSON.parse(savedData) : Array(20).fill().map(() => Array(4).fill(''));
 
             // Initialize HyperFormula for Excel-like formulas
             const hyperformulaInstance = HyperFormula.buildEmpty({
@@ -164,20 +164,20 @@
                 data: initialData,
                 rowHeaders: true,
                 colHeaders: [
-                    'Classification',
-                    'Account Title',
-                    'Amount (₱)',
-                    'Total (₱)'
+                    'Date',
+                    'Descriptions/Particulars',
+                    'Debit',
+                    'Credit'
                 ],
                 columns: [
-                    { type: 'dropdown', source: ['Assets', 'Liabilities', "Owner's Equity"] },
+                    { type: 'date', dateFormat: 'MM/DD/YYYY' },
                     { type: 'text' },
                     { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, readOnly: true }
+                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } }
                 ],
                 width: '100%',
                 height: isMobile ? 350 : (isTablet ? 450 : 500),
-                colWidths: isMobile ? 120 : (isTablet ? 150 : 180),
+                colWidths: isMobile ? [80, 180, 100, 100] : (isTablet ? [100, 220, 130, 130] : [120, 250, 150, 150]),
                 licenseKey: 'non-commercial-and-evaluation',
                 formulas: { engine: hyperformulaInstance },
                 contextMenu: true,
@@ -188,7 +188,7 @@
                 autoColumnSize: false,
                 autoRowSize: false,
                 copyPaste: true,
-                minRows: 15,
+                minRows: 20,
                 minSpareRows: 1,
                 stretchH: 'all',
                 enterMoves: { row: 1, col: 0 },
@@ -209,7 +209,7 @@
                     
                     hot.updateSettings({
                         height: newHeight,
-                        colWidths: newIsMobile ? 120 : (newIsTablet ? 150 : 180)
+                        colWidths: newIsMobile ? [80, 180, 100, 100] : (newIsTablet ? [100, 220, 130, 130] : [120, 250, 150, 150])
                     });
                 }, 250);
             });
@@ -233,6 +233,7 @@
         .handsontable .bg-gray-100 { background-color: #f3f4f6 !important; }
         .handsontable .bg-blue-50 { background-color: #eff6ff !important; }
         .handsontable td { border-color: #d1d5db; }
+        .handsontable th { background-color: #f3f4f6; font-weight: 600; }
         .handsontable .area { background-color: rgba(147, 51, 234, 0.1); }
         .handsontable { position: relative; z-index: 1; }
         #spreadsheet { isolation: isolate; }

@@ -144,7 +144,7 @@
         </div>
     </div>
 
-<script>
+    <script>
         let hot;
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -152,11 +152,15 @@
             
             // Get saved submission data, answer key, and grading status
             const savedData = @json($submission->submission_data ?? null);
-            const correctData = @json($answerKey ?? null);
-            const isGraded = @json($submission->is_graded ?? false);
+            const correctData = @json($answerSheet->correct_data ?? null);
+            const submissionStatus = @json($submission->status ?? null);
+
+            // Parse once for reuse
+            const parsedSaved = savedData ? (typeof savedData === 'string' ? JSON.parse(savedData) : savedData) : null;
+            const parsedCorrect = correctData ? (typeof correctData === 'string' ? JSON.parse(correctData) : correctData) : null;
             
-            // Initialize with McGraw Hill financial statement structure
-            const initialData = savedData ? JSON.parse(savedData) : [
+            // Define the initial empty template (without any pre-filled values)
+            const initialData = [
                 // INCOME STATEMENT - McGraw Hill Format
                 ['', 'Durano Enterprise', '', ''],
                 ['', 'Income Statement', '', ''],
@@ -225,19 +229,62 @@
                 ['Total liabilities and owner\'s equity', '', '', '']
             ];
 
+            // Define template cells that should NEVER be graded (headers, labels, etc.)
+            const templateCells = new Set([
+                // Income Statement headers and labels
+                '0-0', '0-1', '0-2', '0-3',
+                '1-0', '1-1', '1-2', '1-3', 
+                '2-0', '2-1', '2-2', '2-3',
+                '4-0', '8-0', '5-0', '6-0', '9-0', '10-0', '11-0', '12-0', '13-0', '14-0', '16-0',
+                
+                // Statement of Owner's Equity headers and labels
+                '19-0', '19-1', '19-2', '19-3',
+                '20-0', '20-1', '20-2', '20-3',
+                '21-0', '21-1', '21-2', '21-3',
+                '24-0', '25-0', '26-0', '28-0', '29-0', '30-0',
+                
+                // Balance Sheet headers and labels
+                '32-0', '32-1', '32-2', '32-3',
+                '33-0', '33-1', '33-2', '33-3',
+                '34-0', '34-1', '34-2', '34-3',
+                '35-0', '36-0', '37-0', '38-0', '40-0', '41-0', '43-0', '44-0', '46-0', '47-0', '48-0', '49-0',
+                '51-0', '52-0', '53-0', '54-0', '56-0', '57-0', '58-0'
+            ]);
+
+            // Function to check if a cell is a template cell (should not be graded)
+            function isTemplateCell(row, col) {
+                return templateCells.has(`${row}-${col}`);
+            }
+
+            // Function to check if student actually modified this cell
+            function studentModifiedCell(row, col) {
+                if (!parsedSaved || !parsedSaved[row] || parsedSaved[row][col] === undefined) {
+                    return false;
+                }
+                
+                const studentValue = parsedSaved[row][col];
+                const initialValue = initialData[row] ? initialData[row][col] : '';
+                
+                // Student modified if value exists and is different from initial empty template
+                return studentValue !== null && 
+                       studentValue !== undefined && 
+                       studentValue !== '' && 
+                       studentValue !== initialValue;
+            }
+
             // Initialize HyperFormula for Excel-like formulas
             const hyperformulaInstance = HyperFormula.buildEmpty({
                 licenseKey: 'internal-use-in-handsontable',
             });
 
-            // Determine responsive dimensions with better calculations
+            // Determine responsive dimensions
             const viewportWidth = window.innerWidth;
             const viewportHeight = window.innerHeight;
             const isMobile = viewportWidth < 640;
             const isTablet = viewportWidth >= 640 && viewportWidth < 1024;
             const isDesktop = viewportWidth >= 1024;
 
-            // Calculate optimal table height based on viewport
+            // Calculate optimal table height
             let tableHeight;
             if (isMobile) {
                 tableHeight = Math.min(Math.max(viewportHeight * 0.5, 350), 500);
@@ -264,7 +311,7 @@
             }
                 
             hot = new Handsontable(container, {
-                data: initialData,
+                data: parsedSaved || initialData, // Use saved data if available, otherwise empty template
                 rowHeaders: true,
                 colHeaders: [
                     'Account Title',
@@ -277,30 +324,24 @@
                         type: 'text',
                         renderer: function(instance, td, row, col, prop, value, cellProperties) {
                             Handsontable.renderers.TextRenderer.apply(this, arguments);
-                            
-                            // Apply grading colors if graded
-                            if (isGraded && correctData) {
-                                const correctAnswers = JSON.parse(correctData);
-                                const correctAnswer = correctAnswers[row] && correctAnswers[row][col];
-                                
-                                if (correctAnswer !== null && correctAnswer !== '' && correctAnswer !== undefined) {
-                                    const normalizeValue = (val) => {
-                                        if (val === null || val === undefined || val === '') return '';
-                                        if (typeof val === 'string') return val.trim().toLowerCase();
-                                        return val.toString();
-                                    };
-                                    
-                                    const isCorrect = normalizeValue(value) === normalizeValue(correctAnswer);
-                                    if (isCorrect) {
-                                        td.style.backgroundColor = '#d1fae5';
-                                        td.style.color = '#065f46';
-                                    } else {
-                                        td.style.backgroundColor = '#fee2e2';
-                                        td.style.color = '#991b1b';
-                                    }
+                            // --- BEGIN: Coloring logic copied from step 6 ---
+                            if (submissionStatus && parsedCorrect && studentModifiedCell(row, col) && !isTemplateCell(row, col)) {
+                                const studentValue = parsedSaved[row][col];
+                                const correctValue = parsedCorrect[row] ? parsedCorrect[row][col] : '';
+                                const normalizeValue = (val) => {
+                                    if (val === null || val === undefined || val === '') return '';
+                                    if (typeof val === 'string') return val.trim().toLowerCase();
+                                    return val.toString();
+                                };
+                                const isCorrect = normalizeValue(studentValue) === normalizeValue(correctValue);
+                                if (isCorrect) {
+                                    td.classList.add('cell-correct');
+                                } else {
+                                    td.classList.add('cell-wrong');
                                 }
                             }
-                            
+                            // --- END: Coloring logic ---
+
                             // Style statement titles
                             if (value && value.includes('Durano Enterprise')) {
                                 td.style.fontWeight = 'bold';
@@ -331,7 +372,7 @@
                                 value === 'Total property, plant and equipment'
                             )) {
                                 td.style.fontWeight = 'bold';
-                                if (!isGraded || !td.style.backgroundColor || td.style.backgroundColor === '' || td.style.backgroundColor === 'transparent') {
+                                if (!submissionStatus || !td.style.backgroundColor || td.style.backgroundColor === '' || td.style.backgroundColor === 'transparent') {
                                     td.style.backgroundColor = '#f8fafc';
                                 }
                             }
@@ -366,29 +407,23 @@
                         renderer: function(instance, td, row, col, prop, value, cellProperties) {
                             Handsontable.renderers.TextRenderer.apply(this, arguments);
                             td.style.textAlign = 'center';
-                            
-                            // Apply grading colors if graded
-                            if (isGraded && correctData) {
-                                const correctAnswers = JSON.parse(correctData);
-                                const correctAnswer = correctAnswers[row] && correctAnswers[row][col];
-                                
-                                if (correctAnswer !== null && correctAnswer !== '' && correctAnswer !== undefined) {
-                                    const normalizeValue = (val) => {
-                                        if (val === null || val === undefined || val === '') return '';
-                                        if (typeof val === 'string') return val.trim().toLowerCase();
-                                        return val.toString();
-                                    };
-                                    
-                                    const isCorrect = normalizeValue(value) === normalizeValue(correctAnswer);
-                                    if (isCorrect) {
-                                        td.style.backgroundColor = '#d1fae5';
-                                        td.style.color = '#065f46';
-                                    } else {
-                                        td.style.backgroundColor = '#fee2e2';
-                                        td.style.color = '#991b1b';
-                                    }
+                            // --- BEGIN: Coloring logic copied from step 6 ---
+                            if (submissionStatus && parsedCorrect && studentModifiedCell(row, col) && !isTemplateCell(row, col)) {
+                                const studentValue = parsedSaved[row][col];
+                                const correctValue = parsedCorrect[row] ? parsedCorrect[row][col] : '';
+                                const normalizeValue = (val) => {
+                                    if (val === null || val === undefined || val === '') return '';
+                                    if (typeof val === 'string') return val.trim().toLowerCase();
+                                    return val.toString();
+                                };
+                                const isCorrect = normalizeValue(studentValue) === normalizeValue(correctValue);
+                                if (isCorrect) {
+                                    td.classList.add('cell-correct');
+                                } else {
+                                    td.classList.add('cell-wrong');
                                 }
                             }
+                            // --- END: Coloring logic ---
                         }
                     },
                     { 
@@ -396,34 +431,27 @@
                         numericFormat: { pattern: '₱0,0.00' },
                         renderer: function(instance, td, row, col, prop, value, cellProperties) {
                             Handsontable.renderers.NumericRenderer.apply(this, arguments);
-                            
-                            // Apply grading colors if graded
-                            if (isGraded && correctData) {
-                                const correctAnswers = JSON.parse(correctData);
-                                const correctAnswer = correctAnswers[row] && correctAnswers[row][col];
-                                
-                                if (correctAnswer !== null && correctAnswer !== '' && correctAnswer !== undefined) {
-                                    const normalizeValue = (val) => {
-                                        if (val === null || val === undefined || val === '') return '';
-                                        if (typeof val === 'number') return val.toString();
-                                        if (typeof val === 'string') return val.trim();
-                                        return val.toString();
-                                    };
-                                    
-                                    const studentVal = normalizeValue(value);
-                                    const correctVal = normalizeValue(correctAnswer);
-                                    const isCorrect = parseFloat(studentVal) === parseFloat(correctVal);
-                                    
-                                    if (isCorrect) {
-                                        td.style.backgroundColor = '#d1fae5';
-                                        td.style.color = '#065f46';
-                                    } else {
-                                        td.style.backgroundColor = '#fee2e2';
-                                        td.style.color = '#991b1b';
-                                    }
+                            // --- BEGIN: Coloring logic copied from step 6 ---
+                            if (submissionStatus && parsedCorrect && studentModifiedCell(row, col) && !isTemplateCell(row, col)) {
+                                const studentValue = parsedSaved[row][col];
+                                const correctValue = parsedCorrect[row] ? parsedCorrect[row][col] : '';
+                                const normalizeValue = (val) => {
+                                    if (val === null || val === undefined || val === '') return '';
+                                    if (typeof val === 'number') return val.toString();
+                                    if (typeof val === 'string') return val.trim();
+                                    return val.toString();
+                                };
+                                const studentVal = normalizeValue(studentValue);
+                                const correctVal = normalizeValue(correctValue);
+                                const isCorrect = parseFloat(studentVal) === parseFloat(correctVal);
+                                if (isCorrect) {
+                                    td.classList.add('cell-correct');
+                                } else {
+                                    td.classList.add('cell-wrong');
                                 }
                             }
-                            
+                            // --- END: Coloring logic ---
+
                             if (instance.getDataAtCell(row, 0) && (
                                 instance.getDataAtCell(row, 0).includes('Total revenues') ||
                                 instance.getDataAtCell(row, 0).includes('Total expenses') ||
@@ -443,34 +471,27 @@
                         numericFormat: { pattern: '₱0,0.00' },
                         renderer: function(instance, td, row, col, prop, value, cellProperties) {
                             Handsontable.renderers.NumericRenderer.apply(this, arguments);
-                            
-                            // Apply grading colors if graded
-                            if (isGraded && correctData) {
-                                const correctAnswers = JSON.parse(correctData);
-                                const correctAnswer = correctAnswers[row] && correctAnswers[row][col];
-                                
-                                if (correctAnswer !== null && correctAnswer !== '' && correctAnswer !== undefined) {
-                                    const normalizeValue = (val) => {
-                                        if (val === null || val === undefined || val === '') return '';
-                                        if (typeof val === 'number') return val.toString();
-                                        if (typeof val === 'string') return val.trim();
-                                        return val.toString();
-                                    };
-                                    
-                                    const studentVal = normalizeValue(value);
-                                    const correctVal = normalizeValue(correctAnswer);
-                                    const isCorrect = parseFloat(studentVal) === parseFloat(correctVal);
-                                    
-                                    if (isCorrect) {
-                                        td.style.backgroundColor = '#d1fae5';
-                                        td.style.color = '#065f46';
-                                    } else {
-                                        td.style.backgroundColor = '#fee2e2';
-                                        td.style.color = '#991b1b';
-                                    }
+                            // --- BEGIN: Coloring logic copied from step 6 ---
+                            if (submissionStatus && parsedCorrect && studentModifiedCell(row, col) && !isTemplateCell(row, col)) {
+                                const studentValue = parsedSaved[row][col];
+                                const correctValue = parsedCorrect[row] ? parsedCorrect[row][col] : '';
+                                const normalizeValue = (val) => {
+                                    if (val === null || val === undefined || val === '') return '';
+                                    if (typeof val === 'number') return val.toString();
+                                    if (typeof val === 'string') return val.trim();
+                                    return val.toString();
+                                };
+                                const studentVal = normalizeValue(studentValue);
+                                const correctVal = normalizeValue(correctValue);
+                                const isCorrect = parseFloat(studentVal) === parseFloat(correctVal);
+                                if (isCorrect) {
+                                    td.classList.add('cell-correct');
+                                } else {
+                                    td.classList.add('cell-wrong');
                                 }
                             }
-                            
+                            // --- END: Coloring logic ---
+
                             if (instance.getDataAtCell(row, 0) && (
                                 instance.getDataAtCell(row, 0).includes('Total revenues') ||
                                 instance.getDataAtCell(row, 0).includes('Total expenses') ||
@@ -517,7 +538,7 @@
                     { row: 32, col: 1, rowspan: 1, colspan: 3 },
                     { row: 33, col: 1, rowspan: 1, colspan: 3 },
                     { row: 34, col: 1, rowspan: 1, colspan: 3 }
-                ],
+                ]
             });
 
             // Improved window resize handler with debouncing
@@ -600,15 +621,28 @@
             font-weight: bold;
         }
 
-        /* Grading color styles */
-        .handsontable td.correct-answer {
-            background-color: #d1fae5 !important;
-            color: #065f46;
+        /* Grading colors (copied from step 6) */
+        .handsontable td.cell-correct {
+            background-color: #dcfce7 !important; /* Light green */
+            border: 2px solid #16a34a !important; /* Green border */
+            color: #166534;
         }
-        
-        .handsontable td.incorrect-answer {
-            background-color: #fee2e2 !important;
+
+        .handsontable td.cell-wrong {
+            background-color: #fee2e2 !important; /* Light red */
+            border: 2px solid #dc2626 !important; /* Red border */
             color: #991b1b;
+        }
+
+        /* Prevent selected cells from overriding colors */
+        .handsontable td.cell-correct.area,
+        .handsontable td.cell-correct.current {
+            background-color: #bbf7d0 !important; /* Slightly darker green when selected */
+        }
+
+        .handsontable td.cell-wrong.area,
+        .handsontable td.cell-wrong.current {
+            background-color: #fecaca !important; /* Slightly darker red when selected */
         }
 
         @media (max-width: 640px) {

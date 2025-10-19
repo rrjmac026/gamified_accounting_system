@@ -2,8 +2,6 @@
     <!-- Handsontable -->
     <script src="https://cdn.jsdelivr.net/npm/handsontable@14.1.0/dist/handsontable.full.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@14.1.0/dist/handsontable.full.min.css" />
-    <!-- Formula Parser (HyperFormula) -->
-    <script src="https://cdn.jsdelivr.net/npm/hyperformula@2.6.2/dist/hyperformula.full.min.js"></script>
     
     <div class="py-4 sm:py-6 lg:py-8">
         @if (session('error'))
@@ -51,7 +49,6 @@
         <!-- Enhanced Header Section -->
         <div class="mb-6 sm:mb-8">
             <div class="relative">
-                <!-- Step Indicator Badge -->
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-xs sm:text-sm font-semibold mb-3">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
@@ -60,7 +57,6 @@
                     <span>Answer Key - Step 10 of 10</span>
                 </div>
                 
-                <!-- Title Section -->
                 <div class="flex items-start justify-between gap-4">
                     <div class="flex-1">
                         <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
@@ -91,37 +87,10 @@
                     <div>
                         <h3 class="text-sm font-semibold text-purple-900 mb-1">Instructions for Creating Answer Key</h3>
                         <p class="text-xs sm:text-sm text-purple-800">
-                            Fill in the correct answers below. Students' submissions will be compared against this answer key for grading. Empty cells will be ignored during comparison. Ensure debits equal credits for proper validation.
+                            Fill in the correct account titles and amounts in the editable cells. The format follows McGraw Hill's standard Post-Closing Trial Balance layout. Students' answers will be compared cell-by-cell with your answer key.
                         </p>
                     </div>
                 </div>
-            </div>
-
-            <!-- Important Rules Section -->
-            <div class="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-yellow-800">Important Rules for Post-Closing Trial Balance</h3>
-                        <div class="mt-2 text-sm text-yellow-700">
-                            <ul class="list-disc list-inside space-y-1">
-                                <li>Only permanent accounts should be included (Assets, Liabilities, Owner's Capital)</li>
-                                <li>All temporary accounts should be zero (Revenue, Expenses, Withdrawals)</li>
-                                <li>Total debits must equal total credits</li>
-                                <li>All account balances must carry their normal balances</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Validation Status Section -->
-            <div id="validationStatus" class="mt-4 p-4 rounded hidden">
-                <ul class="list-disc list-inside space-y-2" id="validationMessages"></ul>
             </div>
 
             <form id="answerKeyForm" action="{{ route('instructors.performance-tasks.answer-sheets.update', ['task' => $task, 'step' => 10]) }}" method="POST">
@@ -131,18 +100,10 @@
                 <!-- Spreadsheet Section -->
                 <div class="p-3 sm:p-4 lg:p-6">
                     <div class="border rounded-lg shadow-inner bg-gray-50 overflow-hidden">
-                        <div class="overflow-x-auto overflow-y-auto" style="max-height: calc(100vh - 400px); min-height: 400px;">
+                        <div class="overflow-x-auto overflow-y-auto" style="max-height: calc(100vh - 400px); min-height: 500px;">
                             <div id="spreadsheet" class="bg-white min-w-full"></div>
                         </div>
                         <input type="hidden" name="correct_data" id="correctData" required>
-                    </div>
-
-                    <!-- Balance Status Indicator -->
-                    <div id="balanceStatus" class="mt-3 p-3 rounded-lg text-sm font-medium hidden">
-                        <div class="flex items-center gap-2">
-                            <svg id="balanceIcon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"></svg>
-                            <span id="balanceText"></span>
-                        </div>
                     </div>
 
                     <!-- Mobile Scroll Hint -->
@@ -168,7 +129,7 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            Save Answer Key & Finish
+                            Save Answer Key
                         </button>
                     </div>
                 </div>
@@ -182,58 +143,91 @@
         document.addEventListener("DOMContentLoaded", function () {
             const container = document.getElementById('spreadsheet');
             
-            // Get saved answer key data if it exists
             const savedData = @json($sheet->correct_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array(15).fill().map(() => Array(4).fill(''));
+            
+            // McGraw Hill Post-Closing Trial Balance Format
+            const initialData = savedData ? JSON.parse(savedData) : [
+                ['POST-CLOSING TRIAL BALANCE', '', '', ''],
+                ['December 31, 2024', '', '', ''],
+                ['', '', '', ''],
+                ['Account Title', '', 'Debit', 'Credit'],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['', '', '', ''],
+                ['Totals', '', '', '']
+            ];
 
-            // Initialize HyperFormula for Excel-like formulas
-            const hyperformulaInstance = HyperFormula.buildEmpty({
-                licenseKey: 'internal-use-in-handsontable',
-            });
-
-            // Determine responsive dimensions
             const isMobile = window.innerWidth < 640;
             const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
             
             hot = new Handsontable(container, {
                 data: initialData,
                 rowHeaders: true,
-                colHeaders: [
-                    'Account Title',
-                    'Reference',
-                    'Debit (₱)',
-                    'Credit (₱)'
-                ],
+                colHeaders: ['A', 'B', 'C', 'D'],
                 columns: [
                     { type: 'text' },
                     { type: 'text' },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } }
+                    { type: 'numeric', numericFormat: { pattern: '0,0.00' } },
+                    { type: 'numeric', numericFormat: { pattern: '0,0.00' } }
                 ],
+                cells: function(row, col) {
+                    const cellProperties = {};
+                    
+                    // Title row (row 0)
+                    if (row === 0 && col === 0) {
+                        cellProperties.className = 'htCenter htMiddle font-bold';
+                        cellProperties.readOnly = true;
+                    }
+                    
+                    // Date row (row 1)
+                    if (row === 1 && col === 0) {
+                        cellProperties.className = 'htCenter htMiddle';
+                        cellProperties.readOnly = true;
+                    }
+                    
+                    // Header row (row 3)
+                    if (row === 3) {
+                        cellProperties.className = 'htCenter htMiddle font-bold bg-gray-100';
+                        cellProperties.readOnly = true;
+                    }
+                    
+                    // Totals row (last row)
+                    if (row === 19 && col === 0) {
+                        cellProperties.className = 'htLeft htMiddle font-bold';
+                        cellProperties.readOnly = true;
+                    }
+                    
+                    // Make column B empty and read-only for spacing
+                    if (col === 1) {
+                        cellProperties.readOnly = true;
+                    }
+                    
+                    return cellProperties;
+                },
                 width: '100%',
-                height: isMobile ? 350 : (isTablet ? 450 : 500),
-                colWidths: isMobile ? 120 : (isTablet ? 140 : 160),
+                height: isMobile ? 500 : (isTablet ? 550 : 600),
+                colWidths: isMobile ? [200, 50, 120, 120] : (isTablet ? [250, 60, 140, 140] : [300, 80, 160, 160]),
                 licenseKey: 'non-commercial-and-evaluation',
-                formulas: { engine: hyperformulaInstance },
-                contextMenu: true,
+                contextMenu: ['undo', 'redo'],
                 undo: true,
-                manualColumnResize: true,
-                manualRowResize: true,
-                fillHandle: true,
-                autoColumnSize: false,
-                autoRowSize: false,
-                copyPaste: true,
-                minRows: 15,
-                minSpareRows: 1,
+                minSpareRows: 0,
                 stretchH: 'all',
-                enterMoves: { row: 1, col: 0 },
-                tabMoves: { row: 0, col: 1 },
-                outsideClickDeselects: false,
-                selectionMode: 'multiple',
-                className: 'htCenter htMiddle',
-                afterChange: function () {
-                    calculateTotals();
-                }
+                mergeCells: [
+                    { row: 0, col: 0, rowspan: 1, colspan: 4 },
+                    { row: 1, col: 0, rowspan: 1, colspan: 4 }
+                ]
             });
 
             // Handle window resize
@@ -243,129 +237,17 @@
                 resizeTimer = setTimeout(function() {
                     const newIsMobile = window.innerWidth < 640;
                     const newIsTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
-                    const newHeight = newIsMobile ? 350 : (newIsTablet ? 450 : 500);
+                    const newHeight = newIsMobile ? 500 : (newIsTablet ? 550 : 600);
+                    const newColWidths = newIsMobile ? [200, 50, 120, 120] : (newIsTablet ? [250, 60, 140, 140] : [300, 80, 160, 160]);
                     
                     hot.updateSettings({
                         height: newHeight,
-                        colWidths: newIsMobile ? 120 : (newIsTablet ? 140 : 160)
+                        colWidths: newColWidths
                     });
                 }, 250);
             });
 
-            // Calculate and display balance status
-            function calculateTotals() {
-                const data = hot.getData();
-                let debitTotal = 0;
-                let creditTotal = 0;
-
-                data.forEach(row => {
-                    debitTotal += parseFloat(row[2] || 0);
-                    creditTotal += parseFloat(row[3] || 0);
-                });
-
-                const balanceStatus = document.getElementById('balanceStatus');
-                const balanceIcon = document.getElementById('balanceIcon');
-                const balanceText = document.getElementById('balanceText');
-                const container = document.getElementById('spreadsheet');
-
-                if (Math.abs(debitTotal - creditTotal) > 0.01) {
-                    // Not balanced
-                    balanceStatus.className = 'mt-3 p-3 rounded-lg text-sm font-medium bg-red-50 border border-red-200';
-                    balanceIcon.innerHTML = '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>';
-                    balanceIcon.className = 'w-5 h-5 text-red-500';
-                    balanceText.className = 'text-red-700';
-                    balanceText.textContent = `⚠️ Not Balanced - Debits: ₱${debitTotal.toFixed(2)}, Credits: ₱${creditTotal.toFixed(2)}`;
-                    container.style.border = '2px solid #EF4444';
-                    balanceStatus.classList.remove('hidden');
-                    return false;
-                } else {
-                    // Balanced
-                    balanceStatus.className = 'mt-3 p-3 rounded-lg text-sm font-medium bg-green-50 border border-green-200';
-                    balanceIcon.innerHTML = '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>';
-                    balanceIcon.className = 'w-5 h-5 text-green-500';
-                    balanceText.className = 'text-green-700';
-                    balanceText.textContent = `✓ Balanced - Total: ₱${debitTotal.toFixed(2)}`;
-                    container.style.border = '2px solid #10B981';
-                    balanceStatus.classList.remove('hidden');
-                    return true;
-                }
-            }
-
-            // Initial check
-            calculateTotals();
-
-            // Validation function
-            function validateAnswerKey(data) {
-                const validationMessages = [];
-                let hasErrors = false;
-
-                // Check for temporary accounts
-                const temporaryAccounts = ['Revenue', 'Sales', 'Income', 'Expense', 'Withdrawal'];
-                data.forEach((row, index) => {
-                    if (row[0] && temporaryAccounts.some(term => row[0].toLowerCase().includes(term.toLowerCase()))) {
-                        validationMessages.push({
-                            type: 'error',
-                            message: `Row ${index + 1}: Temporary account "${row[0]}" should not appear in post-closing trial balance`
-                        });
-                        hasErrors = true;
-                    }
-                });
-
-                // Calculate totals
-                let debitTotal = 0;
-                let creditTotal = 0;
-                data.forEach(row => {
-                    debitTotal += parseFloat(row[2] || 0);
-                    creditTotal += parseFloat(row[3] || 0);
-                });
-
-                // Check if totals match
-                if (Math.abs(debitTotal - creditTotal) > 0.01) {
-                    validationMessages.push({
-                        type: 'error',
-                        message: `Debits (${debitTotal.toFixed(2)}) do not equal Credits (${creditTotal.toFixed(2)})`
-                    });
-                    hasErrors = true;
-                } else if (debitTotal > 0) {
-                    validationMessages.push({
-                        type: 'success',
-                        message: `✓ Balanced - Total: ₱${debitTotal.toFixed(2)}`
-                    });
-                }
-
-                // Update validation status display
-                const statusDiv = document.getElementById('validationStatus');
-                const messagesList = document.getElementById('validationMessages');
-                messagesList.innerHTML = '';
-
-                validationMessages.forEach(msg => {
-                    const li = document.createElement('li');
-                    li.className = msg.type === 'error' ? 'text-red-600' : 'text-green-600';
-                    li.textContent = msg.message;
-                    messagesList.appendChild(li);
-                });
-
-                statusDiv.className = `mt-4 p-4 rounded ${hasErrors ? 'bg-red-50' : 'bg-green-50'}`;
-                statusDiv.classList.remove('hidden');
-
-                return !hasErrors;
-            }
-
-            // Modify form submission
-            document.getElementById('answerKeyForm').addEventListener('submit', function(e) {
-                const data = hot.getData();
-                if (!validateAnswerKey(data)) {
-                    e.preventDefault();
-                    alert('Please correct the validation errors before saving the answer key.');
-                }
-            });
-
-            // Add validation check on data changes
-            hot.addHook('afterChange', function() {
-                validateAnswerKey(hot.getData());
-            });
-
-            // Capture spreadsheet data on submit
+            // Form submission
             const answerKeyForm = document.getElementById("answerKeyForm");
             if (answerKeyForm) {
                 answerKeyForm.addEventListener("submit", function (e) {
@@ -382,7 +264,6 @@
         body { overflow-x: hidden; }
         .handsontable .font-bold { font-weight: bold; }
         .handsontable .bg-gray-100 { background-color: #f3f4f6 !important; }
-        .handsontable .bg-blue-50 { background-color: #eff6ff !important; }
         .handsontable td { border-color: #d1d5db; }
         .handsontable .area { background-color: rgba(147, 51, 234, 0.1); }
         .handsontable { position: relative; z-index: 1; }

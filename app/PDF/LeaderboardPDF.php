@@ -44,12 +44,42 @@ class LeaderboardPDF extends FPDF
         $this->SetFont('Arial', '', 11);
         $rank = 1;
         foreach ($ranked as $entry) {
-            $this->Cell(10, 10, $rank++, 1);
-            $this->Cell(60, 10, $entry['Student Name'], 1);
-            $this->Cell(40, 10, $entry['Course'], 1);
-            $this->Cell(40, 10, $entry['Total XP'], 1);
-            $this->Cell(40, 10, $entry['Tasks Completed'], 1);
+            // Calculate row height based on course name length
+            $courseLines = $this->getStringLines($entry['Course'], 40);
+            $rowHeight = max(10, $courseLines * 5);
+            
+            // Store current Y position
+            $x = $this->GetX();
+            $y = $this->GetY();
+            
+            // Draw cells with same height
+            $this->Cell(10, $rowHeight, $rank++, 1, 0, 'L');
+            $this->Cell(60, $rowHeight, $entry['Student Name'], 1, 0, 'L');
+            
+            // MultiCell for course name (wrapping text)
+            $this->MultiCell(40, 5, $entry['Course'], 1, 'L');
+            
+            // Move back to the same row for remaining cells
+            $this->SetXY($x + 110, $y);
+            $this->Cell(40, $rowHeight, $entry['Total XP'], 1, 0, 'L');
+            $this->Cell(40, $rowHeight, $entry['Tasks Completed'], 1, 0, 'L');
+            
             $this->Ln();
         }
+    }
+    
+    // Helper function to calculate number of lines for text wrapping
+    private function getStringLines($text, $width)
+    {
+        $lines = 1;
+        $length = strlen($text);
+        $charWidth = $this->GetStringWidth('A'); // Average character width
+        $maxChars = floor($width / $charWidth);
+        
+        if ($length > $maxChars) {
+            $lines = ceil($length / $maxChars);
+        }
+        
+        return $lines;
     }
 }

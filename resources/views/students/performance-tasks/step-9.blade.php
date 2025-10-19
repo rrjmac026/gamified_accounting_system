@@ -4,22 +4,76 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@14.1.0/dist/handsontable.full.min.css" />
 
     <div class="py-6">
+        {{-- Flash Messages --}}
+        @if (session('error'))
+            <div class="mb-6 animate-slideDown">
+                <div class="flex items-start gap-3 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg shadow-sm">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-semibold text-red-800 mb-1">Error</h3>
+                        <p class="text-sm text-red-700 leading-relaxed">{{ session('error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if (session('success'))
+            <div class="mb-6 animate-slideDown">
+                <div class="flex items-start gap-3 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow-sm">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-semibold text-green-800 mb-1">Success</h3>
+                        <p class="text-sm text-green-700 leading-relaxed">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div class="mb-6">
             <span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
                 Step 9 of 10
             </span>
             <h1 class="text-3xl font-bold mt-2">Closing Entries</h1>
             <p class="text-gray-600 mt-2">
-                Record closing entries to transfer temporary account balances to the Income Summary and Owner's Capital accounts.
+                Record closing entries to close temporary accounts (revenues, expenses, withdrawals) at the end of the accounting period.
             </p>
-            <!-- Add attempts counter -->
-            <div class="mt-2 text-sm text-gray-600">
-                Attempts remaining: {{ 2 - ($submission->attempts ?? 0) }}/2
+            <!-- Add attempts counter and status -->
+            <div class="mt-2 flex items-center gap-4">
+                <span class="text-sm text-gray-600">
+                    Attempts remaining: {{ 2 - ($submission->attempts ?? 0) }}/2
+                </span>
+                @if($submission && $submission->status)
+                    <span class="text-sm font-semibold {{ $submission->status === 'correct' ? 'text-green-600' : 'text-red-600' }}">
+                        Status: {{ ucfirst($submission->status) }}
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        <!-- Instructions Panel -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-semibold text-blue-800">Closing Entry Steps:</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                        <ol class="list-decimal ml-4 space-y-1">
+                            <li>Close revenue accounts to Income Summary</li>
+                            <li>Close expense accounts to Income Summary</li>
+                            <li>Close Income Summary to Owner's Capital</li>
+                            <li>Close Owner's Withdrawals to Owner's Capital</li>
+                        </ol>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div id="spreadsheet" class="overflow-x-auto"></div>
+            <div class="overflow-x-auto">
+                <div id="spreadsheet"></div>
+            </div>
 
             <form id="saveForm" method="POST" action="{{ route('students.performance-tasks.save-step', 9) }}" class="mt-6 text-right">
                 @csrf
@@ -34,48 +88,180 @@
     </div>
 
     <script>
+        let hot;
         document.addEventListener('DOMContentLoaded', function () {
             const container = document.getElementById('spreadsheet');
 
-            // ✅ Load saved data from DB if it exists
+            // Student's saved answers
             const savedData = @json($submission->submission_data ?? null);
             const initialData = savedData
                 ? JSON.parse(savedData)
-                : Array.from({ length: 15 }, () => ['', '', '', '', '', '']);
+                : Array.from({ length: 20 }, () => ['', '', '', '']);
 
-            // ✅ Initialize Handsontable
-            const hot = new Handsontable(container, {
+            // Instructor's correct data
+            const correctData = @json($answerSheet->correct_data ?? null);
+            const submissionStatus = @json($submission->status ?? null);
+
+            // Initialize Handsontable with General Journal format
+            hot = new Handsontable(container, {
                 data: initialData,
                 rowHeaders: true,
                 colHeaders: [
                     'Date',
-                    'Account Title',
-                    'Reference',
-                    'Debit (₱)',
-                    'Credit (₱)',
-                    'Explanation'
+                    'Account Titles and Explanation',
+                    'Debit',
+                    'Credit'
                 ],
                 columns: [
-                    { type: 'date', dateFormat: 'MM/DD/YYYY', correctFormat: true },
-                    { type: 'text' },
-                    { type: 'text' },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'text' }
+                    { 
+                        type: 'date', 
+                        dateFormat: 'MM/DD/YYYY', 
+                        correctFormat: true,
+                        width: 120
+                    },
+                    { 
+                        type: 'text',
+                        width: 300
+                    },
+                    { 
+                        type: 'numeric', 
+                        numericFormat: { pattern: '0,0.00' },
+                        width: 120
+                    },
+                    { 
+                        type: 'numeric', 
+                        numericFormat: { pattern: '0,0.00' },
+                        width: 120
+                    }
                 ],
-                stretchH: 'all',
-                height: 'auto',
-                minSpareRows: 1,
-                className: 'htCenter htMiddle',
+                width: '100%',
+                height: 600,
                 licenseKey: 'non-commercial-and-evaluation',
                 contextMenu: true,
+                undo: true,
+                manualColumnResize: true,
+                fillHandle: true,
+                minSpareRows: 1,
+                className: 'htLeft htMiddle',
+                cells: function(row, col) {
+                    const cellProperties = {};
+                    
+                    // Apply correct/incorrect coloring if submission has been graded
+                    if (submissionStatus && correctData && savedData) {
+                        const parsedCorrect = typeof correctData === 'string' ? JSON.parse(correctData) : correctData;
+                        const parsedStudent = typeof savedData === 'string' ? JSON.parse(savedData) : savedData;
+                        
+                        const studentValue = parsedStudent[row]?.[col];
+                        const correctValue = parsedCorrect[row]?.[col];
+                        
+                        // Only compare non-empty cells that the STUDENT filled in
+                        if (studentValue !== null && studentValue !== undefined && studentValue !== '') {
+                            // Normalize values for comparison (trim whitespace, case-insensitive)
+                            const normalizedStudent = String(studentValue).trim().toLowerCase();
+                            const normalizedCorrect = String(correctValue || '').trim().toLowerCase();
+                            
+                            if (normalizedStudent === normalizedCorrect) {
+                                cellProperties.className = 'cell-correct';
+                            } else {
+                                cellProperties.className = 'cell-wrong';
+                            }
+                        }
+                    }
+                    
+                    // Apply alignment classes (merge with existing className if coloring was applied)
+                    if (col === 2 || col === 3) {
+                        cellProperties.className = (cellProperties.className || '') + ' htRight htMiddle';
+                    } else if (col === 0) {
+                        cellProperties.className = (cellProperties.className || '') + ' htCenter htMiddle';
+                    }
+                    
+                    return cellProperties;
+                },
+                afterChange: function(changes, source) {
+                    if (source === 'loadData') return;
+                    
+                    // Auto-indent account titles that don't start with a date
+                    if (changes) {
+                        changes.forEach(([row, prop, oldValue, newValue]) => {
+                            if (prop === 1 && newValue) { // Account title column
+                                const dateCol = hot.getDataAtCell(row, 0);
+                                if (!dateCol && newValue && !newValue.startsWith('  ')) {
+                                    // Indent if no date in same row
+                                    hot.setDataAtCell(row, 1, '  ' + newValue.trim());
+                                }
+                            }
+                        });
+                    }
+                }
             });
 
-            // ✅ Sync data before form submission
+            // Sync data before form submission
             const form = document.getElementById('saveForm');
-            form.addEventListener('submit', function () {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
                 document.getElementById('submission_data').value = JSON.stringify(hot.getData());
+                this.submit();
             });
         });
     </script>
+
+    <style>
+        body { overflow-x: hidden; }
+        .handsontable td {
+            border-color: #d1d5db;
+            vertical-align: middle;
+            background-color: #ffffff; /* Default white background */
+        }
+        
+        .handsontable thead th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+            border-bottom: 2px solid #9ca3af;
+        }
+        
+        .handsontable .htRight {
+            text-align: right;
+        }
+        
+        .handsontable .htLeft {
+            text-align: left;
+        }
+        
+        .handsontable .htCenter {
+            text-align: center;
+        }
+        
+        /* Add visual separator for journal entries */
+        .handsontable tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .handsontable .area { background-color: rgba(59,130,246,0.1); }
+        .handsontable { position: relative; z-index: 1; }
+        #spreadsheet { isolation: isolate; }
+
+        /* Correct/Incorrect answer styling - consistent with Step 6 */
+        .handsontable td.cell-correct {
+            background-color: #dcfce7 !important; /* Light green */
+            border: 2px solid #16a34a !important; /* Green border */
+            color: #166534;
+        }
+
+        .handsontable td.cell-wrong {
+            background-color: #fee2e2 !important; /* Light red */
+            border: 2px solid #dc2626 !important; /* Red border */
+            color: #991b1b;
+        }
+
+        /* Prevent selected cells from overriding colors */
+        .handsontable td.cell-correct.area,
+        .handsontable td.cell-correct.current {
+            background-color: #bbf7d0 !important; /* Slightly darker green when selected */
+        }
+
+        .handsontable td.cell-wrong.area,
+        .handsontable td.cell-wrong.current {
+            background-color: #fecaca !important; /* Slightly darker red when selected */
+        }
+    </style>
 </x-app-layout>

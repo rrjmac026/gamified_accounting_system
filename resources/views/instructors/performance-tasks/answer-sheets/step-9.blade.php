@@ -88,11 +88,18 @@
                     <svg class="w-5 h-5 text-purple-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                     </svg>
-                    <div>
-                        <h3 class="text-sm font-semibold text-purple-900 mb-1">Instructions for Creating Answer Key</h3>
-                        <p class="text-xs sm:text-sm text-purple-800">
-                            Fill in the correct answers below. Students' submissions will be compared against this answer key for grading. Empty cells will be ignored during comparison.
-                        </p>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-semibold text-purple-900 mb-2">Closing Entry Instructions</h3>
+                        <div class="text-xs sm:text-sm text-purple-800 space-y-1">
+                            <p><strong>Standard Closing Process:</strong></p>
+                            <ol class="list-decimal ml-4 space-y-1">
+                                <li>Close all revenue accounts to Income Summary</li>
+                                <li>Close all expense accounts to Income Summary</li>
+                                <li>Close Income Summary to Owner's Capital (net income/loss)</li>
+                                <li>Close Owner's Withdrawals to Owner's Capital</li>
+                            </ol>
+                            <p class="mt-2"><em>Note: Indent account titles with spaces. Empty cells will be ignored during grading.</em></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -104,7 +111,7 @@
                 <!-- Spreadsheet Section -->
                 <div class="p-3 sm:p-4 lg:p-6">
                     <div class="border rounded-lg shadow-inner bg-gray-50 overflow-hidden">
-                        <div class="overflow-x-auto overflow-y-auto" style="max-height: calc(100vh - 400px); min-height: 400px;">
+                        <div class="overflow-x-auto overflow-y-auto" style="max-height: calc(100vh - 400px); min-height: 500px;">
                             <div id="spreadsheet" class="bg-white min-w-full"></div>
                         </div>
                         <input type="hidden" name="correct_data" id="correctData" required>
@@ -149,7 +156,7 @@
             
             // Get saved answer key data if it exists
             const savedData = @json($sheet->correct_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array(15).fill().map(() => Array(6).fill(''));
+            const initialData = savedData ? JSON.parse(savedData) : Array(20).fill().map(() => Array(4).fill(''));
 
             // Initialize HyperFormula for Excel-like formulas
             const hyperformulaInstance = HyperFormula.buildEmpty({
@@ -165,23 +172,34 @@
                 rowHeaders: true,
                 colHeaders: [
                     'Date',
-                    'Account Title',
-                    'Reference',
-                    'Debit (₱)',
-                    'Credit (₱)',
-                    'Explanation'
+                    'Account Titles and Explanation',
+                    'Debit',
+                    'Credit'
                 ],
                 columns: [
-                    { type: 'date', dateFormat: 'MM/DD/YYYY', correctFormat: true },
-                    { type: 'text' },
-                    { type: 'text' },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'text' }
+                    { 
+                        type: 'date', 
+                        dateFormat: 'MM/DD/YYYY', 
+                        correctFormat: true,
+                        width: isMobile ? 100 : 140
+                    },
+                    { 
+                        type: 'text',
+                        width: isMobile ? 200 : 350
+                    },
+                    { 
+                        type: 'numeric', 
+                        numericFormat: { pattern: '0,0.00' },
+                        width: isMobile ? 100 : 140
+                    },
+                    { 
+                        type: 'numeric', 
+                        numericFormat: { pattern: '0,0.00' },
+                        width: isMobile ? 100 : 140
+                    }
                 ],
                 width: '100%',
-                height: isMobile ? 350 : (isTablet ? 450 : 500),
-                colWidths: isMobile ? 100 : (isTablet ? 110 : 120),
+                height: isMobile ? 400 : (isTablet ? 500 : 600),
                 licenseKey: 'non-commercial-and-evaluation',
                 formulas: { engine: hyperformulaInstance },
                 contextMenu: true,
@@ -192,14 +210,33 @@
                 autoColumnSize: false,
                 autoRowSize: false,
                 copyPaste: true,
-                minRows: 15,
+                minRows: 20,
                 minSpareRows: 1,
                 stretchH: 'all',
                 enterMoves: { row: 1, col: 0 },
                 tabMoves: { row: 0, col: 1 },
                 outsideClickDeselects: false,
                 selectionMode: 'multiple',
-                className: 'htCenter htMiddle',
+                cells: function(row, col) {
+                    const cellProperties = {};
+                    
+                    // Right-align numeric columns
+                    if (col === 2 || col === 3) {
+                        cellProperties.className = 'htRight htMiddle';
+                    }
+                    
+                    // Center-align date column
+                    if (col === 0) {
+                        cellProperties.className = 'htCenter htMiddle';
+                    }
+                    
+                    // Left-align account titles
+                    if (col === 1) {
+                        cellProperties.className = 'htLeft htMiddle';
+                    }
+                    
+                    return cellProperties;
+                }
             });
 
             // Handle window resize
@@ -209,11 +246,32 @@
                 resizeTimer = setTimeout(function() {
                     const newIsMobile = window.innerWidth < 640;
                     const newIsTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
-                    const newHeight = newIsMobile ? 350 : (newIsTablet ? 450 : 500);
+                    const newHeight = newIsMobile ? 400 : (newIsTablet ? 500 : 600);
                     
                     hot.updateSettings({
                         height: newHeight,
-                        colWidths: newIsMobile ? 100 : (newIsTablet ? 110 : 120)
+                        columns: [
+                            { 
+                                type: 'date', 
+                                dateFormat: 'MM/DD/YYYY', 
+                                correctFormat: true,
+                                width: newIsMobile ? 100 : 140
+                            },
+                            { 
+                                type: 'text',
+                                width: newIsMobile ? 200 : 350
+                            },
+                            { 
+                                type: 'numeric', 
+                                numericFormat: { pattern: '0,0.00' },
+                                width: newIsMobile ? 100 : 140
+                            },
+                            { 
+                                type: 'numeric', 
+                                numericFormat: { pattern: '0,0.00' },
+                                width: newIsMobile ? 100 : 140
+                            }
+                        ]
                     });
                 }, 250);
             });
@@ -233,14 +291,57 @@
 
     <style>
         body { overflow-x: hidden; }
-        .handsontable .font-bold { font-weight: bold; }
-        .handsontable .bg-gray-100 { background-color: #f3f4f6 !important; }
-        .handsontable .bg-blue-50 { background-color: #eff6ff !important; }
-        .handsontable td { border-color: #d1d5db; }
-        .handsontable .area { background-color: rgba(147, 51, 234, 0.1); }
-        .handsontable { position: relative; z-index: 1; }
-        #spreadsheet { isolation: isolate; }
-        .overflow-x-auto { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+        .handsontable td {
+            border-color: #d1d5db;
+            vertical-align: middle;
+        }
+        
+        .handsontable thead th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+            border-bottom: 2px solid #9ca3af;
+        }
+        
+        .handsontable .htRight {
+            text-align: right;
+            padding-right: 8px;
+        }
+        
+        .handsontable .htLeft {
+            text-align: left;
+            padding-left: 8px;
+        }
+        
+        .handsontable .htCenter {
+            text-align: center;
+        }
+        
+        .handsontable .htMiddle {
+            vertical-align: middle;
+        }
+        
+        .handsontable .area { 
+            background-color: rgba(147, 51, 234, 0.1); 
+        }
+        
+        .handsontable { 
+            position: relative; 
+            z-index: 1; 
+        }
+        
+        #spreadsheet { 
+            isolation: isolate; 
+        }
+        
+        .overflow-x-auto { 
+            -webkit-overflow-scrolling: touch; 
+            scroll-behavior: smooth; 
+        }
+
+        /* Add visual separator for journal entries */
+        .handsontable tbody tr:hover {
+            background-color: #f9fafb;
+        }
 
         @media (max-width: 640px) {
             .handsontable { font-size: 12px; }

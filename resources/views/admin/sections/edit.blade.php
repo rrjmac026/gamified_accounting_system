@@ -1,9 +1,8 @@
 <x-app-layout>
-    <div class="py-6 sm:py-12">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-[#FFF0FA] backdrop-blur-sm overflow-hidden shadow-lg rounded-lg p-8 border border-[#FFC8FB]/50">
+    <div class="py-16 sm:py-20">
+        <div class="max-w-4xl mx-auto px-8 sm:px-12 lg:px-16">
+            <div class="bg-[#FFF0FA] backdrop-blur-sm overflow-hidden shadow-lg rounded-lg p-10 sm:p-12 border border-[#FFC8FB]/50">
                 <h2 class="text-2xl font-bold text-[#FF92C2] mb-6">Edit Section</h2>
-
                 <form action="{{ route('admin.sections.update', $section) }}" method="POST" class="space-y-6">
                     @csrf
                     @method('PUT')
@@ -82,9 +81,10 @@
                                     <div class="relative">
                                         <input type="text" id="instructor-search"
                                                placeholder="Search instructors..."
-                                               class="w-full pl-10 pr-4 py-2 rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
+                                               class="w-full rounded-lg shadow-sm bg-white 
+                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                                text-gray-800 px-4 py-2 transition-all duration-200">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <i class="fas fa-search text-gray-400"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -128,9 +128,10 @@
                                     <div class="relative">
                                         <input type="text" id="student-search"
                                                placeholder="Search students by name or email..."
-                                               class="w-full pl-10 pr-4 py-2 rounded-lg border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200">
+                                               class="w-full rounded-lg shadow-sm bg-white 
+                                                border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                                text-gray-800 px-4 py-2 transition-all duration-200">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <i class="fas fa-search text-gray-400"></i>
                                         </div>
                                     </div>
                                 </div>

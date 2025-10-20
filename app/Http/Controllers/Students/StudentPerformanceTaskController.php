@@ -42,6 +42,9 @@ class StudentPerformanceTaskController extends Controller
             $task->progress = $completedSteps;
             $task->totalSteps = 10;
             $task->progressPercentage = ($completedSteps > 0) ? round(($completedSteps / 10) * 100, 2) : 0;
+            
+            // Add deadline status
+            $task->deadlineStatus = $this->getDeadlineStatus($task);
         });
 
         return view('students.performance-tasks.index', compact('performanceTasks'));
@@ -54,7 +57,6 @@ class StudentPerformanceTaskController extends Controller
     {
         $user = auth()->user();
 
-        // Find the selected performance task
         $performanceTask = PerformanceTask::whereHas('section.students', function ($query) use ($user) {
                 $query->where('student_id', $user->student->id);
             })
@@ -69,15 +71,20 @@ class StudentPerformanceTaskController extends Controller
                 ->with('error', 'Performance task not found or not assigned to you.');
         }
 
-        // Fetch steps already completed
+        // Check if submissions are still allowed
+        $deadlineStatus = $this->getDeadlineStatus($performanceTask);
+        if ($deadlineStatus['canSubmit'] === false) {
+            return redirect()->route('students.performance-tasks.index')
+                ->with('error', $deadlineStatus['message']);
+        }
+
         $completedSteps = PerformanceTaskSubmission::where([
             'task_id' => $performanceTask->id,
             'student_id' => $user->student->id,
         ])->pluck('step')->toArray();
 
-        return view('students.performance-tasks.progress', compact('performanceTask', 'completedSteps'));
+        return view('students.performance-tasks.progress', compact('performanceTask', 'completedSteps', 'deadlineStatus'));
     }
-
 
     /**
      * Load the step view (e.g. step-1, step-2, ...)
@@ -98,6 +105,13 @@ class StudentPerformanceTaskController extends Controller
         if (!$performanceTask) {
             return redirect()->route('students.performance-tasks.index')
                 ->with('error', 'No active performance task found.');
+        }
+
+        // Check deadline restrictions before allowing step access
+        $deadlineStatus = $this->getDeadlineStatus($performanceTask);
+        if ($deadlineStatus['canSubmit'] === false) {
+            return redirect()->route('students.performance-tasks.index')
+                ->with('error', $deadlineStatus['message']);
         }
 
         // Check if the student has a submission for this step
@@ -132,9 +146,9 @@ class StudentPerformanceTaskController extends Controller
             'submission' => $submission,
             'answerSheet' => $answerSheet,
             'completedSteps' => $completedSteps,
+            'deadlineStatus' => $deadlineStatus,
         ]);
     }
-
 
     /**
      * Save or retry a step submission
@@ -143,18 +157,25 @@ class StudentPerformanceTaskController extends Controller
     {
         $user = auth()->user();
 
+        // Find the active performance task for the student's section
         $task = PerformanceTask::whereHas('section.students', function ($query) use ($user) {
-            $query->where('student_id', $user->student->id);
-        })
-        ->latest()
-        ->first();
+                $query->where('student_id', $user->student->id);
+            })
+            ->latest()
+            ->first();
 
         if (!$task) {
             return back()->with('error', 'No active performance task found.');
         }
 
+        // CRITICAL: Check deadline restrictions
+        $deadlineStatus = $this->getDeadlineStatus($task);
+        if ($deadlineStatus['canSubmit'] === false) {
+            return back()->with('error', $deadlineStatus['message']);
+        }
+
         try {
-            // Check existing submission
+            // Check or create submission record
             $submission = PerformanceTaskSubmission::firstOrNew([
                 'task_id' => $task->id,
                 'student_id' => $user->student->id,
@@ -166,11 +187,10 @@ class StudentPerformanceTaskController extends Controller
                 return back()->with('error', 'You have reached the maximum of 2 attempts for this step.');
             }
 
-            // Save student's data
+            // Decode student's submission data
             $studentData = $request->input('submission_data');
-            
-            // Decode JSON
             $studentDataArray = json_decode($studentData, true);
+
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return back()->with('error', 'Invalid submission data format.');
             }
@@ -185,22 +205,24 @@ class StudentPerformanceTaskController extends Controller
             ])->first();
 
             if ($answerSheet && $answerSheet->correct_data) {
-                $correctData = $answerSheet->correct_data;
-
-                if (is_string($correctData)) {
-                    $correctData = json_decode($correctData, true);
-                }
+                $correctData = is_string($answerSheet->correct_data)
+                    ? json_decode($answerSheet->correct_data, true)
+                    : $answerSheet->correct_data;
 
                 $isCorrect = $this->compareAnswers($studentDataArray, $correctData);
 
                 if ($isCorrect) {
                     $submission->status = 'correct';
                     $submission->score = 100;
-                    $submission->remarks = 'Perfect! Your entry is correct.';
+                    $submission->remarks = $deadlineStatus['isLate']
+                        ? 'Perfect! Your entry is correct but submitted late.'
+                        : 'Perfect! Your entry is correct.';
                 } else {
                     $submission->status = 'wrong';
                     $submission->score = 0;
-                    $submission->remarks = 'Your answer is incorrect. Please review and retry.';
+                    $submission->remarks = $deadlineStatus['isLate']
+                        ? 'Incorrect. Also note this submission is late.'
+                        : 'Your answer is incorrect. Please review and retry.';
                 }
             } else {
                 $submission->status = 'in-progress';
@@ -210,6 +232,11 @@ class StudentPerformanceTaskController extends Controller
             $submission->save();
 
             $message = "Step $step saved successfully! (Attempt {$submission->attempts}/2) - Status: " . ucfirst($submission->status);
+            
+            // Add late warning to message if applicable
+            if ($deadlineStatus['isLate']) {
+                $message .= " ⚠️ Late submission - penalties may apply.";
+            }
 
             // If last step
             if ($step >= 10) {
@@ -218,13 +245,74 @@ class StudentPerformanceTaskController extends Controller
             }
 
             // Otherwise go to next step
-            return redirect()->route('students.performance-tasks.step', $step + 1)
-                ->with('success', $message);
+            return redirect()->route('students.performance-tasks.step', [
+                'id' => $task->id,
+                'step' => $step + 1,
+            ])->with('success', $message);
 
         } catch (\Exception $e) {
             \Log::error('Performance Task Submission Error: ' . $e->getMessage());
             return back()->with('error', 'Error saving your submission. Please try again.');
         }
+    }
+
+    /**
+     * Get deadline status for a task
+     * Returns: canSubmit (bool), isLate (bool), message (string), status (string)
+     */
+    private function getDeadlineStatus($task)
+    {
+        $now = now();
+        
+        // If no due dates are set, allow submissions
+        if (!$task->due_date) {
+            return [
+                'canSubmit' => true,
+                'isLate' => false,
+                'status' => 'open',
+                'message' => 'No deadline set for this task.',
+            ];
+        }
+
+        // Check if past the late deadline (hard cutoff)
+        if ($task->late_until && $now->greaterThan($task->late_until)) {
+            return [
+                'canSubmit' => false,
+                'isLate' => true,
+                'status' => 'closed',
+                'message' => 'This task is no longer accepting submissions. The deadline has passed.',
+            ];
+        }
+
+        // Check if between due_date and late_until (late but allowed)
+        if ($task->late_until && $now->greaterThan($task->due_date) && $now->lessThanOrEqualTo($task->late_until)) {
+            $hoursRemaining = $now->diffInHours($task->late_until);
+            return [
+                'canSubmit' => true,
+                'isLate' => true,
+                'status' => 'late',
+                'message' => "⚠️ Late submission period. Final deadline: {$task->late_until->format('M d, Y h:i A')} ({$hoursRemaining} hours remaining)",
+            ];
+        }
+
+        // Check if past due_date but no late_until is set (hard deadline)
+        if (!$task->late_until && $now->greaterThan($task->due_date)) {
+            return [
+                'canSubmit' => false,
+                'isLate' => true,
+                'status' => 'closed',
+                'message' => 'This task is past the due date and no longer accepting submissions.',
+            ];
+        }
+
+        // Before due date (on time)
+        $hoursRemaining = $now->diffInHours($task->due_date);
+        return [
+            'canSubmit' => true,
+            'isLate' => false,
+            'status' => 'on-time',
+            'message' => "Due: {$task->due_date->format('M d, Y h:i A')} ({$hoursRemaining} hours remaining)",
+        ];
     }
 
     /** 

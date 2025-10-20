@@ -1,4 +1,3 @@
-
 <x-app-layout>
     <!-- Quill Editor -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
@@ -105,6 +104,47 @@
                         </div>
                     </div>
 
+                    {{-- Due Dates Section --}}
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-[#FF92C2] border-b border-[#FFC8FB] pb-2">Due Dates</h3>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {{-- Due Date --}}
+                            <div>
+                                <label for="due_date" class="block text-sm font-semibold text-[#FF92C2] mb-1">
+                                    Due Date <span class="text-red-500">*</span>
+                                </label>
+                                <input type="datetime-local" name="due_date" id="due_date" 
+                                    value="{{ old('due_date') }}"
+                                    class="w-full rounded-lg shadow-sm bg-white 
+                                            border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                            text-gray-800 px-4 py-2 transition-all duration-200
+                                            @error('due_date') border-red-500 @enderror" required>
+                                <p class="text-xs text-gray-500 mt-1">Primary deadline for submission</p>
+                                @error('due_date')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            {{-- Late Until --}}
+                            <div>
+                                <label for="late_until" class="block text-sm font-semibold text-[#FF92C2] mb-1">
+                                    Accept Late Until (Optional)
+                                </label>
+                                <input type="datetime-local" name="late_until" id="late_until" 
+                                    value="{{ old('late_until') }}"
+                                    class="w-full rounded-lg shadow-sm bg-white 
+                                            border border-[#FFC8FB] focus:border-pink-400 focus:ring focus:ring-pink-200
+                                            text-gray-800 px-4 py-2 transition-all duration-200
+                                            @error('late_until') border-red-500 @enderror">
+                                <p class="text-xs text-gray-500 mt-1">Final deadline for late submissions (with penalty)</p>
+                                @error('late_until')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Task Settings Section --}}
                     <div class="space-y-4">
                         <h3 class="text-lg font-semibold text-[#FF92C2] border-b border-[#FFC8FB] pb-2">Task Settings</h3>
@@ -201,5 +241,16 @@
         document.getElementById('taskForm').onsubmit = function() {
             document.getElementById('description').value = quill.root.innerHTML;
         };
+
+        // Validate that late_until is after due_date
+        document.getElementById('late_until').addEventListener('change', function() {
+            const dueDate = document.getElementById('due_date').value;
+            const lateUntil = this.value;
+            
+            if (dueDate && lateUntil && new Date(lateUntil) <= new Date(dueDate)) {
+                alert('Late submission deadline must be after the due date.');
+                this.value = '';
+            }
+        });
     </script>
 </x-app-layout>

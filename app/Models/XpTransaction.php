@@ -11,8 +11,8 @@ class XpTransaction extends Model
     protected $fillable = [
         'student_id',
         'amount',
-        'type', // earned, bonus, penalty, adjustment
-        'source', // task_completion, quiz_score, bonus_activity, manual
+        'type',
+        'source', 
         'source_id',
         'description',
         'processed_at'
@@ -27,5 +27,10 @@ class XpTransaction extends Model
     public function student()
     {
         return $this->belongsTo(Student::class);
+    }
+
+    public function performanceTask()
+    {
+        return $this->belongsTo(PerformanceTask::class, 'performance_task_id');
     }
 }

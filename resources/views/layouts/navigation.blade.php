@@ -131,16 +131,16 @@
                     <!-- Profile Menu -->
                     <div class="relative">
                         <button @click="profileOpen = !profileOpen" 
-                            class="flex items-center gap-4 px-4 py-2 rounded-xl transition-all duration-300 bg-white/10 hover:bg-white/20 group">
+                            class="flex items-center gap-4 px-4 py-2 rounded-xl transition-all duration-300 bg-white/10 hover:bg-white/20 group relative">
                             <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300">
                                 <span class="text-sm font-bold text-white" x-text="userInitial">
-                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                    {{ Auth::check() ? substr(Auth::user()->name, 0, 1) : 'G' }}
                                 </span>
                             </div>
                             <div class="flex items-center gap-3">
                                 <div>
                                     <span class="text-sm font-bold text-white dark:text-gray-300 group-hover:text-pink-100 transition-colors duration-300" x-text="userName">
-                                        {{ Auth::user()->name }}
+                                        {{ Auth::check() ? Auth::user()->name : 'Guest' }}
                                     </span>
                                     <p class="text-xs text-pink-100 dark:text-gray-400">User</p>
                                 </div>
@@ -286,6 +286,22 @@
     </nav>
 </div>
 
+@php
+    // Prepare a safe notifications array for the inline JS (empty if not available)
+    $navNotifications = [];
+    if (isset($notifications) && $notifications instanceof \Illuminate\Support\Collection) {
+        $navNotifications = $notifications->map(function($notif) {
+            return [
+                'id' => $notif->id,
+                'title' => $notif->title,
+                'message' => $notif->message,
+                'created_at' => $notif->created_at->diffForHumans(),
+                'is_read' => (bool) $notif->is_read,
+            ];
+        })->toArray();
+    }
+@endphp
+
 <script>
 function navigationComponent() {
     return {
@@ -298,18 +314,10 @@ function navigationComponent() {
         allRead: false,
         
         // Data
-        userName: '{{ Auth::user()->name }}',
-        userInitial: '{{ substr(Auth::user()->name, 0, 1) }}',
-        unreadCount: {{ $unreadCount }},
-        notifications: {!! json_encode($notifications->map(function($notif) {
-            return [
-                'id' => $notif->id,
-                'title' => $notif->title,
-                'message' => $notif->message,
-                'created_at' => $notif->created_at->diffForHumans(),
-                'is_read' => $notif->is_read
-            ];
-        })) !!},
+        userName: @json(Auth::check() ? Auth::user()->name : 'Guest'),
+        userInitial: @json(Auth::check() ? substr(Auth::user()->name, 0, 1) : 'G'),
+        unreadCount: @json($unreadCount ?? 0),
+        notifications: @json($navNotifications),
         
         // Routes
         profileEditRoute: '{{ route("profile.edit") }}',

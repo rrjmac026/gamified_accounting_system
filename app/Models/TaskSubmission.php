@@ -4,51 +4,32 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TaskSubmission extends Model
+class PerformanceTaskSubmission extends Model
 {
-    
-
     protected $fillable = [
         'task_id',
         'student_id',
+        'step',
         'submission_data',
-        'file_path',
-        'score',
-        'xp_earned',
         'status',
-        'submitted_at',
-        'graded_at',
-        'feedback',
-        'attempt_number'
+        'score',  
+        'remarks',    
+        'attempts',
+        'xp_earned'
     ];
 
     protected $casts = [
         'submission_data' => 'array',
-        'submitted_at' => 'datetime',
-        'graded_at' => 'datetime',
-        'score' => 'decimal:2',
-        'xp_earned' => 'integer',
-        'attempt_number' => 'integer'
+        'xp_earned' => 'integer', // ✅ Add this
     ];
 
-    // Relationships
     public function task()
     {
-        return $this->belongsTo(Task::class);
+        return $this->belongsTo(PerformanceTask::class, 'task_id');
     }
 
     public function student()
     {
-        return $this->belongsTo(Student::class);
-    }
-
-    public function answers()
-    {
-        return $this->hasMany(TaskAnswer::class);
-    }
-
-    public function errors()
-    {
-        return $this->hasMany(ErrorRecord::class);
+        return $this->belongsTo(User::class, 'student_id');
     }
 }

@@ -28,26 +28,26 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        TaskSubmission::observe(TaskSubmissionObserver::class);
-        View::composer('*', function ($view) {
-            if (Auth::check()) {
-                $user = Auth::user();
+        // TaskSubmission::observe(TaskSubmissionObserver::class);
+        // View::composer('*', function ($view) {
+        //     if (Auth::check()) {
+        //         $user = Auth::user();
 
-                $notifications = SystemNotification::where('user_id', $user->id)
-                    ->where(function($q) {
-                        $q->whereNull('expires_at')
-                        ->orWhere('expires_at', '>', now());
-                    })
-                    ->latest()
-                    ->take(5)
-                    ->get();
+        //         $notifications = SystemNotification::where('user_id', $user->id)
+        //             ->where(function($q) {
+        //                 $q->whereNull('expires_at')
+        //                 ->orWhere('expires_at', '>', now());
+        //             })
+        //             ->latest()
+        //             ->take(5)
+        //             ->get();
 
-                $unreadCount = SystemNotification::where('user_id', $user->id)
-                    ->where('is_read', false)
-                    ->count();
+        //         $unreadCount = SystemNotification::where('user_id', $user->id)
+        //             ->where('is_read', false)
+        //             ->count();
 
-                $view->with(compact('notifications', 'unreadCount'));
-            }
-        });
+        //         $view->with(compact('notifications', 'unreadCount'));
+        //     }
+        // });
     }
 }

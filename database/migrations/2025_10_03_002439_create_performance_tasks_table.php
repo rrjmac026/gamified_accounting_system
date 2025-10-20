@@ -24,6 +24,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->integer('max_attempts')->default(2);
             $table->integer('xp_reward')->default(50);
+            $table->timestamp('due_date')->nullable();
+            $table->timestamp('late_until')->nullable();
 
             $table->timestamps();
         });

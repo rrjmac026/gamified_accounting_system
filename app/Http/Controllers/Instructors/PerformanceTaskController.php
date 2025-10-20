@@ -49,7 +49,8 @@ class PerformanceTaskController extends Controller
             'max_attempts' => 'required|integer|min:1',
             'subject_id'   => 'required|exists:subjects,id',
             'section_id'   => 'required|exists:sections,id',
-            'template'     => 'nullable|file|mimes:xlsx,xls', // optional Excel template
+            'due_date'     => 'required|date|after:now',
+            'late_until'   => 'nullable|date|after:due_date',
         ]);
 
         $instructor = Auth::user()->instructor;

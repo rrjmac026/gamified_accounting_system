@@ -10,57 +10,135 @@ use Illuminate\Http\Request;
 
 class StudentPerformanceTaskController extends Controller
 {
-    // Redirect index -> Step 1
+    /**
+     * Show list of performance tasks assigned to the logged-in student
+     */
     public function index()
     {
-        return redirect()->route('students.performance-tasks.step', 1);
-    }
-
-    public function step($step)
-    {
         $user = auth()->user();
-        
-        $performanceTask = PerformanceTask::whereHas('section.students', function ($query) use ($user) {
+
+        // Fetch all tasks assigned to the student's section with relationships
+        $performanceTasks = PerformanceTask::whereHas('section.students', function ($query) use ($user) {
             $query->where('student_id', $user->student->id);
         })
+        ->with([
+            'section',
+            'subject',
+            'instructor'
+        ])
         ->latest()
-        ->first();
+        ->get();
+
+        // Calculate progress for each task
+        $performanceTasks->each(function ($task) use ($user) {
+            // Count unique completed steps (regardless of correct/wrong status)
+            $completedSteps = PerformanceTaskSubmission::where('task_id', $task->id)
+                ->where('student_id', $user->student->id)
+                ->distinct()
+                ->pluck('step')
+                ->unique()
+                ->count();
+            
+            $task->progress = $completedSteps;
+            $task->totalSteps = 10;
+            $task->progressPercentage = ($completedSteps > 0) ? round(($completedSteps / 10) * 100, 2) : 0;
+        });
+
+        return view('students.performance-tasks.index', compact('performanceTasks'));
+    }
+
+    /**
+     * Show progress page for the most recent active performance task
+     */
+    public function progress($taskId = null)
+    {
+        $user = auth()->user();
+
+        // Find the selected performance task
+        $performanceTask = PerformanceTask::whereHas('section.students', function ($query) use ($user) {
+                $query->where('student_id', $user->student->id);
+            })
+            ->when($taskId, function ($query) use ($taskId) {
+                $query->where('id', $taskId);
+            })
+            ->latest()
+            ->first();
 
         if (!$performanceTask) {
-            return redirect()->route('students.dashboard')
-                ->with('error', 'No active performance task found.');
+            return redirect()->route('students.performance-tasks.index')
+                ->with('error', 'Performance task not found or not assigned to you.');
         }
 
-        $submission = PerformanceTaskSubmission::where([
-            'task_id' => $performanceTask->id,
-            'student_id' => $user->student->id,
-            'step' => $step
-        ])->first();
-
-        // Fetch answer sheet for comparison
-        $answerSheet = PerformanceTaskAnswerSheet::where([
-            'performance_task_id' => $performanceTask->id,
-            'step' => $step
-        ])->first();
-
-        $submissions = PerformanceTaskSubmission::where([
+        // Fetch steps already completed
+        $completedSteps = PerformanceTaskSubmission::where([
             'task_id' => $performanceTask->id,
             'student_id' => $user->student->id,
         ])->pluck('step')->toArray();
 
-        if ($step > 1 && !in_array($step - 1, $submissions)) {
-            return redirect()->route('students.performance-tasks.step', $step - 1)
-                ->with('error', "You must complete Step " . ($step - 1) . " first.");
+        return view('students.performance-tasks.progress', compact('performanceTask', 'completedSteps'));
+    }
+
+
+    /**
+     * Load the step view (e.g. step-1, step-2, ...)
+     */
+    public function step($id, $step)
+    {
+        $user = auth()->user();
+
+        abort_if($step < 1 || $step > 10, 404);
+
+        // Find the performance task and ensure it belongs to the student's section
+        $performanceTask = PerformanceTask::where('id', $id)
+            ->whereHas('section.students', function ($query) use ($user) {
+                $query->where('student_id', $user->student->id);
+            })
+            ->first();
+
+        if (!$performanceTask) {
+            return redirect()->route('students.performance-tasks.index')
+                ->with('error', 'No active performance task found.');
+        }
+
+        // Check if the student has a submission for this step
+        $submission = PerformanceTaskSubmission::where([
+            'task_id' => $performanceTask->id,
+            'student_id' => $user->student->id,
+            'step' => $step,
+        ])->first();
+
+        // Get the answer sheet template for this step
+        $answerSheet = PerformanceTaskAnswerSheet::where([
+            'performance_task_id' => $performanceTask->id,
+            'step' => $step,
+        ])->first();
+
+        // Get all completed steps by the student
+        $completedSteps = PerformanceTaskSubmission::where([
+            'task_id' => $performanceTask->id,
+            'student_id' => $user->student->id,
+        ])->pluck('step')->toArray();
+
+        // Prevent skipping steps
+        if ($step > 1 && !in_array($step - 1, $completedSteps)) {
+            return redirect()->route('students.performance-tasks.step', [
+                'id' => $performanceTask->id,
+                'step' => $step - 1,
+            ])->with('error', "You must complete Step " . ($step - 1) . " first.");
         }
 
         return view("students.performance-tasks.step-$step", [
             'performanceTask' => $performanceTask,
             'submission' => $submission,
             'answerSheet' => $answerSheet,
-            'completedSteps' => $submissions
+            'completedSteps' => $completedSteps,
         ]);
     }
 
+
+    /**
+     * Save or retry a step submission
+     */
     public function saveStep(Request $request, $step)
     {
         $user = auth()->user();
@@ -83,7 +161,7 @@ class StudentPerformanceTaskController extends Controller
                 'step' => $step,
             ]);
 
-            // Stop if already reached 2 attempts
+            // Limit attempts
             if ($submission->exists && $submission->attempts >= 2) {
                 return back()->with('error', 'You have reached the maximum of 2 attempts for this step.');
             }
@@ -91,7 +169,7 @@ class StudentPerformanceTaskController extends Controller
             // Save student's data
             $studentData = $request->input('submission_data');
             
-            // Decode and validate JSON
+            // Decode JSON
             $studentDataArray = json_decode($studentData, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return back()->with('error', 'Invalid submission data format.');
@@ -100,7 +178,7 @@ class StudentPerformanceTaskController extends Controller
             $submission->submission_data = $studentData;
             $submission->attempts = ($submission->attempts ?? 0) + 1;
 
-            // Fetch the correct answer sheet
+            // Fetch correct answers
             $answerSheet = PerformanceTaskAnswerSheet::where([
                 'performance_task_id' => $task->id,
                 'step' => $step
@@ -108,15 +186,13 @@ class StudentPerformanceTaskController extends Controller
 
             if ($answerSheet && $answerSheet->correct_data) {
                 $correctData = $answerSheet->correct_data;
-                
-                // Handle if correct_data is a string
+
                 if (is_string($correctData)) {
                     $correctData = json_decode($correctData, true);
                 }
-                
-                // Compare cell by cell
+
                 $isCorrect = $this->compareAnswers($studentDataArray, $correctData);
-                
+
                 if ($isCorrect) {
                     $submission->status = 'correct';
                     $submission->score = 100;
@@ -133,10 +209,9 @@ class StudentPerformanceTaskController extends Controller
 
             $submission->save();
 
-            // Feedback message
             $message = "Step $step saved successfully! (Attempt {$submission->attempts}/2) - Status: " . ucfirst($submission->status);
 
-            // If last step, go to dashboard
+            // If last step
             if ($step >= 10) {
                 return redirect()->route('students.dashboard')
                     ->with('success', 'You have successfully completed all 10 steps of the performance task!');
@@ -152,79 +227,59 @@ class StudentPerformanceTaskController extends Controller
         }
     }
 
-    /**
-     * Compare student answers with correct answers cell by cell
+    /** 
+     * Compare cell-by-cell answers
      */
     private function compareAnswers($studentData, $correctData)
     {
-        if (!is_array($studentData) || !is_array($correctData)) {
-            return false;
-        }
+        if (!is_array($studentData) || !is_array($correctData)) return false;
 
-        // Compare each row
         foreach ($correctData as $rowIndex => $correctRow) {
-            if (!isset($studentData[$rowIndex])) {
-                return false;
-            }
+            if (!isset($studentData[$rowIndex])) return false;
 
             $studentRow = $studentData[$rowIndex];
-
-            // Compare each cell in the row
             foreach ($correctRow as $colIndex => $correctValue) {
-                // Skip empty cells in answer key
-                if ($correctValue === null || $correctValue === '' || $correctValue === 0) {
-                    continue;
-                }
+                if ($correctValue === null || $correctValue === '' || $correctValue === 0) continue;
 
                 $studentValue = $studentRow[$colIndex] ?? null;
 
-                // Normalize and compare
-                if (!$this->valuesMatch($studentValue, $correctValue)) {
-                    return false;
-                }
+                if (!$this->valuesMatch($studentValue, $correctValue)) return false;
             }
         }
 
         return true;
     }
 
-    /**
-     * Check if two values match after normalization
-     */
     private function valuesMatch($value1, $value2)
     {
-        // Normalize both values
-        $normalized1 = $this->normalizeValue($value1);
-        $normalized2 = $this->normalizeValue($value2);
-
-        return $normalized1 === $normalized2;
+        return $this->normalizeValue($value1) === $this->normalizeValue($value2);
     }
 
-    /**
-     * Normalize a single value for comparison
-     */
     private function normalizeValue($value)
     {
-        // Handle null, empty, or zero
-        if ($value === null || $value === '' || $value === 0) {
-            return '';
-        }
-
-        // Handle numbers - format to 2 decimal places
-        if (is_numeric($value)) {
-            return number_format((float)$value, 2, '.', '');
-        }
-
-        // Handle strings - trim and lowercase
-        if (is_string($value)) {
-            return strtolower(trim($value));
-        }
-
+        if ($value === null || $value === '' || $value === 0) return '';
+        if (is_numeric($value)) return number_format((float)$value, 2, '.', '');
+        if (is_string($value)) return strtolower(trim($value));
         return (string)$value;
     }
 
     public function submit()
     {
         return back()->with('success', 'Performance task submitted!');
+    }
+
+    public function show($id)
+    {
+        $user = auth()->user();
+        
+        // Verify the task belongs to the student
+        $task = PerformanceTask::where('id', $id)
+            ->whereHas('section.students', function ($query) use ($user) {
+                $query->where('student_id', $user->student->id);
+            })
+            ->firstOrFail();
+
+        // Redirect to progress page with the task ID
+        return redirect()->route('students.performance-tasks.progress', ['taskId' => $id]);
     }
 }

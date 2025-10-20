@@ -139,9 +139,9 @@
                         const studentValue = parsedStudent[row]?.[col];
                         const correctValue = parsedCorrect[row]?.[col];
                         
-                        // ONLY color cells where the STUDENT entered something
+                        
                         if (studentValue !== null && studentValue !== undefined && studentValue !== '') {
-                            // Normalize values for comparison
+                            
                             const normalizeValue = (val) => {
                                 if (val === null || val === undefined || val === '') return '';
                                 if (typeof val === 'string') return val.trim().toLowerCase();

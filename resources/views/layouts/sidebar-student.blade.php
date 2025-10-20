@@ -29,13 +29,16 @@
             Assessment
         </span>
         <div class="mt-3 space-y-2">
-            <a href="{{ route('students.tasks.index') }}" 
-            class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 hover:scale-[0.98] group relative overflow-hidden
-            {{ request()->routeIs('students.tasks.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FF92C2]/30 text-[#595758] shadow-lg border border-[#FF92C2]/20' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-gradient-to-r hover:from-[#FFEEF2] hover:to-[#FFF0F5]' }}">
-                <div class="bg-white/20 rounded-full p-3">
-                    <i class="fas fa-tasks w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>
-                </div>
-                <span>Tasks</span>
+            <a href="{{ route('students.performance-tasks.index') }}" 
+                class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 hover:scale-[0.98] group relative overflow-hidden
+                {{ request()->routeIs('students.performance-tasks.*') 
+                    ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FF92C2]/30 text-[#595758] shadow-lg border border-[#FF92C2]/20' 
+                    : 'text-[#595758] dark:text-[#FF92C2] hover:bg-gradient-to-r hover:from-[#FFEEF2] hover:to-[#FFF0F5]' }}">
+                    
+                    <div class="bg-white/20 rounded-full p-3">
+                        <i class="fas fa-tasks w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>
+                    </div>
+                    <span>Performance Tasks</span>
             </a>
             
                 <div class="mb-6">
@@ -49,43 +52,99 @@
                                 {{ request()->routeIs('students.performance-tasks.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FF92C2]/30 shadow-lg border border-[#FF92C2]/20' : '' }}">
                             <div class="flex items-center gap-3">
                                 <i class="fas fa-table w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>
-                                <span>Performance Task</span>
+                                <span>Tasks</span>
                             </div>
                             <i id="dropdown-icon" class="fas fa-chevron-down text-xs transition-transform duration-300"></i>
                         </button>
 
                         <!-- Dropdown Steps -->
-                        <div id="performance-steps" class="ml-4 space-y-1 hidden">
-                            <!-- Step 1 -->
-                            <a href="{{ route('students.performance-tasks.step', 1) }}" 
-                            class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
-                            {{ request()->routeIs('students.performance-tasks.step') && request()->route('step') == 1 ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
-                                <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">1</span>
-                                <span>Analyzing Transactions</span>
-                            </a>
+                        @php
+                            // Get the current task ID from various possible sources
+                            $currentTaskId = request()->route('id') ?? 
+                                            request()->route('taskId') ?? 
+                                            optional(auth()->user()->student->performanceTasks()->latest()->first())->id;
+                        @endphp
 
-                            <!-- Steps 2-10 -->
-                            @for($i = 2; $i <= 10; $i++)
-                                <a href="{{ route('students.performance-tasks.step', $i) }}" 
-                                class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
-                                {{ request()->routeIs('students.performance-tasks.step') && request()->route('step') == $i ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
-                                    <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">{{ $i }}</span>
-                                    <span>
-                                        @switch($i)
-                                            @case(2) Journal Entries @break
-                                            @case(3) Trial Balance @break
-                                            @case(4) Adjusting Entries @break
-                                            @case(5) Adjusted Trial Balance @break
-                                            @case(6) Income Statement @break
-                                            @case(7) Statement of Changes @break
-                                            @case(8) Balance Sheet @break
-                                            @case(9) Closing Entries @break
-                                            @case(10) Post-Closing Trial Balance @break
-                                        @endswitch
+                        <div id="performance-steps" class="ml-4 space-y-1 hidden">
+
+                            <!-- Progress -->
+                            @if($currentTaskId)
+                                <a href="{{ route('students.performance-tasks.progress', ['taskId' => $currentTaskId]) }}"
+                                    class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
+                                    {{ request()->routeIs('students.performance-tasks.progress') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
+                                    <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
+                                        <i class="fas fa-chart-line text-[#FF92C2]"></i>
                                     </span>
+                                    <span>Progress</span>
                                 </a>
+                            @else
+                                <a href="{{ route('students.performance-tasks.index') }}"
+                                    class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2] text-[#595758]/70 dark:text-[#FF92C2]/70">
+                                    <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
+                                        <i class="fas fa-chart-line text-[#FF92C2]"></i>
+                                    </span>
+                                    <span>Progress</span>
+                                </a>
+                            @endif
+
+                            <!-- Step 1 -->
+                            @if($currentTaskId)
+                                <a href="{{ route('students.performance-tasks.step', ['id' => $currentTaskId, 'step' => 1]) }}" 
+                                    class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
+                                    {{ request()->routeIs('students.performance-tasks.step') && request()->route('step') == 1 ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
+                                    <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">1</span>
+                                    <span>Analyzing Transactions</span>
+                                </a>
+                            @else
+                                <span class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg text-gray-400 cursor-not-allowed">
+                                    <span class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold">1</span>
+                                    <span>Analyzing Transactions</span>
+                                </span>
+                            @endif
+
+                            <!-- Steps 2–10 -->
+                            @for($i = 2; $i <= 10; $i++)
+                                @if($currentTaskId)
+                                    <a href="{{ route('students.performance-tasks.step', ['id' => $currentTaskId, 'step' => $i]) }}" 
+                                        class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
+                                        {{ request()->routeIs('students.performance-tasks.step') && request()->route('step') == $i ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
+                                        <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">{{ $i }}</span>
+                                        <span>
+                                            @switch($i)
+                                                @case(2) Journal Entries @break
+                                                @case(3) Trial Balance @break
+                                                @case(4) Adjusting Entries @break
+                                                @case(5) Adjusted Trial Balance @break
+                                                @case(6) Income Statement @break
+                                                @case(7) Statement of Changes @break
+                                                @case(8) Balance Sheet @break
+                                                @case(9) Closing Entries @break
+                                                @case(10) Post-Closing Trial Balance @break
+                                            @endswitch
+                                        </span>
+                                    </a>
+                                @else
+                                    <span class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg text-gray-400 cursor-not-allowed">
+                                        <span class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold">{{ $i }}</span>
+                                        <span>
+                                            @switch($i)
+                                                @case(2) Journal Entries @break
+                                                @case(3) Trial Balance @break
+                                                @case(4) Adjusting Entries @break
+                                                @case(5) Adjusted Trial Balance @break
+                                                @case(6) Income Statement @break
+                                                @case(7) Statement of Changes @break
+                                                @case(8) Balance Sheet @break
+                                                @case(9) Closing Entries @break
+                                                @case(10) Post-Closing Trial Balance @break
+                                            @endswitch
+                                        </span>
+                                    </span>
+                                @endif
                             @endfor
+
                         </div>
+
                     </div>
                 </div>
 
@@ -180,7 +239,7 @@
             Progress
         </span>
         <div class="mt-3 space-y-2">
-            <a href="{{ route('students.progress') }}" 
+            <a href="{{ route('students.performance-tasks.progress') }}" 
             class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 hover:scale-[0.98] group relative overflow-hidden
             {{ request()->routeIs('students.progress') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FF92C2]/30 text-[#595758] shadow-lg border border-[#FF92C2]/20' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-gradient-to-r hover:from-[#FFEEF2] hover:to-[#FFF0F5]' }}">
                 <i class="fas fa-chart-line w-5 h-5 transition-transform duration-300 group-hover:scale-110"></i>

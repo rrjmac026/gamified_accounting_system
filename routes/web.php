@@ -362,16 +362,23 @@ Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.
     Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submitAnswer'])->name('quizzes.submit');
     // List all performance tasks assigned to the student
 
-    // Performance Tasks - Step 1 is the index
+    // Performance Tasks
     Route::get('/performance-tasks', [StudentPerformanceTaskController::class, 'index'])
         ->name('performance-tasks.index');
-    
-    Route::get('/performance-tasks/step/{step}', [StudentPerformanceTaskController::class, 'step'])
+
+    Route::get('/performance-tasks/progress/{taskId?}', [StudentPerformanceTaskController::class, 'progress'])
+        ->name('performance-tasks.progress');
+
+    Route::get('/performance-tasks/{id}', [StudentPerformanceTaskController::class, 'show'])
+        ->name('performance-tasks.show');
+
+    // Fixed: Added {id} parameter
+    Route::get('/performance-tasks/{id}/step/{step}', [StudentPerformanceTaskController::class, 'step'])
         ->name('performance-tasks.step');
-    
-    Route::post('/performance-tasks/step/{step}/save', [StudentPerformanceTaskController::class, 'saveStep'])
+
+    Route::post('/performance-tasks/{id}/step/{step}/save', [StudentPerformanceTaskController::class, 'saveStep'])
         ->name('performance-tasks.save-step');
-    
+
     Route::post('/performance-tasks/submit', [StudentPerformanceTaskController::class, 'submit'])
         ->name('performance-tasks.submit');
         

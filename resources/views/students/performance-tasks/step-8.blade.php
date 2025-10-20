@@ -51,7 +51,7 @@
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <div id="spreadsheet" class="overflow-x-auto"></div>
 
-            <form id="saveForm" method="POST" action="{{ route('students.performance-tasks.save-step', 8) }}" class="mt-6 text-right">
+            <form id="saveForm" method="POST" action="{{ route('students.performance-tasks.save-step', ['id' => $performanceTask->id, 'step' => 8]) }}">
                 @csrf
                 <input type="hidden" name="submission_data" id="submission_data">
                 <button type="submit"

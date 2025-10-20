@@ -52,5 +52,10 @@ class Subject extends Model
                     ->withTimestamps();
     }
 
+    public function performanceTasks()
+    {
+        return $this->hasMany(PerformanceTask::class, 'subject_id');
+    }
+
 }
 

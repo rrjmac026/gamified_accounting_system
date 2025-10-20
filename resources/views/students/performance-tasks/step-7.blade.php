@@ -99,7 +99,7 @@
                 </div>
             </div>
 
-            <form id="saveForm" method="POST" action="{{ route('students.performance-tasks.save-step', 7) }}">
+            <form id="saveForm" method="POST" action="{{ route('students.performance-tasks.save-step', ['id' => $performanceTask->id, 'step' => 7]) }}">
                 @csrf
                 
                 <!-- Spreadsheet Section -->

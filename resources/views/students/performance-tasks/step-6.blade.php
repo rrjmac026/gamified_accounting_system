@@ -75,7 +75,7 @@
                 </div>
             </div>
 
-            <form id="saveForm" method="POST" action="{{ route('students.performance-tasks.save-step', 6) }}">
+            <form id="saveForm" method="POST" action="{{ route('students.performance-tasks.save-step', ['id' => $performanceTask->id, 'step' => 6]) }}">
                 @csrf
 
                 <!-- Spreadsheet -->

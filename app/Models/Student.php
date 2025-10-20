@@ -163,5 +163,13 @@ class Student extends Model
                     ->withTimestamps();
     }
 
+    // app/Models/Student.php
+
+    public function performanceTaskSubmissions()
+    {
+        return $this->hasMany(\App\Models\PerformanceTaskSubmission::class, 'student_id');
+    }
+
+
     
 }

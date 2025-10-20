@@ -69,7 +69,7 @@
                 </p>
             </div>
 
-            <form id="taskForm" method="POST" action="{{ route('students.performance-tasks.save-step', 4) }}">
+            <form id="saveForm" method="POST" action="{{ route('students.performance-tasks.save-step', ['id' => $performanceTask->id, 'step' => 4]) }}">
                 @csrf
                 <div class="p-3 sm:p-4 lg:p-6">
                     <div class="border rounded-lg shadow-inner bg-gray-50 overflow-hidden">

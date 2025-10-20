@@ -54,7 +54,7 @@
                             @if($task->subject)
                                 <div class="flex items-center text-xs text-gray-600">
                                     <i class="fas fa-book mr-2 text-[#FF92C2] w-4"></i>
-                                    <span class="font-medium">{{ $task->subject->name ?? 'N/A' }}</span>
+                                    <span class="font-medium">{{ $task->subject->subject_name ?? 'N/A' }}</span>
                                 </div>
                             @endif
 

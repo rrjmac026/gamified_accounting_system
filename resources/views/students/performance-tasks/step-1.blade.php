@@ -88,7 +88,7 @@
                     </p>
                 </div>
 
-                <form id="taskForm" action="{{ route('students.performance-tasks.save-step', 1) }}" method="POST">
+                <form id="taskForm" action="{{ route('students.performance-tasks.save-step', ['id' => $performanceTask->id, 'step' => $step ?? 1]) }}" method="POST">
                     @csrf
                     <!-- Spreadsheet Section -->
                     <div class="p-3 sm:p-4 lg:p-6">

@@ -23,7 +23,6 @@ class Subject extends Model
         'is_active' => 'boolean'
     ];
 
-    // Relationships
     public function instructors()
     {
         return $this->belongsToMany(Instructor::class, 'instructor_subject')

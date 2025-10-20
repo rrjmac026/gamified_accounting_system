@@ -64,7 +64,7 @@
                 </button>
 
                 <!-- Task Dropdown Content -->
-                <div x-show="taskOpen" x-collapse class="ml-4 space-y-1">
+                <div x-show="taskOpen" x-collapse class="ml-4 mt-2 space-y-1">
                     <!-- All Tasks -->
                     <a href="{{ route('instructors.tasks.index') }}" 
                        class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
@@ -96,15 +96,8 @@
                     </a>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Reports -->
-    <div class="mb-6">
-        <span class="px-3 text-xs font-semibold text-[#595758] dark:text-[#FFC8FB] uppercase tracking-wider border-l-4 border-[#FF92C2] bg-gradient-to-r from-[#FF92C2]/10 to-transparent rounded-r-lg py-2">
-            Reports
-        </span>
-        <div class="mt-3 space-y-2">
+            <!-- Student Progress -->
             <a href="{{ route('instructors.progress.index') }}" 
                class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 hover:scale-[0.98] group relative overflow-hidden
                {{ request()->routeIs('instructors.progress.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FF92C2]/30 text-[#595758] shadow-lg border border-[#FF92C2]/20' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-gradient-to-r hover:from-[#FFEEF2] hover:to-[#FFF0F5]' }}">

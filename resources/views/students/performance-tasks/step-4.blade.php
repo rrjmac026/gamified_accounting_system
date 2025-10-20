@@ -1,8 +1,7 @@
 <x-app-layout>
-    <!-- Handsontable + HyperFormula -->
+    <!-- Handsontable -->
     <script src="https://cdn.jsdelivr.net/npm/handsontable@14.1.0/dist/handsontable.full.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@14.1.0/dist/handsontable.full.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/hyperformula@2.6.2/dist/hyperformula.full.min.js"></script>
 
     <div class="py-4 sm:py-6 lg:py-8">
         {{-- ✅ Flash Messages --}}
@@ -98,6 +97,7 @@
     </div>
 
     <script>
+        let hot;
         document.addEventListener('DOMContentLoaded', function () {
             const container = document.getElementById('spreadsheet');
             const savedData = @json($submission->submission_data ?? null);
@@ -109,7 +109,7 @@
                 ? JSON.parse(savedData)
                 : Array.from({ length: 12 }, () => ['', '', '']);
 
-            const hot = new Handsontable(container, {
+            hot = new Handsontable(container, {
                 data: initialData,
                 colHeaders: ['Account Title', 'Debit (₱)', 'Credit (₱)'],
                 columns: [
@@ -139,9 +139,9 @@
                         const studentValue = parsedStudent[row]?.[col];
                         const correctValue = parsedCorrect[row]?.[col];
                         
-                        
+                        // ONLY color cells where the STUDENT entered something
                         if (studentValue !== null && studentValue !== undefined && studentValue !== '') {
-                            
+                            // Normalize values for comparison
                             const normalizeValue = (val) => {
                                 if (val === null || val === undefined || val === '') return '';
                                 if (typeof val === 'string') return val.trim().toLowerCase();
@@ -165,10 +165,12 @@
                 }
             });
 
-            // ✅ Save data before form submit
-            const form = document.getElementById('taskForm');
-            form.addEventListener('submit', function () {
+            // ✅ Save data before form submit - FIXED: Changed from 'taskForm' to 'saveForm'
+            const form = document.getElementById('saveForm');
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
                 document.getElementById('submission_data').value = JSON.stringify(hot.getData());
+                this.submit();
             });
         });
     </script>

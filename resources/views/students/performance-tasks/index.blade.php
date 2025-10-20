@@ -5,6 +5,12 @@
         </h2>
     </x-slot>
 
+            @if (session('success'))
+                <div class="mb-6 px-4 py-3 bg-green-100 border border-green-200 text-green-700 rounded-lg">
+                    {{ session('success') }}
+                </div>
+            @endif
+
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             

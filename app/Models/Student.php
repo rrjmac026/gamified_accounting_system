@@ -135,8 +135,6 @@ class Student extends Model
     {
         $totalXp = $this->getTotalXp();
         
-        // Get badges that student hasn't earned yet but qualifies for
-        // Modified to check all badge types, not just 'xp' criteria
         $eligibleBadges = Badge::where(function($query) use ($totalXp) {
                 $query->where('xp_threshold', '<=', $totalXp)
                       ->where('is_active', true);
@@ -162,8 +160,6 @@ class Student extends Model
                     ->withPivot('status', 'score', 'feedback')
                     ->withTimestamps();
     }
-
-    // app/Models/Student.php
 
     public function performanceTaskSubmissions()
     {

@@ -151,21 +151,21 @@ class StudentPerformanceTaskController extends Controller
     }
 
     /**
-     * Save or retry a step submission
+     * Save or retry a step submission - FIXED METHOD SIGNATURE
      */
-    public function saveStep(Request $request, $step)
+    public function saveStep(Request $request, $id, $step) // Added $id parameter
     {
         $user = auth()->user();
 
-        // Find the active performance task for the student's section
-        $task = PerformanceTask::whereHas('section.students', function ($query) use ($user) {
+        // Find the specific performance task by ID (not just the latest)
+        $task = PerformanceTask::where('id', $id)
+            ->whereHas('section.students', function ($query) use ($user) {
                 $query->where('student_id', $user->student->id);
             })
-            ->latest()
             ->first();
 
         if (!$task) {
-            return back()->with('error', 'No active performance task found.');
+            return back()->with('error', 'Performance task not found or not assigned to you.');
         }
 
         // CRITICAL: Check deadline restrictions
@@ -175,6 +175,11 @@ class StudentPerformanceTaskController extends Controller
         }
 
         try {
+            // Validate submission data
+            $validated = $request->validate([
+                'submission_data' => 'required|string'
+            ]);
+
             // Check or create submission record
             $submission = PerformanceTaskSubmission::firstOrNew([
                 'task_id' => $task->id,
@@ -188,7 +193,7 @@ class StudentPerformanceTaskController extends Controller
             }
 
             // Decode student's submission data
-            $studentData = $request->input('submission_data');
+            $studentData = $validated['submission_data'];
             $studentDataArray = json_decode($studentData, true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
@@ -231,20 +236,17 @@ class StudentPerformanceTaskController extends Controller
 
             $submission->save();
 
-            $message = "Step $step saved successfully! (Attempt {$submission->attempts}/2) - Status: " . ucfirst($submission->status);
-            
-            // Add late warning to message if applicable
+            $message = "Step $step saved successfully! (Attempt {$submission->attempts}/2) - Status: " . ucfirst($submission->status); 
+
             if ($deadlineStatus['isLate']) {
                 $message .= " ⚠️ Late submission - penalties may apply.";
             }
 
-            // If last step
             if ($step >= 10) {
-                return redirect()->route('students.dashboard')
+                return redirect()->route('students.performance-tasks.index')
                     ->with('success', 'You have successfully completed all 10 steps of the performance task!');
             }
 
-            // Otherwise go to next step
             return redirect()->route('students.performance-tasks.step', [
                 'id' => $task->id,
                 'step' => $step + 1,

@@ -208,94 +208,74 @@
                     </p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Developer 1 -->
-                <div class="group bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/50 hover:border-[#FF9AAB]/50 text-center">
-                    <div class="w-24 h-24 rounded-full mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg overflow-hidden ring-4 ring-[#D5006D]/20">
-                        <img src="{{ asset('images/team/nica.jpg') }}" alt="Nica Christina P. Aguelo" class="w-full h-full object-cover">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                    <!-- Developer 1 -->
+                    <div class="group bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/50 hover:border-[#FF9AAB]/50 text-center">
+                        <div class="w-24 h-24 rounded-full mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg overflow-hidden ring-4 ring-[#D5006D]/20">
+                            <img src="{{ asset('images/team/nica.jpg') }}" alt="Nica Christina P. Aguelo" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Nica Christina P. Aguelo</h3>
+                        <p class="text-[#D5006D] font-semibold mb-3">Full Stack Engineer</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                            Architecting innovative solutions and leading the technical vision of GAS.
+                        </p>
+                        <div class="flex justify-center gap-3">
+                            <a href="#" class="w-8 h-8 bg-[#FAF3F3] dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-[#D5006D] hover:text-white transition-colors">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="#" class="w-8 h-8 bg-[#FAF3F3] dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-[#D5006D] hover:text-white transition-colors">
+                                <i class="fab fa-linkedin"></i>
+                            </a>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Nica Christina P. Aguelo</h3>
-                    <p class="text-[#D5006D] font-semibold mb-3">Full Stack Engineer</p>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
-                        Architecting innovative solutions and leading the technical vision of GAS.
-                    </p>
-                    <div class="flex justify-center gap-3">
-                        <a href="#" class="w-8 h-8 bg-[#FAF3F3] dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-[#D5006D] hover:text-white transition-colors">
-                            <i class="fab fa-github"></i>
-                        </a>
-                        <a href="#" class="w-8 h-8 bg-[#FAF3F3] dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-[#D5006D] hover:text-white transition-colors">
-                            <i class="fab fa-linkedin"></i>
-                        </a>
-                    </div>
-                </div>
 
-                <!-- Developer 2 -->
-                <div class="group bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/50 hover:border-[#FF9AAB]/50 text-center">
-                    <div class="w-24 h-24 rounded-full mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg overflow-hidden ring-4 ring-[#FF6F91]/20">
-                        <img src="{{ asset('images/team/rovi.jpg') }}" alt="Rovi Hannz Tabigne" class="w-full h-full object-cover">
+                    <!-- Developer 2 -->
+                    <div class="group bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/50 hover:border-[#FF9AAB]/50 text-center">
+                        <div class="w-24 h-24 rounded-full mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg overflow-hidden ring-4 ring-[#FF6F91]/20">
+                            <img src="{{ asset('images/team/rovi.jpg') }}" alt="Rovi Hannz Tabigne" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Rovi Hannz Tabigne</h3>
+                        <p class="text-[#D5006D] font-semibold mb-3">Design Lead</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                            Crafting beautiful and intuitive user experiences that delight.
+                        </p>
+                        <div class="flex justify-center gap-3">
+                            <a href="#" class="w-8 h-8 bg-[#FAF3F3] dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-[#FF6F91] hover:text-white transition-colors">
+                                <i class="fab fa-dribbble"></i>
+                            </a>
+                            <a href="#" class="w-8 h-8 bg-[#FAF3F3] dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-[#FF6F91] hover:text-white transition-colors">
+                                <i class="fab fa-linkedin"></i>
+                            </a>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Rovi Hannz Tabigne</h3>
-                    <p class="text-[#D5006D] font-semibold mb-3">Design Lead</p>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
-                        Crafting beautiful and intuitive user experiences that delight.
-                    </p>
-                    <div class="flex justify-center gap-3">
-                        <a href="#" class="w-8 h-8 bg-[#FAF3F3] dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-[#FF6F91] hover:text-white transition-colors">
-                            <i class="fab fa-dribbble"></i>
-                        </a>
-                        <a href="#" class="w-8 h-8 bg-[#FAF3F3] dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-[#FF6F91] hover:text-white transition-colors">
-                            <i class="fab fa-linkedin"></i>
-                        </a>
-                    </div>
-                </div>
 
-                <!-- Developer 3 -->
-                <div class="group bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/50 hover:border-[#FF9AAB]/50 text-center">
-                    <div class="w-24 h-24 rounded-full mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg overflow-hidden ring-4 ring-[#D5006D]/20">
-                        <img src="{{ asset('images/team/ton.jpg') }}" alt="Ton Rako" class="w-full h-full object-cover">
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Ton Rako</h3>
-                    <p class="text-[#D5006D] font-semibold mb-3">Systems Architect</p>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
-                        Building robust and scalable backend infrastructure.
-                    </p>
-                    <div class="flex justify-center gap-3">
-                        <a href="#" class="w-8 h-8 bg-[#FAF3F3] dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-[#D5006D] hover:text-white transition-colors">
-                            <i class="fab fa-github"></i>
-                        </a>
-                        <a href="#" class="w-8 h-8 bg-[#FAF3F3] dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-[#D5006D] hover:text-white transition-colors">
-                            <i class="fab fa-linkedin"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Developer 4 -->
-                <div class="group bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/50 hover:border-[#FF9AAB]/50 text-center">
-                    <div class="w-24 h-24 rounded-full mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg overflow-hidden ring-4 ring-[#FF6F91]/20">
-                        <img src="{{ asset('images/team/developer4.jpg') }}" alt="Frontend Developer" class="w-full h-full object-cover">
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Frontend Developer</h3>
-                    <p class="text-[#D5006D] font-semibold mb-3">Interface Specialist</p>
-                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
-                        Creating responsive and dynamic user interfaces.
-                    </p>
-                    <div class="flex justify-center gap-3">
-                        <a href="#" class="w-8 h-8 bg-[#FAF3F3] dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-[#FF6F91] hover:text-white transition-colors">
-                            <i class="fab fa-github"></i>
-                        </a>
-                        <a href="#" class="w-8 h-8 bg-[#FAF3F3] dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-[#FF6F91] hover:text-white transition-colors">
-                            <i class="fab fa-linkedin"></i>
-                        </a>
+                    <!-- Developer 3 -->
+                    <div class="group bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/50 hover:border-[#FF9AAB]/50 text-center">
+                        <div class="w-24 h-24 rounded-full mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg overflow-hidden ring-4 ring-[#D5006D]/20">
+                            <img src="{{ asset('images/team/rako.jpg') }}" alt="Ton Rako" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Ton Rako</h3>
+                        <p class="text-[#D5006D] font-semibold mb-3">Systems Architect</p>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                            Building robust and scalable backend infrastructure.
+                        </p>
+                        <div class="flex justify-center gap-3">
+                            <a href="#" class="w-8 h-8 bg-[#FAF3F3] dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-[#D5006D] hover:text-white transition-colors">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="#" class="w-8 h-8 bg-[#FAF3F3] dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-[#D5006D] hover:text-white transition-colors">
+                                <i class="fab fa-linkedin"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
 
                 <div class="text-center mt-12">
                     <p class="text-gray-600 dark:text-gray-300 text-lg mb-6">
                         Want to join our team or collaborate on a project?
                     </p>
                     <a href="#" 
-                       class="inline-flex items-center px-8 py-4 rounded-xl bg-gradient-to-r from-[#D5006D] to-[#FF6F91] text-white text-lg font-semibold hover:from-[#FF6F91] hover:to-[#D5006D] transform hover:scale-105 transition-all duration-200 shadow-xl hover:shadow-2xl">
+                    class="inline-flex items-center px-8 py-4 rounded-xl bg-gradient-to-r from-[#D5006D] to-[#FF6F91] text-white text-lg font-semibold hover:from-[#FF6F91] hover:to-[#D5006D] transform hover:scale-105 transition-all duration-200 shadow-xl hover:shadow-2xl">
                         <i class="fas fa-envelope mr-2"></i>
                         Get In Touch
                     </a>

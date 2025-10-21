@@ -150,9 +150,9 @@
 
 
             {{-- Sidebar To-Do Dropdown --}}
-            <div x-data="{ open: {{ request()->routeIs('students.todo.*') ? 'true' : 'false' }} }" class="space-y-1">
+           <div x-data="{ open: {{ request()->routeIs('students.todo.*') ? 'true' : 'false' }} }" class="space-y-1">
                 <!-- Parent link (click to expand) -->
-                <button @click="open = !open"
+                <!-- <button @click="open = !open"
                     class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 hover:scale-[0.98] group relative overflow-hidden
                     {{ request()->routeIs('students.todo.*') ? 'bg-gradient-to-r from-[#FFC8FB] to-[#FF92C2]/30 text-[#595758] shadow-lg border border-[#FF92C2]/20' : 'text-[#595758] dark:text-[#FF92C2] hover:bg-gradient-to-r hover:from-[#FFEEF2] hover:to-[#FFF0F5]' }}">
                     <span class="flex items-center gap-3">
@@ -162,10 +162,10 @@
                     <div class="flex items-center gap-2">
                         <i :class="open ? 'fas fa-chevron-up transition-all duration-300 text-[#FF92C2] transform rotate-180' : 'fas fa-chevron-down transition-all duration-300 group-hover:text-[#FF92C2] transform rotate-0'"></i>
                     </div>
-                </button>
+                </button> -->
 
                 <!-- Enhanced Dropdown items -->
-                <div x-show="open" x-cloak 
+                <!-- <div x-show="open" x-cloak 
                      x-transition:enter="transition ease-out duration-300"
                      x-transition:enter-start="opacity-0 transform -translate-y-4 scale-95"
                      x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
@@ -228,7 +228,7 @@
                             {{ auth()->user()->student->tasks()->wherePivot('status', 'graded')->count() }}
                         </span>
                     </a>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

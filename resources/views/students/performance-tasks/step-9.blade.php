@@ -2,6 +2,8 @@
     <!-- Handsontable -->
     <script src="https://cdn.jsdelivr.net/npm/handsontable@14.1.0/dist/handsontable.full.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@14.1.0/dist/handsontable.full.min.css" />
+    <!-- Formula Parser (HyperFormula) -->
+    <script src="https://cdn.jsdelivr.net/npm/hyperformula@2.6.2/dist/hyperformula.full.min.js"></script>
 
     <div class="py-6">
         {{-- Flash Messages --}}
@@ -71,11 +73,21 @@
         </div>
 
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div class="overflow-x-auto">
-                <div id="spreadsheet"></div>
+            <div class="border rounded-lg shadow-inner bg-gray-50 overflow-hidden">
+                <div class="overflow-x-auto overflow-y-auto" style="max-height: calc(100vh - 400px); min-height: 500px;">
+                    <div id="spreadsheet" class="bg-white min-w-full"></div>
+                </div>
             </div>
 
-            <form id="saveForm" method="POST" action="{{ route('students.performance-tasks.save-step', ['id' => $performanceTask->id, 'step' => 9]) }}">
+            <!-- Mobile Scroll Hint -->
+            <div class="mt-2 text-xs text-gray-500 sm:hidden text-center">
+                <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                </svg>
+                Swipe to scroll spreadsheet
+            </div>
+
+            <form id="saveForm" method="POST" action="{{ route('students.performance-tasks.save-step', ['id' => $performanceTask->id, 'step' => 9]) }}" class="mt-4">
                 @csrf
                 <input type="hidden" name="submission_data" id="submission_data">
                 <button type="submit"
@@ -96,53 +108,65 @@
             const savedData = @json($submission->submission_data ?? null);
             const initialData = savedData
                 ? JSON.parse(savedData)
-                : Array.from({ length: 20 }, () => ['', '', '', '']);
+                : Array(20).fill().map(() => Array(3).fill(''));
 
             // Instructor's correct data
             const correctData = @json($answerSheet->correct_data ?? null);
             const submissionStatus = @json($submission->status ?? null);
+
+            // Initialize HyperFormula for Excel-like formulas
+            const hyperformulaInstance = HyperFormula.buildEmpty({
+                licenseKey: 'internal-use-in-handsontable',
+            });
+
+            // Determine responsive dimensions
+            const isMobile = window.innerWidth < 640;
+            const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
 
             // Initialize Handsontable with General Journal format
             hot = new Handsontable(container, {
                 data: initialData,
                 rowHeaders: true,
                 colHeaders: [
-                    'Date',
-                    'Account Titles and Explanation',
+                    'Account Title',
                     'Debit',
                     'Credit'
                 ],
                 columns: [
                     { 
-                        type: 'date', 
-                        dateFormat: 'MM/DD/YYYY', 
-                        correctFormat: true,
-                        width: 120
-                    },
-                    { 
                         type: 'text',
-                        width: 300
+                        width: isMobile ? 200 : 350
                     },
                     { 
                         type: 'numeric', 
                         numericFormat: { pattern: '0,0.00' },
-                        width: 120
+                        width: isMobile ? 100 : 140
                     },
                     { 
                         type: 'numeric', 
                         numericFormat: { pattern: '0,0.00' },
-                        width: 120
+                        width: isMobile ? 100 : 140
                     }
                 ],
                 width: '100%',
-                height: 600,
+                height: isMobile ? 400 : (isTablet ? 500 : 600),
                 licenseKey: 'non-commercial-and-evaluation',
+                formulas: { engine: hyperformulaInstance },
                 contextMenu: true,
                 undo: true,
                 manualColumnResize: true,
+                manualRowResize: true,
                 fillHandle: true,
+                autoColumnSize: false,
+                autoRowSize: false,
+                copyPaste: true,
+                minRows: 20,
                 minSpareRows: 1,
-                className: 'htLeft htMiddle',
+                stretchH: 'all',
+                enterMoves: { row: 1, col: 0 },
+                tabMoves: { row: 0, col: 1 },
+                outsideClickDeselects: false,
+                selectionMode: 'multiple',
                 cells: function(row, col) {
                     const cellProperties = {};
                     
@@ -169,10 +193,10 @@
                     }
                     
                     // Apply alignment classes (merge with existing className if coloring was applied)
-                    if (col === 2 || col === 3) {
+                    if (col === 1 || col === 2) {
                         cellProperties.className = (cellProperties.className || '') + ' htRight htMiddle';
                     } else if (col === 0) {
-                        cellProperties.className = (cellProperties.className || '') + ' htCenter htMiddle';
+                        cellProperties.className = (cellProperties.className || '') + ' htLeft htMiddle';
                     }
                     
                     return cellProperties;
@@ -183,16 +207,45 @@
                     // Auto-indent account titles that don't start with a date
                     if (changes) {
                         changes.forEach(([row, prop, oldValue, newValue]) => {
-                            if (prop === 1 && newValue) { // Account title column
-                                const dateCol = hot.getDataAtCell(row, 0);
-                                if (!dateCol && newValue && !newValue.startsWith('  ')) {
-                                    // Indent if no date in same row
-                                    hot.setDataAtCell(row, 1, '  ' + newValue.trim());
+                            if (prop === 0 && newValue) { // Account title column
+                                if (newValue && !newValue.startsWith('  ')) {
+                                    // Check if this might be a sub-account (no need to auto-indent if user handles it)
                                 }
                             }
                         });
                     }
                 }
+            });
+
+            // Handle window resize
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    const newIsMobile = window.innerWidth < 640;
+                    const newIsTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
+                    const newHeight = newIsMobile ? 400 : (newIsTablet ? 500 : 600);
+                    
+                    hot.updateSettings({
+                        height: newHeight,
+                        columns: [
+                            { 
+                                type: 'text',
+                                width: newIsMobile ? 200 : 350
+                            },
+                            { 
+                                type: 'numeric', 
+                                numericFormat: { pattern: '0,0.00' },
+                                width: newIsMobile ? 100 : 140
+                            },
+                            { 
+                                type: 'numeric', 
+                                numericFormat: { pattern: '0,0.00' },
+                                width: newIsMobile ? 100 : 140
+                            }
+                        ]
+                    });
+                }, 250);
             });
 
             // Sync data before form submission
@@ -221,14 +274,20 @@
         
         .handsontable .htRight {
             text-align: right;
+            padding-right: 8px;
         }
         
         .handsontable .htLeft {
             text-align: left;
+            padding-left: 8px;
         }
         
         .handsontable .htCenter {
             text-align: center;
+        }
+        
+        .handsontable .htMiddle {
+            vertical-align: middle;
         }
         
         /* Add visual separator for journal entries */
@@ -236,9 +295,23 @@
             background-color: #f9fafb;
         }
 
-        .handsontable .area { background-color: rgba(59,130,246,0.1); }
-        .handsontable { position: relative; z-index: 1; }
-        #spreadsheet { isolation: isolate; }
+        .handsontable .area { 
+            background-color: rgba(147, 51, 234, 0.1); 
+        }
+        
+        .handsontable { 
+            position: relative; 
+            z-index: 1; 
+        }
+        
+        #spreadsheet { 
+            isolation: isolate; 
+        }
+        
+        .overflow-x-auto { 
+            -webkit-overflow-scrolling: touch; 
+            scroll-behavior: smooth; 
+        }
 
         /* Correct/Incorrect answer styling - consistent with Step 6 */
         .handsontable td.cell-correct {
@@ -260,8 +333,17 @@
         }
 
         .handsontable td.cell-wrong.area,
-        .handsontable td.cell-wrong.current {
+        .hantml:handantable td.cell-wrong.current {
             background-color: #fecaca !important; /* Slightly darker red when selected */
+        }
+
+        @media (max-width: 640px) {
+            .handsontable { font-size: 12px; }
+            .handsontable th, .handsontable td { padding: 4px; }
+        }
+
+        @media (min-width: 640px) and (max-width: 1024px) {
+            .handsontable { font-size: 13px; }
         }
     </style>
 </x-app-layout>

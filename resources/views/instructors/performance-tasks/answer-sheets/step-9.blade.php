@@ -171,18 +171,11 @@
                 data: initialData,
                 rowHeaders: true,
                 colHeaders: [
-                    'Date',
-                    'Account Titles and Explanation',
+                    'Account Title',
                     'Debit',
                     'Credit'
                 ],
                 columns: [
-                    { 
-                        type: 'date', 
-                        dateFormat: 'MM/DD/YYYY', 
-                        correctFormat: true,
-                        width: isMobile ? 100 : 140
-                    },
                     { 
                         type: 'text',
                         width: isMobile ? 200 : 350

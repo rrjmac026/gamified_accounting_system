@@ -125,71 +125,87 @@
         document.addEventListener('DOMContentLoaded', function() {
             const container = document.getElementById('spreadsheet');
 
-            // Student's saved answers
+            // Student's saved answers - NOW 20 columns to match answer key
             const savedData = @json($submission->submission_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => Array(19).fill(''));
+            const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => Array(20).fill(''));
 
             // Instructor's correct data
             const correctData = @json($answerSheet->correct_data ?? null);
             const submissionStatus = @json($submission->status ?? null);
 
-            // Create columns config
-            const columnsConfig = [
-                { type: 'date', dateFormat: 'MM/DD/YYYY', correctFormat: true, width: 120 },
-                { type: 'text', width: 400 },
-                { type: 'text', width: 100 },
-                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
-                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
-                { type: 'text', width: 100 }, // Cash
-                { type: 'text', width: 120 }, // Accounts Receivable
-                { type: 'text', width: 100 }, // Supplies
-                { type: 'text', width: 120 }, // Furniture & Fixtures
-                { type: 'text', width: 100 }, // Land
-                { type: 'text', width: 100 }, // Equipment
-                { type: 'text', width: 120 }, // Accounts Payable
-                { type: 'text', width: 120 }, // Notes Payable
-                { type: 'text', width: 100 }, // Capital
-                { type: 'text', width: 100 }, // Withdrawal
-                { type: 'text', width: 120 }, // Service Revenue
-                { type: 'text', width: 120 }, // Rent Expense
-                { type: 'text', width: 100 }, // Paid Licenses
-                { type: 'text', width: 120 }, // Salaries Expense
-            ];
-
-            // Initialize Handsontable
+            // Initialize Handsontable with NESTED HEADERS like answer key
             hot = new Handsontable(container, {
                 data: initialData,
-                columns: columnsConfig,
                 rowHeaders: true,
-                colHeaders: [
-                    'Date', 
-                    'Account Titles and Explanation', 
-                    'Account Number', 
-                    'Debit (₱)', 
-                    'Credit (₱)',
-                    '',
-                    'Cash', 
-                    'Accounts Receivable', 
-                    'Supplies', 
-                    'Furniture & Fixtures', 
-                    'Land', 
-                    'Equipment', 
-                    'Accounts Payable', 
-                    'Notes Payable', 
-                    'Capital', 
-                    'Withdrawal', 
-                    'Service Revenue', 
-                    'Rent Expense', 
-                    'Paid Licenses', 
-                    'Salaries Expense'
+                // Using nested headers matching Step 2/Answer Key
+                nestedHeaders: [
+                    [
+                        {label: 'Date', colspan: 2}, // Date spans 2 columns
+                        'Account Titles and Explanation', 
+                        'Account Number', 
+                        'Debit (₱)', 
+                        'Credit (₱)',
+                        '',
+                        'Cash', 
+                        'Accounts Receivable', 
+                        'Supplies', 
+                        'Furniture & Fixtures', 
+                        'Land', 
+                        'Equipment', 
+                        'Accounts Payable', 
+                        'Notes Payable', 
+                        'Capital', 
+                        'Withdrawal', 
+                        'Service Revenue', 
+                        'Rent Expense', 
+                        'Paid Licenses', 
+                        'Salaries Expense'
+                    ],
+                    [
+                        '', // Sub-column 1 under Date (Month)
+                        '', // Sub-column 2 under Date (Day)
+                        '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
+                    ]
+                ],
+                columns: [
+                    { type: 'text', width: 100 }, // Month
+                    { type: 'text', width: 100 }, // Day
+                    { type: 'text', width: 400 },
+                    { type: 'text', width: 100 },
+                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
+                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 120 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 120 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 120 },
+                    { type: 'text', width: 120 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 120 },
+                    { type: 'text', width: 120 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 120 }
                 ],
                 stretchH: 'all',
                 height: 'auto',
                 licenseKey: 'non-commercial-and-evaluation',
                 contextMenu: true,
+                undo: true,
                 manualColumnResize: true,
                 manualRowResize: true,
+                fillHandle: true,
+                autoColumnSize: false,
+                autoRowSize: false,
+                copyPaste: true,
                 minSpareRows: 1,
+                enterMoves: { row: 1, col: 0 },
+                tabMoves: { row: 0, col: 1 },
+                outsideClickDeselects: false,
+                selectionMode: 'multiple',
                 cells: function(row, col) {
                     const cellProperties = {};
                     
@@ -216,7 +232,22 @@
                     }
                     
                     return cellProperties;
+                },
+                afterRenderer: function (TD, row, col, prop, value, cellProperties) {
+                    // Make the border after Credit column (now index 5) bold
+                    if (col === 5) {
+                        TD.style.borderRight = '3px solid #000000ff';
+                    }
                 }
+            });
+
+            // Handle window resize
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    hot.render();
+                }, 250);
             });
 
             // Save submission data
@@ -233,14 +264,13 @@
         body { overflow-x: hidden; }
         .handsontable td { 
             border-color: #d1d5db;
-            background-color: #ffffff; /* Default white background */
         }
         .handsontable .area { background-color: rgba(59,130,246,0.1); }
         .handsontable { position: relative; z-index: 1; }
         #spreadsheet { isolation: isolate; }
         .overflow-x-auto { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
 
-        /* Correct/Incorrect answer styling - consistent with Step 2 */
+        /* Correct/Incorrect answer styling */
         .handsontable td.cell-correct {
             background-color: #dcfce7 !important; /* Light green */
             border: 2px solid #16a34a !important; /* Green border */

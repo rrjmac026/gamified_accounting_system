@@ -149,35 +149,73 @@
             
             // Get saved answer key data if it exists
             const savedData = @json($sheet->correct_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array(20).fill().map(() => Array(4).fill(''));
+            // Changed to 20 columns to match Step 5 structure
+            const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => Array(20).fill(''));
 
             // Initialize HyperFormula for Excel-like formulas
             const hyperformulaInstance = HyperFormula.buildEmpty({
                 licenseKey: 'internal-use-in-handsontable',
             });
-
-            // Determine responsive dimensions
-            const isMobile = window.innerWidth < 640;
-            const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
             
             hot = new Handsontable(container, {
                 data: initialData,
                 rowHeaders: true,
-                colHeaders: [
-                    'Date',
-                    'Descriptions/Particulars',
-                    'Debit',
-                    'Credit'
+                // Using nested headers like Step 5
+                nestedHeaders: [
+                    [
+                        {label: 'Date', colspan: 2}, // Date spans 2 columns
+                        'Account Titles and Explanation', 
+                        'Account Number', 
+                        'Debit (₱)', 
+                        'Credit (₱)',
+                        '',
+                        'Cash', 
+                        'Accounts Receivable', 
+                        'Supplies', 
+                        'Furniture & Fixtures', 
+                        'Land', 
+                        'Equipment', 
+                        'Accounts Payable', 
+                        'Notes Payable', 
+                        'Capital', 
+                        'Withdrawal', 
+                        'Service Revenue', 
+                        'Rent Expense', 
+                        'Paid Licenses', 
+                        'Salaries Expense'
+                    ],
+                    [
+                        '', // Sub-column 1 under Date
+                        '', // Sub-column 2 under Date
+                        '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
+                    ]
                 ],
                 columns: [
-                    { type: 'date', dateFormat: 'MM/DD/YYYY' },
-                    { type: 'text' },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } }
+                    { type: 'text', width: 100 }, // Month
+                    { type: 'text', width: 100 }, // Day
+                    { type: 'text', width: 400 },
+                    { type: 'text', width: 100 },
+                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
+                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 120 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 120 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 120 },
+                    { type: 'text', width: 120 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 120 },
+                    { type: 'text', width: 120 },
+                    { type: 'text', width: 100 },
+                    { type: 'text', width: 120 }
                 ],
-                width: '100%',
-                height: isMobile ? 350 : (isTablet ? 450 : 500),
-                colWidths: isMobile ? [80, 180, 100, 100] : (isTablet ? [100, 220, 130, 130] : [120, 250, 150, 150]),
+                
+                stretchH: 'all',
+                height: 'auto',
                 licenseKey: 'non-commercial-and-evaluation',
                 formulas: { engine: hyperformulaInstance },
                 contextMenu: true,
@@ -188,14 +226,17 @@
                 autoColumnSize: false,
                 autoRowSize: false,
                 copyPaste: true,
-                minRows: 20,
                 minSpareRows: 1,
-                stretchH: 'all',
                 enterMoves: { row: 1, col: 0 },
                 tabMoves: { row: 0, col: 1 },
                 outsideClickDeselects: false,
                 selectionMode: 'multiple',
-                className: 'htCenter htMiddle',
+                afterRenderer: function (TD, row, col, prop, value, cellProperties) {
+                    // Make the border after Credit column (now index 5) bold
+                    if (col === 5) {
+                        TD.style.borderRight = '3px solid #000000ff';
+                    }
+                }
             });
 
             // Handle window resize
@@ -203,14 +244,7 @@
             window.addEventListener('resize', function() {
                 clearTimeout(resizeTimer);
                 resizeTimer = setTimeout(function() {
-                    const newIsMobile = window.innerWidth < 640;
-                    const newIsTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
-                    const newHeight = newIsMobile ? 350 : (newIsTablet ? 450 : 500);
-                    
-                    hot.updateSettings({
-                        height: newHeight,
-                        colWidths: newIsMobile ? [80, 180, 100, 100] : (newIsTablet ? [100, 220, 130, 130] : [120, 250, 150, 150])
-                    });
+                    hot.render();
                 }, 250);
             });
 
@@ -229,11 +263,9 @@
 
     <style>
         body { overflow-x: hidden; }
-        .handsontable .font-bold { font-weight: bold; }
-        .handsontable .bg-gray-100 { background-color: #f3f4f6 !important; }
-        .handsontable .bg-blue-50 { background-color: #eff6ff !important; }
-        .handsontable td { border-color: #d1d5db; }
-        .handsontable th { background-color: #f3f4f6; font-weight: 600; }
+        .handsontable td { 
+            border-color: #d1d5db;
+        }
         .handsontable .area { background-color: rgba(147, 51, 234, 0.1); }
         .handsontable { position: relative; z-index: 1; }
         #spreadsheet { isolation: isolate; }

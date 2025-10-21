@@ -96,120 +96,155 @@
         </div>
     </div>
 
-    <script>
-        let hot;
-        document.addEventListener('DOMContentLoaded', function () {
-            const container = document.getElementById('spreadsheet');
-            const savedData = @json($submission->submission_data ?? null);
-            const correctData = @json($answerSheet->correct_data ?? null);
-            const submissionStatus = @json($submission->status ?? null);
+<script>
+    let hot;
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('spreadsheet');
+        const savedData = @json($submission->submission_data ?? null);
+        const correctData = @json($answerSheet->correct_data ?? null);
+        const submissionStatus = @json($submission->status ?? null);
 
-            // ✅ Load saved or default data
-            const initialData = savedData
-                ? JSON.parse(savedData)
-                : Array.from({ length: 12 }, () => ['', '', '']);
+        // ✅ Load saved or default data
+        let initialData = savedData
+            ? JSON.parse(savedData)
+            : Array.from({ length: 12 }, () => ['', '', '']);
 
-            hot = new Handsontable(container, {
-                data: initialData,
-                colHeaders: ['Account Title', 'Debit (₱)', 'Credit (₱)'],
-                columns: [
-                    { type: 'text' },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                ],
-                rowHeaders: true,
-                licenseKey: 'non-commercial-and-evaluation',
-                height: 450,
-                stretchH: 'all',
-                contextMenu: true,
-                manualColumnResize: true,
-                manualRowResize: true,
-                minSpareRows: 1,
-                className: 'htCenter htMiddle',
+        // Add a final "Total" row if not already present
+        if (!initialData[initialData.length - 1] || initialData[initialData.length - 1][0] !== 'Total') {
+            initialData.push(['Total', '', '']);
+        }
+
+        hot = new Handsontable(container, {
+            data: initialData,
+            colHeaders: ['Account Title', 'Debit (₱)', 'Credit (₱)'],
+            columns: [
+                { type: 'text' },
+                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
+                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
+            ],
+            rowHeaders: true,
+            licenseKey: 'non-commercial-and-evaluation',
+            height: 450,
+            stretchH: 'all',
+            contextMenu: true,
+            manualColumnResize: true,
+            manualRowResize: true,
+            minSpareRows: 0, // Changed from 1 to 0 to prevent extra rows after Total
+            className: 'htCenter htMiddle',
+            
+            // ✅ Add cell coloring logic
+            cells: function(row, col) {
+                const cellProperties = {};
+                const data = this.instance.getData();
+                const lastRow = data.length - 1;
                 
-                // ✅ Add cell coloring logic
-                cells: function(row, col) {
-                    const cellProperties = {};
+                // Make last row "Total" static and bold
+                if (row === lastRow) {
+                    cellProperties.readOnly = true;
+                    cellProperties.className = 'total-row';
                     
-                    // Only apply correct/incorrect coloring if submission has been graded
-                    if (submissionStatus && correctData && savedData) {
-                        const parsedCorrect = typeof correctData === 'string' ? JSON.parse(correctData) : correctData;
-                        const parsedStudent = typeof savedData === 'string' ? JSON.parse(savedData) : savedData;
+                    // Set "Total" text in first column
+                    if (col === 0) {
+                        cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+                            td.innerHTML = '<strong>Total</strong>';
+                        };
+                    } else {
+                        // Add bold border class for debit and credit columns
+                        cellProperties.className = 'total-row total-cell-bold';
+                    }
+                }
+                
+                // Only apply correct/incorrect coloring if submission has been graded
+                if (submissionStatus && correctData && savedData && row !== lastRow) {
+                    const parsedCorrect = typeof correctData === 'string' ? JSON.parse(correctData) : correctData;
+                    const parsedStudent = typeof savedData === 'string' ? JSON.parse(savedData) : savedData;
+                    
+                    const studentValue = parsedStudent[row]?.[col];
+                    const correctValue = parsedCorrect[row]?.[col];
+                    
+                    // ONLY color cells where the STUDENT entered something
+                    if (studentValue !== null && studentValue !== undefined && studentValue !== '') {
+                        // Normalize values for comparison
+                        const normalizeValue = (val) => {
+                            if (val === null || val === undefined || val === '') return '';
+                            if (typeof val === 'string') return val.trim().toLowerCase();
+                            if (typeof val === 'number') return val.toFixed(2);
+                            return String(val);
+                        };
                         
-                        const studentValue = parsedStudent[row]?.[col];
-                        const correctValue = parsedCorrect[row]?.[col];
+                        const normalizedStudent = normalizeValue(studentValue);
+                        const normalizedCorrect = normalizeValue(correctValue);
                         
-                        // ONLY color cells where the STUDENT entered something
-                        if (studentValue !== null && studentValue !== undefined && studentValue !== '') {
-                            // Normalize values for comparison
-                            const normalizeValue = (val) => {
-                                if (val === null || val === undefined || val === '') return '';
-                                if (typeof val === 'string') return val.trim().toLowerCase();
-                                if (typeof val === 'number') return val.toFixed(2);
-                                return String(val);
-                            };
-                            
-                            const normalizedStudent = normalizeValue(studentValue);
-                            const normalizedCorrect = normalizeValue(correctValue);
-                            
-                            // Compare student's answer with correct answer
-                            if (normalizedStudent === normalizedCorrect) {
-                                cellProperties.className = 'cell-correct';
-                            } else {
-                                cellProperties.className = 'cell-wrong';
-                            }
+                        // Compare student's answer with correct answer
+                        if (normalizedStudent === normalizedCorrect) {
+                            cellProperties.className = (cellProperties.className || '') + ' cell-correct';
+                        } else {
+                            cellProperties.className = (cellProperties.className || '') + ' cell-wrong';
                         }
                     }
-                    
-                    return cellProperties;
                 }
-            });
-
-            // ✅ Save data before form submit - FIXED: Changed from 'taskForm' to 'saveForm'
-            const form = document.getElementById('saveForm');
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                document.getElementById('submission_data').value = JSON.stringify(hot.getData());
-                this.submit();
-            });
+                
+                return cellProperties;
+            }
         });
-    </script>
 
-    <style>
-        body { overflow-x: hidden; }
-        .handsontable td { 
-            border-color: #d1d5db;
-            background-color: #ffffff;
-        }
-        .handsontable .area { background-color: rgba(59, 130, 246, 0.1); }
-        #spreadsheet { isolation: isolate; }
-        
-        /* Correct/Incorrect answer styling - consistent with Steps 1, 2, 3 */
-        .handsontable td.cell-correct {
-            background-color: #dcfce7 !important; /* Light green */
-            border: 2px solid #16a34a !important; /* Green border */
-            color: #166534;
-        }
-        
-        .handsontable td.cell-wrong {
-            background-color: #fee2e2 !important; /* Light red */
-            border: 2px solid #dc2626 !important; /* Red border */
-            color: #991b1b;
-        }
-        
-        /* Prevent selected cells from overriding colors */
-        .handsontable td.cell-correct.area,
-        .handsontable td.cell-correct.current {
-            background-color: #bbf7d0 !important;
-        }
+        // ✅ Save data before form submit
+        const form = document.getElementById('saveForm');
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            document.getElementById('submission_data').value = JSON.stringify(hot.getData());
+            this.submit();
+        });
+    });
+</script>
 
-        .handsontable td.cell-wrong.area,
-        .handsontable td.cell-wrong.current {
-            background-color: #fecaca !important;
-        }
-        
-        @media (max-width: 640px) {
-            .handsontable { font-size: 12px; }
-        }
-    </style>
+<style>
+    body { overflow-x: hidden; }
+    .handsontable td { 
+        border-color: #d1d5db;
+        background-color: #ffffff;
+    }
+    .handsontable .area { background-color: rgba(59, 130, 246, 0.1); }
+    #spreadsheet { isolation: isolate; }
+    
+    /* Total row styling */
+    .handsontable td.total-row {
+        background-color: #f3f4f6 !important;
+        font-weight: 700;
+    }
+
+    .handsontable td.total-cell-bold {
+        border-top: 3px solid #374151 !important;
+        border-bottom: 3px double #374151 !important;
+    }
+    
+    /* Correct/Incorrect answer styling - consistent with Steps 1, 2, 3 */
+    .handsontable td.cell-correct {
+        background-color: #dcfce7 !important; /* Light green */
+        border: 2px solid #16a34a !important; /* Green border */
+        color: #166534;
+    }
+    
+    .handsontable td.cell-wrong {
+        background-color: #fee2e2 !important; /* Light red */
+        border: 2px solid #dc2626 !important; /* Red border */
+        color: #991b1b;
+    }
+    
+    /* Prevent selected cells from overriding colors */
+    .handsontable td.cell-correct.area,
+    .handsontable td.cell-correct.current {
+        background-color: #bbf7d0 !important;
+    }
+
+    .handsontable td.cell-wrong.area,
+    .handsontable td.cell-wrong.current {
+        background-color: #fecaca !important;
+    }
+    
+    @media (max-width: 640px) {
+        .handsontable { font-size: 12px; }
+    }
+</style>
 </x-app-layout>

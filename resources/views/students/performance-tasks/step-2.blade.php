@@ -120,49 +120,52 @@
         </div>
     </div>
 
-    <script>
-        let hot;
-        document.addEventListener('DOMContentLoaded', function() {
-            const container = document.getElementById('spreadsheet');
+<script>
+    let hot;
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('spreadsheet');
 
-            // Student's saved answers
-            const savedData = @json($submission->submission_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => Array(19).fill(''));
+        // Student's saved answers
+        const savedData = @json($submission->submission_data ?? null);
+        const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => Array(21).fill('')); // Changed to 21 columns
 
-            // Instructor's correct data
-            const correctData = @json($answerSheet->correct_data ?? null);
-            const submissionStatus = @json($submission->status ?? null);
+        // Instructor's correct data
+        const correctData = @json($answerSheet->correct_data ?? null);
+        const submissionStatus = @json($submission->status ?? null);
 
-            // Create columns config
-            const columnsConfig = [
-                { type: 'date', dateFormat: 'MM/DD/YYYY', correctFormat: true, width: 120 },
-                { type: 'text', width: 400 },
-                { type: 'text', width: 100 },
-                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
-                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
-                { type: 'text', width: 100 }, // Cash
-                { type: 'text', width: 120 }, // Accounts Receivable
-                { type: 'text', width: 100 }, // Supplies
-                { type: 'text', width: 120 }, // Furniture & Fixtures
-                { type: 'text', width: 100 }, // Land
-                { type: 'text', width: 100 }, // Equipment
-                { type: 'text', width: 120 }, // Accounts Payable
-                { type: 'text', width: 120 }, // Notes Payable
-                { type: 'text', width: 100 }, // Capital
-                { type: 'text', width: 100 }, // Withdrawal
-                { type: 'text', width: 120 }, // Service Revenue
-                { type: 'text', width: 120 }, // Rent Expense
-                { type: 'text', width: 100 }, // Paid Licenses
-                { type: 'text', width: 120 }, // Salaries Expense
-            ];
+        // Create columns config
+        const columnsConfig = [
+            { type: 'text', width: 100 }, // Month
+            { type: 'text', width: 100 }, // Day
+            { type: 'text', width: 400 },
+            { type: 'text', width: 100 },
+            { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
+            { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
+            { type: 'text', width: 100 }, // Blank Column
+            { type: 'text', width: 100 }, // Cash
+            { type: 'text', width: 120 }, // Accounts Receivable
+            { type: 'text', width: 100 }, // Supplies
+            { type: 'text', width: 120 }, // Furniture & Fixtures
+            { type: 'text', width: 100 }, // Land
+            { type: 'text', width: 100 }, // Equipment
+            { type: 'text', width: 120 }, // Accounts Payable
+            { type: 'text', width: 120 }, // Notes Payable
+            { type: 'text', width: 100 }, // Capital
+            { type: 'text', width: 100 }, // Withdrawal
+            { type: 'text', width: 120 }, // Service Revenue
+            { type: 'text', width: 120 }, // Rent Expense
+            { type: 'text', width: 100 }, // Paid Licenses
+            { type: 'text', width: 120 }, // Salaries Expense
+        ];
 
-            // Initialize Handsontable
-            hot = new Handsontable(container, {
-                data: initialData,
-                columns: columnsConfig,
-                rowHeaders: true,
-                colHeaders: [
-                    'Date', 
+        // Initialize Handsontable with nested headers
+        hot = new Handsontable(container, {
+            data: initialData,
+            columns: columnsConfig,
+            rowHeaders: true,
+            nestedHeaders: [
+                [
+                    {label: 'Date', colspan: 2}, // Date spans 2 columns
                     'Account Titles and Explanation', 
                     'Account Number', 
                     'Debit (₱)', 
@@ -183,51 +186,59 @@
                     'Paid Licenses', 
                     'Salaries Expense'
                 ],
-                stretchH: 'all',
-                height: 'auto',
-                licenseKey: 'non-commercial-and-evaluation',
-                contextMenu: true,
-                manualColumnResize: true,
-                manualRowResize: true,
-                minSpareRows: 1,
-                cells: function(row, col) {
-                    const cellProperties = {};
+                [
+                    'Month', // Sub-column 1 under Date
+                    'Day',   // Sub-column 2 under Date
+                    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
+                ]
+            ],
+            stretchH: 'all',
+            height: 'auto',
+            licenseKey: 'non-commercial-and-evaluation',
+            contextMenu: true,
+            manualColumnResize: true,
+            manualRowResize: true,
+            minSpareRows: 1,
+            afterRenderer: function (TD, row, col, prop, value, cellProperties) {
+                // Add bold border to data cells after blank column (column index 6 - Cash data)
+                if (col === 6) {
+                    TD.style.borderLeft = '3px solid #000000ff';
+                }
+                
+                // Only apply correct/incorrect coloring if submission has been graded
+                if (submissionStatus && correctData && savedData) {
+                    const parsedCorrect = typeof correctData === 'string' ? JSON.parse(correctData) : correctData;
+                    const parsedStudent = typeof savedData === 'string' ? JSON.parse(savedData) : savedData;
                     
-                    // Only apply correct/incorrect coloring if submission has been graded
-                    if (submissionStatus && correctData && savedData) {
-                        const parsedCorrect = typeof correctData === 'string' ? JSON.parse(correctData) : correctData;
-                        const parsedStudent = typeof savedData === 'string' ? JSON.parse(savedData) : savedData;
+                    const studentValue = parsedStudent[row]?.[col];
+                    const correctValue = parsedCorrect[row]?.[col];
+                    
+                    // Only compare non-empty cells that the STUDENT filled in
+                    if (studentValue !== null && studentValue !== undefined && studentValue !== '') {
+                        // Normalize values for comparison (trim whitespace, case-insensitive)
+                        const normalizedStudent = String(studentValue).trim().toLowerCase();
+                        const normalizedCorrect = String(correctValue || '').trim().toLowerCase();
                         
-                        const studentValue = parsedStudent[row]?.[col];
-                        const correctValue = parsedCorrect[row]?.[col];
-                        
-                        // Only compare non-empty cells that the STUDENT filled in
-                        if (studentValue !== null && studentValue !== undefined && studentValue !== '') {
-                            // Normalize values for comparison (trim whitespace, case-insensitive)
-                            const normalizedStudent = String(studentValue).trim().toLowerCase();
-                            const normalizedCorrect = String(correctValue || '').trim().toLowerCase();
-                            
-                            if (normalizedStudent === normalizedCorrect) {
-                                cellProperties.className = 'cell-correct';
-                            } else {
-                                cellProperties.className = 'cell-wrong';
-                            }
+                        if (normalizedStudent === normalizedCorrect) {
+                            TD.classList.add('cell-correct');
+                        } else {
+                            TD.classList.add('cell-wrong');
                         }
                     }
-                    
-                    return cellProperties;
                 }
-            });
-
-            // Save submission data
-            const form = document.getElementById('saveForm');
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                document.getElementById('submission_data').value = JSON.stringify(hot.getData());
-                this.submit();
-            });
+            }
         });
-    </script>
+
+        // Save submission data
+        const form = document.getElementById('saveForm');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('submission_data').value = JSON.stringify(hot.getData());
+            this.submit();
+        });
+    });
+</script>
+
 
     <style>
         body { overflow-x: hidden; }

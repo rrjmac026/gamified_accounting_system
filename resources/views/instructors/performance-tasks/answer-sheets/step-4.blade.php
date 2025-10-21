@@ -109,53 +109,102 @@
         </div>
     </div>
 
-    <script>
-        let hot;
-        document.addEventListener("DOMContentLoaded", function () {
-            const container = document.getElementById('spreadsheet');
-            const savedData = @json($sheet->correct_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 12 }, () => ['', '', '']);
-            hot = new Handsontable(container, {
-                data: initialData,
-                colHeaders: ['Account Title', 'Debit (₱)', 'Credit (₱)'],
-                columns: [
-                    { type: 'text' },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                ],
-                rowHeaders: true,
-                licenseKey: 'non-commercial-and-evaluation',
-                height: 450,
-                stretchH: 'all',
-                contextMenu: true,
-                manualColumnResize: true,
-                manualRowResize: true,
-                minSpareRows: 1,
-                className: 'htCenter htMiddle',
-            });
-            const answerKeyForm = document.getElementById("answerKeyForm");
-            if (answerKeyForm) {
-                answerKeyForm.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    document.getElementById("correctData").value = JSON.stringify(hot.getData());
-                    this.submit();
-                });
+<script>
+    let hot;
+    document.addEventListener("DOMContentLoaded", function () {
+        const container = document.getElementById('spreadsheet');
+        const savedData = @json($sheet->correct_data ?? null);
+        
+        // ✅ Load saved or default data
+        let initialData = savedData
+            ? JSON.parse(savedData)
+            : Array.from({ length: 12 }, () => ['', '', '']);
+
+        // Add a final "Total" row if not already present
+        if (!initialData[initialData.length - 1] || initialData[initialData.length - 1][0] !== 'Total') {
+            initialData.push(['Total', '', '']);
+        }
+
+        hot = new Handsontable(container, {
+            data: initialData,
+            colHeaders: ['Account Title', 'Debit (₱)', 'Credit (₱)'],
+            columns: [
+                { type: 'text' },
+                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
+                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
+            ],
+            rowHeaders: true,
+            licenseKey: 'non-commercial-and-evaluation',
+            height: 450,
+            stretchH: 'all',
+            contextMenu: true,
+            manualColumnResize: true,
+            manualRowResize: true,
+            minSpareRows: 0, // Changed from 1 to 0 to prevent extra rows after Total
+            className: 'htCenter htMiddle',
+            
+            // ✅ Add cell styling for Total row
+            cells: function(row, col) {
+                const cellProperties = {};
+                const data = this.instance.getData();
+                const lastRow = data.length - 1;
+                
+                // Make last row "Total" static and bold
+                if (row === lastRow) {
+                    cellProperties.readOnly = true;
+                    cellProperties.className = 'total-row';
+                    
+                    // Set "Total" text in first column
+                    if (col === 0) {
+                        cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+                            td.innerHTML = '<strong>Total</strong>';
+                        };
+                    } else {
+                        // Add bold border class for debit and credit columns
+                        cellProperties.className = 'total-row total-cell-bold';
+                    }
+                }
+                
+                return cellProperties;
             }
         });
-    </script>
-    <style>
-        body { overflow-x: hidden; }
-        .handsontable td { border-color: #d1d5db; }
-        .handsontable .area { background-color: rgba(147, 51, 234, 0.1); }
-        .handsontable { position: relative; z-index: 1; }
-        #spreadsheet { isolation: isolate; }
-        .overflow-x-auto { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
-        @media (max-width: 640px) {
-            .handsontable { font-size: 12px; }
-            .handsontable th, .handsontable td { padding: 4px; }
+
+        const answerKeyForm = document.getElementById("answerKeyForm");
+        if (answerKeyForm) {
+            answerKeyForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                document.getElementById("correctData").value = JSON.stringify(hot.getData());
+                this.submit();
+            });
         }
-        @media (min-width: 640px) and (max-width: 1024px) {
-            .handsontable { font-size: 13px; }
-        }
-    </style>
+    });
+</script>
+<style>
+    body { overflow-x: hidden; }
+    .handsontable td { border-color: #d1d5db; }
+    .handsontable .area { background-color: rgba(147, 51, 234, 0.1); }
+    .handsontable { position: relative; z-index: 1; }
+    #spreadsheet { isolation: isolate; }
+    .overflow-x-auto { -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+    
+    /* Total row styling */
+    .handsontable td.total-row {
+        background-color: #f3f4f6 !important;
+        font-weight: 700;
+    }
+
+    .handsontable td.total-cell-bold {
+        border-top: 3px solid #374151 !important;
+        border-bottom: 3px double #374151 !important;
+    }
+    
+    @media (max-width: 640px) {
+        .handsontable { font-size: 12px; }
+        .handsontable th, .handsontable td { padding: 4px; }
+    }
+    @media (min-width: 640px) and (max-width: 1024px) {
+        .handsontable { font-size: 13px; }
+    }
+</style>
 </x-app-layout>

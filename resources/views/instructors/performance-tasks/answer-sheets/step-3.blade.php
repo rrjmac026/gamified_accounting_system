@@ -110,8 +110,8 @@
         </div>
     </div>
 
-    <script>
-        let hot;
+<script>
+    let hot;
         document.addEventListener("DOMContentLoaded", function () {
             const container = document.getElementById('spreadsheet');
             const savedData = @json($sheet->correct_data ?? null);
@@ -127,23 +127,24 @@
                 'Income Summary'
             ];
             
-            // Generate columns: Date, Debit, Credit for each account (3 cols per account)
-            const numCols = accounts.length * 3;
+            // Generate columns: Date, Blank, Debit, Credit for each account (4 cols per account)
+            const numCols = accounts.length * 4;
             const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => Array(numCols).fill(''));
             
-            // Create nested headers
+            // Create nested headers with blank column after Date
             const nestedHeaders = [
-                accounts.map(name => ({ label: name, colspan: 3 })),
-                Array(accounts.length).fill(['Date', 'Debit (₱)', 'Credit (₱)']).flat()
+                accounts.map(name => ({ label: name, colspan: 4 })),
+                Array(accounts.length).fill(['Date', '', 'Debit (₱)', 'Credit (₱)']).flat()
             ];
             
             // Create columns config with custom renderer for T-account style
             const columns = [];
             for (let i = 0; i < accounts.length; i++) {
                 columns.push(
-                    { type: 'date', dateFormat: 'MM/DD/YYYY', correctFormat: true },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } }
+                    { type: 'text', width: 100 },      // Date
+                    { type: 'text', width: 50 },       // Blank column
+                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 }, // Debit
+                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 }  // Credit
                 );
             }
             
@@ -152,7 +153,6 @@
                 rowHeaders: true,
                 nestedHeaders: nestedHeaders,
                 columns: columns,
-                colWidths: 100,
                 height: 'auto',
                 licenseKey: 'non-commercial-and-evaluation',
                 contextMenu: true,
@@ -161,26 +161,41 @@
                 minSpareRows: 1,
                 cells: function(row, col) {
                     const cellProperties = {};
-                    const colIndex = col % 3;
+                    const colIndex = col % 4;
                     
-                    // Apply T-account styling
-                    if (colIndex === 1) {
-                        // Debit column (left side)
-                        cellProperties.className = 't-account-debit';
-                    } else if (colIndex === 2) {
-                        // Credit column (right side)
-                        cellProperties.className = 't-account-credit';
-                    } else {
+                    // Make row 8 and row 9 bold (indices 7 and 8)
+                    if (row === 7 || row === 8) {
+                        cellProperties.className = 't-account-row-bold';
+                    }
+                    
+                    // Apply T-account styling (append to existing className)
+                    if (colIndex === 0) {
                         // Date column
-                        cellProperties.className = 't-account-date';
+                        cellProperties.className = (cellProperties.className || '') + ' t-account-date';
+                    } else if (colIndex === 1) {
+                        // Blank column
+                        cellProperties.className = (cellProperties.className || '') + ' t-account-blank';
+                        cellProperties.readOnly = true; // Make blank column read-only
+                    } else if (colIndex === 2) {
+                        // Debit column (left side)
+                        cellProperties.className = (cellProperties.className || '') + ' t-account-debit';
+                    } else if (colIndex === 3) {
+                        // Credit column (right side)
+                        cellProperties.className = (cellProperties.className || '') + ' t-account-credit';
                     }
                     
                     return cellProperties;
                 },
                 afterGetColHeader: function(col, TH) {
-                    const colIndex = col % 3;
-                    if (colIndex === 1) {
+                    const colIndex = col % 4;
+                    if (colIndex === 2) {
                         TH.style.borderRight = '2px solid #6b7280';
+                    }
+                },
+                afterGetRowHeader: function(row, TH) {
+                    // Make row headers 8 and 9 bold
+                    if (row === 7 || row === 8) {
+                        TH.style.fontWeight = '700';
                     }
                 }
             });
@@ -194,7 +209,7 @@
                 });
             }
         });
-    </script>
+</script>
     <style>
         body { overflow-x: hidden; }
         .handsontable td { border-color: #d1d5db; }
@@ -216,6 +231,10 @@
         
         .handsontable td.t-account-credit {
             background-color: #dbeafe;
+        }
+        .handsontable td.t-account-row-bold {
+            font-weight: 700;
+            border-bottom: 2px solid #6b7280;
         }
         
         /* Highlight the vertical line between debit and credit */

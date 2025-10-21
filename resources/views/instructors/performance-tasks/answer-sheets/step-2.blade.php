@@ -110,75 +110,90 @@
 
     <script>
         let hot;
-        document.addEventListener("DOMContentLoaded", function () {
-            const container = document.getElementById('spreadsheet');
-            const savedData = @json($sheet->correct_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => Array(19).fill(''));
-            
-            hot = new Handsontable(container, {
-                data: initialData,
-                rowHeaders: true,
-                colHeaders: [
-                    'Date', 
-                    'Account Titles and Explanation', 
-                    'Account Number', 
-                    'Debit (₱)', 
-                    'Credit (₱)',
-                    '',
-                    'Cash', 
-                    'Accounts Receivable', 
-                    'Supplies', 
-                    'Furniture & Fixtures', 
-                    'Land', 
-                    'Equipment', 
-                    'Accounts Payable', 
-                    'Notes Payable', 
-                    'Capital', 
-                    'Withdrawal', 
-                    'Service Revenue', 
-                    'Rent Expense', 
-                    'Paid Licenses', 
-                    'Salaries Expense'
-                ],
-                columns: [
-                    { type: 'date', dateFormat: 'MM/DD/YYYY', correctFormat: true, width: 120 },
-                    { type: 'text', width: 400 },
-                    { type: 'text', width: 100 },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
-                    { type: 'text', width: 100 }, // Cash
-                    { type: 'text', width: 120 }, // Accounts Receivable
-                    { type: 'text', width: 100 }, // Supplies
-                    { type: 'text', width: 120 }, // Furniture & Fixtures
-                    { type: 'text', width: 100 }, // Land
-                    { type: 'text', width: 100 }, // Equipment
-                    { type: 'text', width: 120 }, // Accounts Payable
-                    { type: 'text', width: 120 }, // Notes Payable
-                    { type: 'text', width: 100 }, // Capital
-                    { type: 'text', width: 100 }, // Withdrawal
-                    { type: 'text', width: 120 }, // Service Revenue
-                    { type: 'text', width: 120 }, // Rent Expense
-                    { type: 'text', width: 100 }, // Paid Licenses
-                    { type: 'text', width: 120 }, // Salaries Expense
-                ],
-                stretchH: 'all',
-                height: 'auto',
-                licenseKey: 'non-commercial-and-evaluation',
-                contextMenu: true,
-                manualColumnResize: true,
-                manualRowResize: true,
-                minSpareRows: 1,
-            });
-            
-            const answerKeyForm = document.getElementById("answerKeyForm");
-            if (answerKeyForm) {
-                answerKeyForm.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    document.getElementById("correctData").value = JSON.stringify(hot.getData());
-                    this.submit();
+            document.addEventListener("DOMContentLoaded", function () {
+                const container = document.getElementById('spreadsheet');
+                const savedData = @json($sheet->correct_data ?? null);
+                const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => Array(20).fill('')); // Changed to 20 columns
+                
+                hot = new Handsontable(container, {
+                    data: initialData,
+                    rowHeaders: true,
+                    nestedHeaders: [
+                        [
+                            {label: 'Date', colspan: 2}, // Date spans 2 columns
+                            'Account Titles and Explanation', 
+                            'Account Number', 
+                            'Debit (₱)', 
+                            'Credit (₱)',
+                            '',
+                            'Cash', 
+                            'Accounts Receivable', 
+                            'Supplies', 
+                            'Furniture & Fixtures', 
+                            'Land', 
+                            'Equipment', 
+                            'Accounts Payable', 
+                            'Notes Payable', 
+                            'Capital', 
+                            'Withdrawal', 
+                            'Service Revenue', 
+                            'Rent Expense', 
+                            'Paid Licenses', 
+                            'Salaries Expense'
+                        ],
+                        [
+                            '', // Sub-column 1 under Date
+                            '',   // Sub-column 2 under Date
+                            '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
+                        ]
+                    ],
+                    columns: [
+                        { type: 'text', width: 100 }, // Month
+                        { type: 'text', width: 100 }, // Day
+                        { type: 'text', width: 400 },
+                        { type: 'text', width: 100 },
+                        { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
+                        { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 150 },
+                        { type: 'text', width: 100 },
+                        { type: 'text', width: 100 },
+                        { type: 'text', width: 120 },
+                        { type: 'text', width: 100 },
+                        { type: 'text', width: 120 },
+                        { type: 'text', width: 100 },
+                        { type: 'text', width: 100 },
+                        { type: 'text', width: 120 },
+                        { type: 'text', width: 120 },
+                        { type: 'text', width: 100 },
+                        { type: 'text', width: 100 },
+                        { type: 'text', width: 120 },
+                        { type: 'text', width: 120 },
+                        { type: 'text', width: 100 },
+                        { type: 'text', width: 120 }
+                    ],
+                    stretchH: 'all',
+                    height: 'auto',
+                    licenseKey: 'non-commercial-and-evaluation',
+                    contextMenu: true,
+                    manualColumnResize: true,
+                    manualRowResize: true,
+                    minSpareRows: 1,
+                    afterRenderer: function (TD, row, col, prop, value, cellProperties) {
+                        // Make the border after Credit column (now index 5) bold
+                        if (col === 5) {
+                            TD.style.borderRight = '3px solid #000000ff';
+                        }
+                    }
                 });
-            }
-        });
+                
+                const answerKeyForm = document.getElementById("answerKeyForm");
+                if (answerKeyForm) {
+                    answerKeyForm.addEventListener("submit", function (e) {
+                        e.preventDefault();
+                        document.getElementById("correctData").value = JSON.stringify(hot.getData());
+                        this.submit();
+                    });
+                }
+            });
     </script>
     <style>
         body { overflow-x: hidden; }

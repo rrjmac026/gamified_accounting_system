@@ -71,12 +71,12 @@
                             @else
                                 <a href="{{ route('login') }}" 
                                    class="px-4 sm:px-6 py-2 text-gray-600 dark:text-gray-300 hover:text-[#D5006D] transition-colors font-medium hidden sm:block">
-                                    Sign in
+                                    
                                 </a>
                                 @if (Route::has('login'))
                                     <a href="{{ route('login') }}" 
                                        class="px-4 sm:px-6 py-3 rounded-xl bg-gradient-to-r from-[#D5006D] to-[#FF6F91] text-white hover:from-[#FF6F91] hover:to-[#D5006D] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 font-semibold text-sm sm:text-base">
-                                        Get Started
+                                        Sign In
                                     </a>
                                 @endif
                             @endauth

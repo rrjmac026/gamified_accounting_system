@@ -141,120 +141,249 @@
         </div>
     </div>
 
-    <script>
-        let hot;
+<script>
+    let hot;
+    document.addEventListener("DOMContentLoaded", function () {
+        const container = document.getElementById('spreadsheet');
+        const savedData = @json($sheet->correct_data ?? null);
+        
+        // ✅ Load saved or default data with 3 editable header rows
+        let initialData = savedData
+            ? JSON.parse(savedData)
+            : [
+                ['Durano Enterprise', '', '', '', '', '', '', '', '', '', ''],  // Row 0: Company name
+                ['Trial Balance', '', '', '', '', '', '', '', '', '', ''],      // Row 1: Document title
+                ['Date: ____________________________', '', '', '', '', '', '', '', '', '', ''], // Row 2: Date
+                ['', '', '', '', '', '', '', '', '', '', ''], // Row 3: First data row
+                ['', '', '', '', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', '', '', '', '']
+            ];
 
-        document.addEventListener("DOMContentLoaded", function () {
-            const container = document.getElementById('spreadsheet');
+        // Initialize HyperFormula
+        const hyperformulaInstance = HyperFormula.buildEmpty({
+            licenseKey: 'internal-use-in-handsontable',
+        });
+
+        const isMobile = window.innerWidth < 640;
+        const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
+
+        hot = new Handsontable(container, {
+            data: initialData,
+            rowHeaders: true,
+            columns: [
+                { type: 'text', width: 200 },
+                ...Array(10).fill({ type: 'numeric', numericFormat: { pattern: '₱0,0.00' } })
+            ],
+            width: '100%',
+            height: isMobile ? 350 : (isTablet ? 450 : 500),
+            colWidths: [220, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120],
+            minCols: 11,
+            stretchH: 'all',
+            licenseKey: 'non-commercial-and-evaluation',
+            formulas: { engine: hyperformulaInstance },
+            contextMenu: true,
+            undo: true,
+            manualColumnResize: true,
+            manualRowResize: true,
+            manualColumnMove: true,
+            manualRowMove: true,
+            fillHandle: true,
+            autoColumnSize: false,
+            autoRowSize: false,
+            copyPaste: true,
+            minRows: 18,
+            enterMoves: { row: 1, col: 0 },
+            tabMoves: { row: 0, col: 1 },
+            outsideClickDeselects: false,
+            selectionMode: 'multiple',
+            comments: true,
+            customBorders: true,
+            className: 'htCenter htMiddle',
             
-            // Get saved answer key data if it exists
-            const savedData = @json($sheet->correct_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array(15).fill().map(() => Array(11).fill(''));
-
-            // Initialize HyperFormula for Excel-like formulas
-            const hyperformulaInstance = HyperFormula.buildEmpty({
-                licenseKey: 'internal-use-in-handsontable',
-            });
-
-            // Determine responsive dimensions
-            const isMobile = window.innerWidth < 640;
-            const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
+            // ✅ Merge cells for the first 3 rows
+            mergeCells: [
+                { row: 0, col: 0, rowspan: 1, colspan: 11 }, // Company name spans all columns
+                { row: 1, col: 0, rowspan: 1, colspan: 11 }, // Document title spans all columns
+                { row: 2, col: 0, rowspan: 1, colspan: 11 }  // Date spans all columns
+            ],
             
-            hot = new Handsontable(container, {
-                data: initialData,
-                rowHeaders: true,
-                colHeaders: [
-                    'Account Title',
-                    'Unadjusted Trial Balance (Debit)', 'Unadjusted Trial Balance (Credit)',
-                    'Adjustments (Debit)', 'Adjustments (Credit)',
-                    'Adjusted Trial Balance (Debit)', 'Adjusted Trial Balance (Credit)',
-                    'Income Statement (Debit)', 'Income Statement (Credit)',
-                    'Balance Sheet (Debit)', 'Balance Sheet (Credit)'
-                ],
-                nestedHeaders: [
-                    [
-                        { label: 'Account Title', colspan: 1 },
-                        { label: 'Unadjusted Trial Balance', colspan: 2 },
-                        { label: 'Adjustments', colspan: 2 },
-                        { label: 'Adjusted Trial Balance', colspan: 2 },
-                        { label: 'Income Statement', colspan: 2 },
-                        { label: 'Balance Sheet', colspan: 2 },
-                    ],
-                    [
-                        '', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit'
-                    ]
-                ],
-                columns: [
-                    { type: 'text', width: 200 },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } }
-                ],
-                width: '100%',
-                height: isMobile ? 350 : (isTablet ? 450 : 500),
-                colWidths: [220, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120],
-                minCols: 11, // ensure 11 columns total
-                stretchH: 'all', // ensure columns expand to container width
-                licenseKey: 'non-commercial-and-evaluation',
-                formulas: { engine: hyperformulaInstance },
-                contextMenu: true,
-                undo: true,
-                manualColumnResize: true,
-                manualRowResize: true,
-                manualColumnMove: true,
-                manualRowMove: true,
-                fillHandle: true,
-                autoColumnSize: false,
-                autoRowSize: false,
-                copyPaste: true,
-                minRows: 15,
-                enterMoves: { row: 1, col: 0 },
-                tabMoves: { row: 0, col: 1 },
-                outsideClickDeselects: false,
-                selectionMode: 'multiple',
-                mergeCells: false,
-                comments: true,
-                customBorders: true,
-                className: 'htCenter htMiddle',
-                headerTooltips: true
-            });
-
-
-            // Handle window resize
-            let resizeTimer;
-            window.addEventListener('resize', function() {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(function() {
-                    const newIsMobile = window.innerWidth < 640;
-                    const newIsTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
-                    const newHeight = newIsMobile ? 350 : (newIsTablet ? 450 : 500);
-                    
-                    hot.updateSettings({
-                        height: newHeight,
-                        colWidths: newIsMobile ? 100 : (newIsTablet ? 110 : 120)
-                    });
-                }, 250);
-            });
-
-            // Capture spreadsheet data on submit
-            const answerKeyForm = document.getElementById("answerKeyForm");
-            if (answerKeyForm) {
-                answerKeyForm.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    const data = hot.getData();
-                    document.getElementById("correctData").value = JSON.stringify(data);
-                    this.submit();
-                });
+            // ✅ Hide column headers completely - we'll add them manually
+            colHeaders: false,
+            
+            // ✅ Add custom headers using afterGetRowHeader hook
+            afterGetRowHeader: function(row, TH) {
+                // Add a data attribute to identify header rows
+                if (row < 3) {
+                    TH.style.backgroundColor = '#fafafa';
+                }
+            },
+            
+            // ✅ Custom cell rendering and styling
+            cells: function(row, col) {
+                const cellProperties = {};
+                
+                // Row 0: Company name (editable, centered, bold)
+                if (row === 0) {
+                    cellProperties.className = 'header-company';
+                    cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                        Handsontable.renderers.TextRenderer.apply(this, arguments);
+                        td.innerHTML = '<strong>' + (value || 'Durano Enterprise') + '</strong>';
+                        td.style.textAlign = 'center';
+                        td.style.fontSize = '16px';
+                        td.style.backgroundColor = '#fafafa';
+                    };
+                }
+                
+                // Row 1: Document title (editable, centered, bold)
+                else if (row === 1) {
+                    cellProperties.className = 'header-title';
+                    cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                        Handsontable.renderers.TextRenderer.apply(this, arguments);
+                        td.innerHTML = '<strong>' + (value || 'Trial Balance') + '</strong>';
+                        td.style.textAlign = 'center';
+                        td.style.fontSize = '14px';
+                        td.style.backgroundColor = '#fafafa';
+                    };
+                }
+                
+                // Row 2: Date field (editable, centered, bold)
+                else if (row === 2) {
+                    cellProperties.className = 'header-date';
+                    cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                        Handsontable.renderers.TextRenderer.apply(this, arguments);
+                        td.innerHTML = '<strong>' + (value || 'Date: ____________________________') + '</strong>';
+                        td.style.textAlign = 'center';
+                        td.style.fontSize = '13px';
+                        td.style.backgroundColor = '#fafafa';
+                        td.style.borderBottom = '2px solid #e5e7eb';
+                    };
+                }
+                
+                // Row 3: Section headers (read-only)
+                else if (row === 3) {
+                    cellProperties.readOnly = true;
+                    cellProperties.className = 'section-headers';
+                    cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                        const labels = ['Account Title', 'Unadjusted TB', '', 'Adjustments', '', 'Adjusted TB', '', 'Income Stmt', '', 'Balance Sheet', ''];
+                        const sectionLabels = [
+                            'Account Title',
+                            'Unadjusted Trial Balance',
+                            '',
+                            'Adjustments', 
+                            '',
+                            'Adjusted Trial Balance',
+                            '',
+                            'Income Statement',
+                            '',
+                            'Balance Sheet',
+                            ''
+                        ];
+                        
+                        Handsontable.renderers.TextRenderer.apply(this, arguments);
+                        td.innerHTML = '<strong>' + sectionLabels[col] + '</strong>';
+                        td.style.textAlign = 'center';
+                        td.style.backgroundColor = '#f3f4f6';
+                        td.style.fontWeight = '700';
+                        td.style.borderBottom = '1px solid #d1d5db';
+                    };
+                }
+                
+                // Row 4: Sub-headers (Debit/Credit) - read-only
+                else if (row === 4) {
+                    cellProperties.readOnly = true;
+                    cellProperties.className = 'sub-headers';
+                    cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                        const subLabels = ['', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit'];
+                        
+                        Handsontable.renderers.TextRenderer.apply(this, arguments);
+                        td.innerHTML = '<strong>' + subLabels[col] + '</strong>';
+                        td.style.textAlign = 'center';
+                        td.style.backgroundColor = '#f3f4f6';
+                        td.style.fontWeight = '700';
+                        td.style.borderBottom = '2px solid #374151';
+                    };
+                }
+                
+                return cellProperties;
             }
         });
-    </script>
+
+        // ✅ Manually merge header cells for sections
+        hot.updateSettings({
+            mergeCells: [
+                { row: 0, col: 0, rowspan: 1, colspan: 11 }, // Company name
+                { row: 1, col: 0, rowspan: 1, colspan: 11 }, // Document title
+                { row: 2, col: 0, rowspan: 1, colspan: 11 }, // Date
+                // Section headers merge
+                { row: 3, col: 1, rowspan: 1, colspan: 2 }, // Unadjusted Trial Balance
+                { row: 3, col: 3, rowspan: 1, colspan: 2 }, // Adjustments
+                { row: 3, col: 5, rowspan: 1, colspan: 2 }, // Adjusted Trial Balance
+                { row: 3, col: 7, rowspan: 1, colspan: 2 }, // Income Statement
+                { row: 3, col: 9, rowspan: 1, colspan: 2 }, // Balance Sheet
+            ]
+        });
+
+        // Handle responsive resize
+        let resizeTimer;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () {
+                const newIsMobile = window.innerWidth < 640;
+                const newIsTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
+                const newHeight = newIsMobile ? 350 : (newIsTablet ? 450 : 500);
+
+                hot.updateSettings({
+                    height: newHeight,
+                    colWidths: newIsMobile ? 100 : (newIsTablet ? 110 : 120)
+                });
+            }, 250);
+        });
+
+        // Save data on submit
+        const answerKeyForm = document.getElementById("answerKeyForm");
+        if (answerKeyForm) {
+            answerKeyForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                const data = hot.getData();
+                document.getElementById("correctData").value = JSON.stringify(data);
+                this.submit();
+            });
+        }
+    });
+</script>
+
+<style>
+    /* Center and style the top report headers */
+    .handsontable thead th.report-header {
+        text-align: center !important;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
+        background-color: #fafafa !important;
+        border-bottom: none !important;
+    }
+
+    /* Optional: give subtle separator line before table content */
+    .handsontable thead tr:nth-child(3) th.report-header {
+        border-bottom: 2px solid #e5e7eb !important;
+    }
+
+    @media (max-width: 640px) {
+        .handsontable { font-size: 12px; }
+    }
+</style>
+
 
     <style>
         body { overflow-x: hidden; }

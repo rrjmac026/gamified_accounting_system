@@ -2,6 +2,8 @@
     <!-- Handsontable -->
     <script src="https://cdn.jsdelivr.net/npm/handsontable@14.1.0/dist/handsontable.full.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable@14.1.0/dist/handsontable.full.min.css" />
+    <!-- Formula Parser (HyperFormula) -->
+    <script src="https://cdn.jsdelivr.net/npm/hyperformula@2.6.2/dist/hyperformula.full.min.js"></script>
 
     <div class="py-4 sm:py-6 lg:py-8">
         {{-- Flash Messages --}}
@@ -127,57 +129,173 @@
 
             // Student's saved answers
             const savedData = @json($submission->submission_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => Array(11).fill(''));
+            
+            // ✅ Load saved or default data with 3 editable header rows
+            let initialData = savedData
+                ? JSON.parse(savedData)
+                : [
+                    ['Durano Enterprise', '', '', '', '', '', '', '', '', '', ''],  // Row 0: Company name
+                    ['Trial Balance', '', '', '', '', '', '', '', '', '', ''],      // Row 1: Document title
+                    ['Date: ____________________________', '', '', '', '', '', '', '', '', '', ''], // Row 2: Date
+                    ['', '', '', '', '', '', '', '', '', '', ''], // Row 3: First data row
+                    ['', '', '', '', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '', '', '', '']
+                ];
 
             // Instructor's correct data
             const correctData = @json($answerSheet->correct_data ?? null);
             const submissionStatus = @json($submission->status ?? null);
 
-            // Create columns config
-            const columnsConfig = [
-                { type: 'text', width: 220 },
-                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 },
-                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 },
-                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 },
-                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 },
-                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 },
-                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 },
-                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 },
-                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 },
-                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 },
-                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 },
-            ];
+            // Initialize HyperFormula
+            const hyperformulaInstance = HyperFormula.buildEmpty({
+                licenseKey: 'internal-use-in-handsontable',
+            });
 
-            // Initialize Handsontable
+            const isMobile = window.innerWidth < 640;
+            const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
+
             hot = new Handsontable(container, {
                 data: initialData,
-                columns: columnsConfig,
                 rowHeaders: true,
-                nestedHeaders: [
-                    [
-                        { label: 'Account Title', colspan: 1 },
-                        { label: 'Unadjusted Trial Balance', colspan: 2 },
-                        { label: 'Adjustments', colspan: 2 },
-                        { label: 'Adjusted Trial Balance', colspan: 2 },
-                        { label: 'Income Statement', colspan: 2 },
-                        { label: 'Balance Sheet', colspan: 2 },
-                    ],
-                    [
-                        '', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit'
-                    ]
+                columns: [
+                    { type: 'text', width: 200 },
+                    ...Array(10).fill({ type: 'numeric', numericFormat: { pattern: '₱0,0.00' } })
                 ],
+                width: '100%',
+                height: isMobile ? 350 : (isTablet ? 450 : 500),
+                colWidths: [220, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120],
+                minCols: 11,
                 stretchH: 'all',
-                height: 'auto',
                 licenseKey: 'non-commercial-and-evaluation',
+                formulas: { engine: hyperformulaInstance },
                 contextMenu: true,
+                undo: true,
                 manualColumnResize: true,
                 manualRowResize: true,
-                minSpareRows: 1,
+                manualColumnMove: true,
+                manualRowMove: true,
+                fillHandle: true,
+                autoColumnSize: false,
+                autoRowSize: false,
+                copyPaste: true,
+                minRows: 18,
+                enterMoves: { row: 1, col: 0 },
+                tabMoves: { row: 0, col: 1 },
+                outsideClickDeselects: false,
+                selectionMode: 'multiple',
+                comments: true,
+                customBorders: true,
+                className: 'htCenter htMiddle',
+                
+                // ✅ Merge cells for the first 3 rows
+                mergeCells: [
+                    { row: 0, col: 0, rowspan: 1, colspan: 11 }, // Company name spans all columns
+                    { row: 1, col: 0, rowspan: 1, colspan: 11 }, // Document title spans all columns
+                    { row: 2, col: 0, rowspan: 1, colspan: 11 }  // Date spans all columns
+                ],
+                
+                // ✅ Hide column headers completely
+                colHeaders: false,
+                
+                // ✅ Custom cell rendering and styling
                 cells: function(row, col) {
                     const cellProperties = {};
                     
-                    // Only apply correct/incorrect coloring if submission has been graded
-                    if (submissionStatus && correctData && savedData) {
+                    // Row 0: Company name (editable, centered, bold)
+                    if (row === 0) {
+                        cellProperties.className = 'header-company';
+                        cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+                            td.innerHTML = '<strong>' + (value || 'Durano Enterprise') + '</strong>';
+                            td.style.textAlign = 'center';
+                            td.style.fontSize = '16px';
+                            td.style.backgroundColor = '#fafafa';
+                        };
+                    }
+                    
+                    // Row 1: Document title (editable, centered, bold)
+                    else if (row === 1) {
+                        cellProperties.className = 'header-title';
+                        cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+                            td.innerHTML = '<strong>' + (value || 'Trial Balance') + '</strong>';
+                            td.style.textAlign = 'center';
+                            td.style.fontSize = '14px';
+                            td.style.backgroundColor = '#fafafa';
+                        };
+                    }
+                    
+                    // Row 2: Date field (editable, centered, bold)
+                    else if (row === 2) {
+                        cellProperties.className = 'header-date';
+                        cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+                            td.innerHTML = '<strong>' + (value || 'Date: ____________________________') + '</strong>';
+                            td.style.textAlign = 'center';
+                            td.style.fontSize = '13px';
+                            td.style.backgroundColor = '#fafafa';
+                            td.style.borderBottom = '2px solid #e5e7eb';
+                        };
+                    }
+                    
+                    // Row 3: Section headers (read-only)
+                    else if (row === 3) {
+                        cellProperties.readOnly = true;
+                        cellProperties.className = 'section-headers';
+                        cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                            const sectionLabels = [
+                                'Account Title',
+                                'Unadjusted Trial Balance',
+                                '',
+                                'Adjustments', 
+                                '',
+                                'Adjusted Trial Balance',
+                                '',
+                                'Income Statement',
+                                '',
+                                'Balance Sheet',
+                                ''
+                            ];
+                            
+                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+                            td.innerHTML = '<strong>' + sectionLabels[col] + '</strong>';
+                            td.style.textAlign = 'center';
+                            td.style.backgroundColor = '#f3f4f6';
+                            td.style.fontWeight = '700';
+                            td.style.borderBottom = '1px solid #d1d5db';
+                        };
+                    }
+                    
+                    // Row 4: Sub-headers (Debit/Credit) - read-only
+                    else if (row === 4) {
+                        cellProperties.readOnly = true;
+                        cellProperties.className = 'sub-headers';
+                        cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                            const subLabels = ['', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit', 'Debit', 'Credit'];
+                            
+                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+                            td.innerHTML = '<strong>' + subLabels[col] + '</strong>';
+                            td.style.textAlign = 'center';
+                            td.style.backgroundColor = '#f3f4f6';
+                            td.style.fontWeight = '700';
+                            td.style.borderBottom = '2px solid #374151';
+                        };
+                    }
+                    
+                    // For data rows (row >= 5): Apply correct/incorrect coloring if submission has been graded
+                    else if (row >= 5 && submissionStatus && correctData && savedData) {
                         const parsedCorrect = typeof correctData === 'string' ? JSON.parse(correctData) : correctData;
                         const parsedStudent = typeof savedData === 'string' ? JSON.parse(savedData) : savedData;
                         
@@ -202,6 +320,37 @@
                 }
             });
 
+            // ✅ Manually merge header cells for sections
+            hot.updateSettings({
+                mergeCells: [
+                    { row: 0, col: 0, rowspan: 1, colspan: 11 }, // Company name
+                    { row: 1, col: 0, rowspan: 1, colspan: 11 }, // Document title
+                    { row: 2, col: 0, rowspan: 1, colspan: 11 }, // Date
+                    // Section headers merge
+                    { row: 3, col: 1, rowspan: 1, colspan: 2 }, // Unadjusted Trial Balance
+                    { row: 3, col: 3, rowspan: 1, colspan: 2 }, // Adjustments
+                    { row: 3, col: 5, rowspan: 1, colspan: 2 }, // Adjusted Trial Balance
+                    { row: 3, col: 7, rowspan: 1, colspan: 2 }, // Income Statement
+                    { row: 3, col: 9, rowspan: 1, colspan: 2 }, // Balance Sheet
+                ]
+            });
+
+            // Handle responsive resize
+            let resizeTimer;
+            window.addEventListener('resize', function () {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function () {
+                    const newIsMobile = window.innerWidth < 640;
+                    const newIsTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
+                    const newHeight = newIsMobile ? 350 : (newIsTablet ? 450 : 500);
+
+                    hot.updateSettings({
+                        height: newHeight,
+                        colWidths: newIsMobile ? 100 : (newIsTablet ? 110 : 120)
+                    });
+                }, 250);
+            });
+
             // Save submission data
             const form = document.getElementById('saveForm');
             form.addEventListener('submit', function(e) {
@@ -214,10 +363,10 @@
 
     <style>
         body { overflow-x: hidden; }
-        .handsontable td { 
-            border-color: #d1d5db;
-            background-color: #ffffff; /* Default white background */
-        }
+        .handsontable .font-bold { font-weight: bold; }
+        .handsontable .bg-gray-100 { background-color: #f3f4f6 !important; }
+        .handsontable .bg-blue-50 { background-color: #eff6ff !important; }
+        .handsontable td { border-color: #d1d5db; }
         .handsontable .area { background-color: rgba(59,130,246,0.1); }
         .handsontable { position: relative; z-index: 1; }
         #spreadsheet { isolation: isolate; }

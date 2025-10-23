@@ -148,139 +148,119 @@
         </div>
     </div>
 
-    <script>
-        let hot;
+<script>
+    let hot;
 
-        document.addEventListener("DOMContentLoaded", function () {
-            const container = document.getElementById('spreadsheet');
-            
-            // Get saved answer key data if it exists
-            const savedData = @json($sheet->correct_data ?? null);
-            const initialData = savedData ? JSON.parse(savedData) : Array(20).fill().map(() => Array(4).fill(''));
+    document.addEventListener("DOMContentLoaded", function () {
+        const container = document.getElementById('spreadsheet');
 
-            // Initialize HyperFormula for Excel-like formulas
-            const hyperformulaInstance = HyperFormula.buildEmpty({
-                licenseKey: 'internal-use-in-handsontable',
-            });
+        // Get saved data or initialize blank
+        const savedData = @json($sheet->correct_data ?? null);
+        const initialData = savedData ? JSON.parse(savedData) : [
+            ['Durano Enterprise', '', '', '', '', '', '', '', '', '', ''],
+            ['Trial Balance', '', '', '', '', '', '', '', '', '', ''],
+            ['Date: ____________________________', '', '', '', '', '', '', '', '', '', ''],
+            ['Account Title', 'Unadjusted Trial Balance (Debit)', 'Unadjusted Trial Balance (Credit)',
+                'Adjustments (Debit)', 'Adjustments (Credit)',
+                'Adjusted Trial Balance (Debit)', 'Adjusted Trial Balance (Credit)',
+                'Income Statement (Debit)', 'Income Statement (Credit)',
+                'Balance Sheet (Debit)', 'Balance Sheet (Credit)'
+            ],
+            ['', '', '', '', '', '', '', '', '', '', ''],
+            ...Array(15).fill(Array(11).fill(''))
+        ];
 
-            // Determine responsive dimensions
-            const isMobile = window.innerWidth < 640;
-            const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
-            
-            hot = new Handsontable(container, {
-                data: initialData,
-                rowHeaders: true,
-                colHeaders: [
-                    'Account Title',
-                    'Debit',
-                    'Credit'
-                ],
-                columns: [
-                    { 
-                        type: 'text',
-                        width: isMobile ? 200 : 350
-                    },
-                    { 
-                        type: 'numeric', 
-                        numericFormat: { pattern: '0,0.00' },
-                        width: isMobile ? 100 : 140
-                    },
-                    { 
-                        type: 'numeric', 
-                        numericFormat: { pattern: '0,0.00' },
-                        width: isMobile ? 100 : 140
-                    }
-                ],
-                width: '100%',
-                height: isMobile ? 400 : (isTablet ? 500 : 600),
-                licenseKey: 'non-commercial-and-evaluation',
-                formulas: { engine: hyperformulaInstance },
-                contextMenu: true,
-                undo: true,
-                manualColumnResize: true,
-                manualRowResize: true,
-                fillHandle: true,
-                autoColumnSize: false,
-                autoRowSize: false,
-                copyPaste: true,
-                minRows: 20,
-                minSpareRows: 1,
-                stretchH: 'all',
-                enterMoves: { row: 1, col: 0 },
-                tabMoves: { row: 0, col: 1 },
-                outsideClickDeselects: false,
-                selectionMode: 'multiple',
-                cells: function(row, col) {
-                    const cellProperties = {};
-                    
-                    // Right-align numeric columns
-                    if (col === 2 || col === 3) {
-                        cellProperties.className = 'htRight htMiddle';
-                    }
-                    
-                    // Center-align date column
-                    if (col === 0) {
-                        cellProperties.className = 'htCenter htMiddle';
-                    }
-                    
-                    // Left-align account titles
-                    if (col === 1) {
-                        cellProperties.className = 'htLeft htMiddle';
-                    }
-                    
-                    return cellProperties;
-                }
-            });
-
-            // Handle window resize
-            let resizeTimer;
-            window.addEventListener('resize', function() {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(function() {
-                    const newIsMobile = window.innerWidth < 640;
-                    const newIsTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
-                    const newHeight = newIsMobile ? 400 : (newIsTablet ? 500 : 600);
-                    
-                    hot.updateSettings({
-                        height: newHeight,
-                        columns: [
-                            { 
-                                type: 'date', 
-                                dateFormat: 'MM/DD/YYYY', 
-                                correctFormat: true,
-                                width: newIsMobile ? 100 : 140
-                            },
-                            { 
-                                type: 'text',
-                                width: newIsMobile ? 200 : 350
-                            },
-                            { 
-                                type: 'numeric', 
-                                numericFormat: { pattern: '0,0.00' },
-                                width: newIsMobile ? 100 : 140
-                            },
-                            { 
-                                type: 'numeric', 
-                                numericFormat: { pattern: '0,0.00' },
-                                width: newIsMobile ? 100 : 140
-                            }
-                        ]
-                    });
-                }, 250);
-            });
-
-            // Capture spreadsheet data on submit
-            const answerKeyForm = document.getElementById("answerKeyForm");
-            if (answerKeyForm) {
-                answerKeyForm.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    const data = hot.getData();
-                    document.getElementById("correctData").value = JSON.stringify(data);
-                    this.submit();
-                });
-            }
+        // Initialize HyperFormula
+        const hyperformulaInstance = HyperFormula.buildEmpty({
+            licenseKey: 'internal-use-in-handsontable',
         });
-    </script>
+
+        const isMobile = window.innerWidth < 640;
+        const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
+
+        // Initialize Handsontable
+        hot = new Handsontable(container, {
+            data: initialData,
+            rowHeaders: true,
+            colHeaders: false,
+
+            columns: [
+                { type: 'text', width: 200 },
+                ...Array(10).fill({ type: 'numeric', numericFormat: { pattern: '₱0,0.00' } })
+            ],
+
+            width: '100%',
+            height: isMobile ? 350 : (isTablet ? 450 : 500),
+            colWidths: [220, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120],
+            minCols: 11,
+            stretchH: 'all',
+            minRows: 20,
+            licenseKey: 'non-commercial-and-evaluation',
+            formulas: { engine: hyperformulaInstance },
+            contextMenu: true,
+            undo: true,
+            manualColumnResize: true,
+            manualRowResize: true,
+            manualColumnMove: true,
+            manualRowMove: true,
+            fillHandle: true,
+            copyPaste: true,
+            autoColumnSize: false,
+            autoRowSize: false,
+            outsideClickDeselects: false,
+            selectionMode: 'multiple',
+            mergeCells: [
+                { row: 0, col: 0, rowspan: 1, colspan: 11 },
+                { row: 1, col: 0, rowspan: 1, colspan: 11 },
+                { row: 2, col: 0, rowspan: 1, colspan: 11 },
+            ],
+            comments: true,
+            customBorders: true,
+            className: 'htCenter htMiddle',
+
+            // ✅ Styling and Read-Only Logic
+            cells: function (row, col) {
+                const cellProperties = {};
+                if (row <= 2 && col === 0) {
+                    cellProperties.className = 'htCenter htBold';
+                    cellProperties.readOnly = false; // Editable headers
+                } else if (row === 3) {
+                    cellProperties.className = 'htCenter htBold';
+                    cellProperties.readOnly = true; // Column headers not editable
+                }
+                return cellProperties;
+            },
+        });
+
+        // ✅ Responsive resizing
+        let resizeTimer;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () {
+                const newIsMobile = window.innerWidth < 640;
+                const newIsTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
+                const newHeight = newIsMobile ? 350 : (newIsTablet ? 450 : 500);
+
+                hot.updateSettings({
+                    height: newHeight,
+                    colWidths: newIsMobile ? 100 : (newIsTablet ? 110 : 120)
+                });
+            }, 250);
+        });
+
+        // ✅ Save data on submit
+        const answerKeyForm = document.getElementById("answerKeyForm");
+        if (answerKeyForm) {
+            answerKeyForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                const data = hot.getData();
+                document.getElementById("correctData").value = JSON.stringify(data);
+                this.submit();
+            });
+        }
+    });
+</script>
+
 
     <style>
         body { overflow-x: hidden; }

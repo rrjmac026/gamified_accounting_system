@@ -99,78 +99,95 @@
         </div>
     </div>
 
-    <script>
-        let hot;
-        document.addEventListener('DOMContentLoaded', function () {
-            const container = document.getElementById('spreadsheet');
+<script>
+    let hot;
 
-            // Student's saved answers
-            const savedData = @json($submission->submission_data ?? null);
-            const initialData = savedData
-                ? JSON.parse(savedData)
-                : Array(20).fill().map(() => Array(3).fill(''));
+    document.addEventListener("DOMContentLoaded", function () {
+        const container = document.getElementById('spreadsheet');
 
-            // Instructor's correct data
-            const correctData = @json($answerSheet->correct_data ?? null);
-            const submissionStatus = @json($submission->status ?? null);
+        // ✅ Load saved submission data or default blank
+        const savedData = @json($submission->submission_data ?? null);
+        const initialData = savedData ? JSON.parse(savedData) : [
+            ['Durano Enterprise', '', '', '', '', '', '', '', '', '', ''],
+            ['Trial Balance', '', '', '', '', '', '', '', '', '', ''],
+            ['Date: ____________________________', '', '', '', '', '', '', '', '', '', ''],
+            ['Account Title', 'Unadjusted Trial Balance (Debit)', 'Unadjusted Trial Balance (Credit)',
+                'Adjustments (Debit)', 'Adjustments (Credit)',
+                'Adjusted Trial Balance (Debit)', 'Adjusted Trial Balance (Credit)',
+                'Income Statement (Debit)', 'Income Statement (Credit)',
+                'Balance Sheet (Debit)', 'Balance Sheet (Credit)'
+            ],
+            ['', '', '', '', '', '', '', '', '', '', ''],
+            ...Array(15).fill(Array(11).fill(''))
+        ];
 
-            // Initialize HyperFormula for Excel-like formulas
-            const hyperformulaInstance = HyperFormula.buildEmpty({
-                licenseKey: 'internal-use-in-handsontable',
-            });
+        // ✅ Initialize HyperFormula
+        const hyperformulaInstance = HyperFormula.buildEmpty({
+            licenseKey: 'internal-use-in-handsontable',
+        });
 
-            // Determine responsive dimensions
-            const isMobile = window.innerWidth < 640;
-            const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
+        // ✅ Responsive detection
+        const isMobile = window.innerWidth < 640;
+        const isTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
 
-            // Initialize Handsontable with General Journal format
-            hot = new Handsontable(container, {
-                data: initialData,
-                rowHeaders: true,
-                colHeaders: [
-                    'Account Title',
-                    'Debit',
-                    'Credit'
-                ],
-                columns: [
-                    { 
-                        type: 'text',
-                        width: isMobile ? 200 : 350
-                    },
-                    { 
-                        type: 'numeric', 
-                        numericFormat: { pattern: '0,0.00' },
-                        width: isMobile ? 100 : 140
-                    },
-                    { 
-                        type: 'numeric', 
-                        numericFormat: { pattern: '0,0.00' },
-                        width: isMobile ? 100 : 140
-                    }
-                ],
-                width: '100%',
-                height: isMobile ? 400 : (isTablet ? 500 : 600),
-                licenseKey: 'non-commercial-and-evaluation',
-                formulas: { engine: hyperformulaInstance },
-                contextMenu: true,
-                undo: true,
-                manualColumnResize: true,
-                manualRowResize: true,
-                fillHandle: true,
-                autoColumnSize: false,
-                autoRowSize: false,
-                copyPaste: true,
-                minRows: 20,
-                minSpareRows: 1,
-                stretchH: 'all',
-                enterMoves: { row: 1, col: 0 },
-                tabMoves: { row: 0, col: 1 },
-                outsideClickDeselects: false,
-                selectionMode: 'multiple',
-                cells: function(row, col) {
-                    const cellProperties = {};
-                    
-                    // Apply correct/incorrect coloring if submission has been graded
+        // ✅ Handsontable initialization
+        hot = new Handsontable(container, {
+            data: initialData,
+            rowHeaders: true,
+            colHeaders: false,
+
+            columns: [
+                { type: 'text', width: 200 },
+                ...Array(10).fill({ type: 'numeric', numericFormat: { pattern: '₱0,0.00' } })
+            ],
+
+            width: '100%',
+            height: isMobile ? 350 : (isTablet ? 450 : 500),
+            colWidths: [220, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120],
+            minCols: 11,
+            minRows: 20,
+            stretchH: 'all',
+            licenseKey: 'non-commercial-and-evaluation',
+            formulas: { engine: hyperformulaInstance },
+            contextMenu: true,
+            undo: true,
+            manualColumnResize: true,
+            manualRowResize: true,
+            manualColumnMove: true,
+            manualRowMove: true,
+            fillHandle: true,
+            copyPaste: true,
+            autoColumnSize: false,
+            autoRowSize: false,
+            outsideClickDeselects: false,
+            selectionMode: 'multiple',
+            mergeCells: [
+                { row: 0, col: 0, rowspan: 1, colspan: 11 },
+                { row: 1, col: 0, rowspan: 1, colspan: 11 },
+                { row: 2, col: 0, rowspan: 1, colspan: 11 },
+            ],
+            comments: true,
+            customBorders: true,
+            className: 'htCenter htMiddle',
+
+            // Add cell validation similar to Step 1
+            cells: function(row, col) {
+                const cellProperties = {};
+                
+                if (row <= 2 && col === 0) {
+                    cellProperties.className = 'htCenter htBold';
+                    cellProperties.readOnly = false;
+                } else if (row === 3) {
+                    cellProperties.className = 'htCenter htBold';
+                    cellProperties.readOnly = true;
+                } else {
+                    cellProperties.readOnly = false;
+
+                    // Add color validation for submitted answers
+                    const submissionStatus = @json($submission->status ?? null);
+                    const correctData = @json($answerSheet->correct_data ?? null);
+                    const savedData = @json($submission->submission_data ?? null);
+
                     if (submissionStatus && correctData && savedData) {
                         const parsedCorrect = typeof correctData === 'string' ? JSON.parse(correctData) : correctData;
                         const parsedStudent = typeof savedData === 'string' ? JSON.parse(savedData) : savedData;
@@ -178,9 +195,7 @@
                         const studentValue = parsedStudent[row]?.[col];
                         const correctValue = parsedCorrect[row]?.[col];
                         
-                        // Only compare non-empty cells that the STUDENT filled in
                         if (studentValue !== null && studentValue !== undefined && studentValue !== '') {
-                            // Normalize values for comparison (trim whitespace, case-insensitive)
                             const normalizedStudent = String(studentValue).trim().toLowerCase();
                             const normalizedCorrect = String(correctValue || '').trim().toLowerCase();
                             
@@ -191,72 +206,39 @@
                             }
                         }
                     }
-                    
-                    // Apply alignment classes (merge with existing className if coloring was applied)
-                    if (col === 1 || col === 2) {
-                        cellProperties.className = (cellProperties.className || '') + ' htRight htMiddle';
-                    } else if (col === 0) {
-                        cellProperties.className = (cellProperties.className || '') + ' htLeft htMiddle';
-                    }
-                    
-                    return cellProperties;
-                },
-                afterChange: function(changes, source) {
-                    if (source === 'loadData') return;
-                    
-                    // Auto-indent account titles that don't start with a date
-                    if (changes) {
-                        changes.forEach(([row, prop, oldValue, newValue]) => {
-                            if (prop === 0 && newValue) { // Account title column
-                                if (newValue && !newValue.startsWith('  ')) {
-                                    // Check if this might be a sub-account (no need to auto-indent if user handles it)
-                                }
-                            }
-                        });
-                    }
                 }
-            });
+                return cellProperties;
+            },
+        });
 
-            // Handle window resize
-            let resizeTimer;
-            window.addEventListener('resize', function() {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(function() {
-                    const newIsMobile = window.innerWidth < 640;
-                    const newIsTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
-                    const newHeight = newIsMobile ? 400 : (newIsTablet ? 500 : 600);
-                    
-                    hot.updateSettings({
-                        height: newHeight,
-                        columns: [
-                            { 
-                                type: 'text',
-                                width: newIsMobile ? 200 : 350
-                            },
-                            { 
-                                type: 'numeric', 
-                                numericFormat: { pattern: '0,0.00' },
-                                width: newIsMobile ? 100 : 140
-                            },
-                            { 
-                                type: 'numeric', 
-                                numericFormat: { pattern: '0,0.00' },
-                                width: newIsMobile ? 100 : 140
-                            }
-                        ]
-                    });
-                }, 250);
-            });
+        // ✅ Responsive behavior
+        let resizeTimer;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () {
+                const newIsMobile = window.innerWidth < 640;
+                const newIsTablet = window.innerWidth >= 640 && window.innerWidth < 1024;
+                const newHeight = newIsMobile ? 350 : (newIsTablet ? 450 : 500);
 
-            // Sync data before form submission
-            const form = document.getElementById('saveForm');
-            form.addEventListener('submit', function (e) {
+                hot.updateSettings({
+                    height: newHeight,
+                    colWidths: newIsMobile ? 100 : (newIsTablet ? 110 : 120)
+                });
+            }, 250);
+        });
+
+        // ✅ Save submission data
+        const saveForm = document.getElementById("saveForm");
+        if (saveForm) {
+            saveForm.addEventListener("submit", function (e) {
                 e.preventDefault();
-                document.getElementById('submission_data').value = JSON.stringify(hot.getData());
+                document.getElementById("submission_data").value = JSON.stringify(hot.getData());
                 this.submit();
             });
-        });
-    </script>
+        }
+    });
+</script>
+
 
     <style>
         body { overflow-x: hidden; }

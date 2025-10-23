@@ -64,37 +64,41 @@
                 </button>
 
                 <!-- Task Dropdown Content -->
-                <div x-show="taskOpen" x-collapse class="ml-4 mt-2 space-y-1">
-                    <!-- All Tasks -->
-                    <a href="{{ route('instructors.performance-tasks.index') }}" 
-                    class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
-                    {{ request()->routeIs('instructors.performance-tasks.*') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
-                        <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
-                            <i class="fas fa-chart-line text-xs"></i>
-                        </span>
-                        <span>All Tasks</span>
-                    </a>
+                    <div x-show="taskOpen" x-collapse class="ml-4 mt-2 space-y-1">
+                        <!-- All Tasks -->
+                        <a href="{{ route('instructors.performance-tasks.index') }}" 
+                        class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 
+                                hover:bg-[#FFEEF2]
+                                {{ request()->routeIs('instructors.performance-tasks.index') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
+                            <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
+                                <i class="fas fa-chart-line text-xs"></i>
+                            </span>
+                            <span>All Tasks</span>
+                        </a>
 
-                    <!-- Answer Sheets -->
-                    <a href="{{ route('instructors.performance-tasks.answer-sheets.index') }}" 
-                       class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
-                       {{ request()->routeIs('instructors.performance-tasks.answer-sheets.*') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
-                        <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
-                            <i class="fas fa-folder-open text-xs"></i>
-                        </span>
-                        <span>Answer Sheets</span>
-                    </a>
+                        <!-- Answer Sheets -->
+                        <a href="{{ route('instructors.performance-tasks.answer-sheets.index') }}" 
+                        class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 
+                                hover:bg-[#FFEEF2]
+                                {{ request()->routeIs('instructors.performance-tasks.answer-sheets.*') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
+                            <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
+                                <i class="fas fa-folder-open text-xs"></i>
+                            </span>
+                            <span>Answer Sheets</span>
+                        </a>
 
-                    <!-- Task Submissions -->
-                    <a href="{{ route('instructors.performance-tasks.submissions.index') }}" 
-                        class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
-                        {{ request()->routeIs('instructors.performance-tasks.submissions.*') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
-                        <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
-                            <i class="fas fa-file-alt text-xs"></i>
-                        </span>
-                        <span>Submissions</span>
-                    </a>
-                </div>
+                        <!-- Task Submissions -->
+                        <a href="{{ route('instructors.performance-tasks.submissions.index') }}" 
+                        class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 
+                                hover:bg-[#FFEEF2]
+                                {{ request()->routeIs('instructors.performance-tasks.submissions.*') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
+                            <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
+                                <i class="fas fa-file-alt text-xs"></i>
+                            </span>
+                            <span>Submissions</span>
+                        </a>
+                    </div>
+
             </div>
 
             <!-- Student Progress -->

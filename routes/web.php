@@ -260,27 +260,6 @@ Route::middleware(['auth', 'role:instructor'])
         Route::get('subjects', [InstructorSubjectController::class, 'index'])->name('subjects.index');
         Route::get('subjects/{subject}', [InstructorSubjectController::class, 'show'])->name('subjects.show');
 
-        // Task Management
-        Route::resource('tasks', TaskController::class);
-        Route::post('/tasks/{task}/assign-students', [TaskController::class, 'assignToStudent'])->name('tasks.assign-students');
-        Route::get('/tasks/{task}/assign-students', [TaskController::class, 'showAssignStudentsForm'])->name('tasks.assign-students-form');
-        Route::post('/instructors/tasks/{task}/sync-students', [TaskController::class, 'syncStudentsToTask'])->name('tasks.sync-students');
-        Route::post('/instructors/tasks/sync-all', [TaskController::class, 'syncAllStudentsToTasks'])->name('tasks.sync-all');
-
-        // Question Management for Tasks
-        Route::post('tasks/{task}/add-question', [TaskController::class, 'addQuestion'])->name('tasks.add-question');
-        Route::get('tasks/{task}/questions/{question}/edit', [TaskController::class, 'editQuestion'])->name('tasks.edit-question');
-        Route::put('tasks/{task}/questions/{question}', [TaskController::class, 'updateQuestion'])->name('tasks.update-question');
-        Route::delete('tasks/{task}/questions/{question}', [TaskController::class, 'deleteQuestion'])->name('tasks.delete-question');
-
-        // Student Assignment for Tasks
-        Route::post('tasks/{task}/assign-student', [TaskController::class, 'assignToStudent'])->name('tasks.assign-student');
-        Route::post('tasks/bulk-assign', [TaskController::class, 'bulkAssign'])->name('tasks.bulk-assign');
-        Route::get('tasks/student-tasks', [TaskController::class, 'studentTasks'])->name('tasks.student-tasks');
-        Route::get('tasks/{task}/students/{student}', [TaskController::class, 'showStudentTask'])->name('tasks.show-student-task');
-        Route::get('tasks/{task}/students/{student}/grade', [TaskController::class, 'gradeStudentForm'])->name('tasks.grade-student-form');
-        Route::put('tasks/{task}/students/{student}/grade', [TaskController::class, 'gradeStudent'])->name('tasks.grade-student');
-
         // Performance Task Management
         Route::get('performance-tasks', [PerformanceTaskController::class, 'index'])->name('performance-tasks.index');
         Route::get('performance-tasks/create', [PerformanceTaskController::class, 'create'])->name('performance-tasks.create');
@@ -337,12 +316,6 @@ Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.
     // Progress & Achievements
     Route::get('/progress', [StudentProgressController::class, 'progress'])->name('progress');
     Route::get('/achievements', [StudentProgressController::class, 'achievements'])->name('achievements');
-    
-    // Task Management
-    Route::get('tasks', [\App\Http\Controllers\Students\TaskController::class, 'index'])->name('tasks.index');
-    Route::get('tasks/{task}', [\App\Http\Controllers\Students\TaskController::class, 'show'])->name('tasks.show');
-    Route::post('tasks/{task}/submit', [\App\Http\Controllers\Students\TaskController::class, 'submit'])->name('tasks.submit');
-    
     // Todo Management
     Route::prefix('todo')->group(function () {
         Route::get('/{status?}', [TodoController::class, 'index'])

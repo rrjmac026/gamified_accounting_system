@@ -180,7 +180,7 @@
                     } else if (colIndex === 1) {
                         // Blank column
                         cellProperties.className = (cellProperties.className || '') + ' t-account-blank';
-                        cellProperties.readOnly = true; // Make blank column read-only
+                        cellProperties.readOnly = false; // Make blank column read-only
                     } else if (colIndex === 2) {
                         // Debit column (left side)
                         cellProperties.className = (cellProperties.className || '') + ' t-account-debit';

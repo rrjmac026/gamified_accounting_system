@@ -172,7 +172,7 @@
                     cellProperties.className = (cellProperties.className || '') + ' t-account-date';
                 } else if (colIndex === 1 || colIndex === 4) {
                     cellProperties.className = (cellProperties.className || '') + ' t-account-blank';
-                    cellProperties.readOnly = true;
+                    cellProperties.readOnly = false;
                 } else if (colIndex === 2) {
                     cellProperties.className = (cellProperties.className || '') + ' t-account-debit';
                 } else if (colIndex === 3) {

@@ -104,19 +104,30 @@
         const correctData = @json($answerSheet->correct_data ?? null);
         const submissionStatus = @json($submission->status ?? null);
 
-        // ✅ Load saved or default data
+        // ✅ Load saved or default data with header rows
         let initialData = savedData
             ? JSON.parse(savedData)
-            : Array.from({ length: 12 }, () => ['', '', '']);
-
-        // Add a final "Total" row if not already present
-        if (!initialData[initialData.length - 1] || initialData[initialData.length - 1][0] !== 'Total') {
-            initialData.push(['Total', '', '']);
-        }
+            : [
+                ['Durano Enterprise', '', ''],  // Row 0: Company name
+                ['Trial Balance', '', ''],      // Row 1: Document title
+                ['Date: ____________', '', ''], // Row 2: Date field
+                ['Account Title', 'Debit (₱)', 'Credit (₱)'], // Row 3: Column headers
+                ['', '', ''],                   // Row 4: First data row
+                ['', '', ''],
+                ['', '', ''],
+                ['', '', ''],
+                ['', '', ''],
+                ['', '', ''],
+                ['', '', ''],
+                ['', '', ''],
+                ['', '', ''],
+                ['', '', ''],
+                ['', '', ''],
+                ['Total', '', '']               // Last row: Totals
+            ];
 
         hot = new Handsontable(container, {
             data: initialData,
-            colHeaders: ['Account Title', 'Debit (₱)', 'Credit (₱)'],
             columns: [
                 { type: 'text' },
                 { type: 'numeric', numericFormat: { pattern: '₱0,0.00' } },
@@ -129,7 +140,7 @@
             contextMenu: true,
             manualColumnResize: true,
             manualRowResize: true,
-            minSpareRows: 0, // Changed from 1 to 0 to prevent extra rows after Total
+            minSpareRows: 0,
             className: 'htCenter htMiddle',
             
             // ✅ Add cell coloring logic
@@ -138,25 +149,92 @@
                 const data = this.instance.getData();
                 const lastRow = data.length - 1;
                 
+                // Row 0: Company name (only in Debit column)
+                if (row === 0) {
+                    cellProperties.className = 'header-company';
+                    if (col === 0 || col === 2) {
+                        cellProperties.readOnly = true;
+                        cellProperties.renderer = function(instance, td) {
+                            td.innerHTML = '';
+                            td.style.background = 'white';
+                            td.style.border = 'none';
+                        };
+                    } else if (col === 1) {
+                        cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+                            td.innerHTML = '<strong>' + (value || 'Durano Enterprise') + '</strong>';
+                            td.style.textAlign = 'center';
+                        };
+                    }
+                }
+                
+                // Row 1: Document title (only in Debit column)
+                if (row === 1) {
+                    cellProperties.className = 'header-title';
+                    if (col === 0 || col === 2) {
+                        cellProperties.readOnly = true;
+                        cellProperties.renderer = function(instance, td) {
+                            td.innerHTML = '';
+                            td.style.background = 'white';
+                            td.style.border = 'none';
+                        };
+                    } else if (col === 1) {
+                        cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+                            td.innerHTML = '<strong>' + (value || 'Trial Balance') + '</strong>';
+                            td.style.textAlign = 'center';
+                        };
+                    }
+                }
+                
+                // Row 2: Date field (only in Debit column)
+                if (row === 2) {
+                    cellProperties.className = 'header-date';
+                    if (col === 0 || col === 2) {
+                        cellProperties.readOnly = true;
+                        cellProperties.renderer = function(instance, td) {
+                            td.innerHTML = '';
+                            td.style.background = 'white';
+                            td.style.border = 'none';
+                        };
+                    } else if (col === 1) {
+                        cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                            Handsontable.renderers.TextRenderer.apply(this, arguments);
+                            td.innerHTML = '<strong>' + (value || 'Date: ____________') + '</strong>';
+                            td.style.textAlign = 'center';
+                        };
+                    }
+                }
+                
+                // Row 3: Column headers (bold, centered, read-only)
+                if (row === 3) {
+                    cellProperties.readOnly = true;
+                    cellProperties.className = 'header-columns';
+                    cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
+                        Handsontable.renderers.TextRenderer.apply(this, arguments);
+                        td.innerHTML = '<strong>' + value + '</strong>';
+                        td.style.textAlign = 'center';
+                        td.style.backgroundColor = '#f3f4f6';
+                    };
+                }
+                
                 // Make last row "Total" static and bold
                 if (row === lastRow) {
-                    cellProperties.readOnly = true;
                     cellProperties.className = 'total-row';
-                    
-                    // Set "Total" text in first column
                     if (col === 0) {
+                        cellProperties.readOnly = true;
                         cellProperties.renderer = function(instance, td, row, col, prop, value, cellProperties) {
                             Handsontable.renderers.TextRenderer.apply(this, arguments);
                             td.innerHTML = '<strong>Total</strong>';
                         };
                     } else {
-                        // Add bold border class for debit and credit columns
                         cellProperties.className = 'total-row total-cell-bold';
                     }
                 }
                 
                 // Only apply correct/incorrect coloring if submission has been graded
-                if (submissionStatus && correctData && savedData && row !== lastRow) {
+                // Skip header rows (0-3) and total row
+                if (submissionStatus && correctData && savedData && row > 3 && row !== lastRow) {
                     const parsedCorrect = typeof correctData === 'string' ? JSON.parse(correctData) : correctData;
                     const parsedStudent = typeof savedData === 'string' ? JSON.parse(savedData) : savedData;
                     

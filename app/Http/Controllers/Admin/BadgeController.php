@@ -18,7 +18,6 @@ class BadgeController extends Controller
      */
     public function index()
     {
-        // Better to paginate if many badges
         $badges = Badge::paginate(10); 
         return view('admin.badges.index', compact('badges'));
     }
@@ -39,7 +38,9 @@ class BadgeController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'icon' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
+            'icon_type' => 'required|in:preset,upload',
+            'preset_icon' => 'required_if:icon_type,preset|nullable|string',
+            'icon' => 'required_if:icon_type,upload|nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
             'xp_threshold' => 'required|integer|min:0',
             'criteria' => 'required|in:achievement,skill,participation,milestone',
         ]);
@@ -50,10 +51,18 @@ class BadgeController extends Controller
 
         $validated = $validator->validated();
         
-        if ($request->hasFile('icon')) {
-            $path = $request->file('icon')->store('badges', 'public');
+        // Handle icon based on selection type
+        if ($request->input('icon_type') === 'preset' && $request->input('preset_icon')) {
+            // Use preset icon path
+            $validated['icon_path'] = 'badges/presets/' . $request->input('preset_icon');
+        } elseif ($request->hasFile('icon')) {
+            // Upload custom icon
+            $path = $request->file('icon')->store('badges/custom', 'public');
             $validated['icon_path'] = $path;
         }
+
+        // Remove temporary fields not in database
+        unset($validated['icon_type'], $validated['preset_icon'], $validated['icon']);
 
         $badge = Badge::create($validated);
 
@@ -97,7 +106,9 @@ class BadgeController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'icon' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
+            'icon_type' => 'required|in:preset,upload',
+            'preset_icon' => 'required_if:icon_type,preset|nullable|string',
+            'icon' => 'required_if:icon_type,upload|nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
             'xp_threshold' => 'required|integer|min:0',
             'criteria' => 'required|in:achievement,skill,participation,milestone',
         ]);
@@ -109,15 +120,30 @@ class BadgeController extends Controller
         $validated = $validator->validated();
         $originalData = $badge->toArray();
         
-        if ($request->hasFile('icon')) {
-            // Delete old icon if exists
-            if ($badge->icon_path && Storage::disk('public')->exists($badge->icon_path)) {
+        // Handle icon based on selection type
+        if ($request->input('icon_type') === 'preset' && $request->input('preset_icon')) {
+            // Delete old custom icon if it exists and is not a preset
+            if ($badge->icon_path && 
+                !str_contains($badge->icon_path, 'badges/presets/') && 
+                Storage::disk('public')->exists($badge->icon_path)) {
+                Storage::disk('public')->delete($badge->icon_path);
+            }
+            // Use preset icon path
+            $validated['icon_path'] = 'badges/presets/' . $request->input('preset_icon');
+        } elseif ($request->hasFile('icon')) {
+            // Delete old icon if exists and is not a preset
+            if ($badge->icon_path && 
+                !str_contains($badge->icon_path, 'badges/presets/') && 
+                Storage::disk('public')->exists($badge->icon_path)) {
                 Storage::disk('public')->delete($badge->icon_path);
             }
             
-            // Store new icon
-            $validated['icon_path'] = $request->file('icon')->store('badges', 'public');
+            // Store new custom icon
+            $validated['icon_path'] = $request->file('icon')->store('badges/custom', 'public');
         }
+
+        // Remove temporary fields not in database
+        unset($validated['icon_type'], $validated['preset_icon'], $validated['icon']);
 
         $badge->update($validated);
 
@@ -142,6 +168,14 @@ class BadgeController extends Controller
     public function destroy(Badge $badge)
     {
         $badgeData = $badge->toArray();
+        
+        // Delete custom icon file if exists (don't delete presets)
+        if ($badge->icon_path && 
+            !str_contains($badge->icon_path, 'badges/presets/') && 
+            Storage::disk('public')->exists($badge->icon_path)) {
+            Storage::disk('public')->delete($badge->icon_path);
+        }
+        
         $badge->delete();
 
         $this->logActivity(

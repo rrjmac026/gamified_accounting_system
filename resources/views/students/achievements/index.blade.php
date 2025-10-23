@@ -96,6 +96,25 @@
             border-radius: 20px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
+
+        .badge-icon-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .badge-icon-container img {
+            width: 100%;
+            height: 100%;
+            object-cover;
+            border-radius: 50%;
+        }
     </style>
 
     <div class="py-8 px-4">
@@ -159,13 +178,16 @@
 
                     <div class="badge-card {{ $badge->earned ? 'badge-earned' : ($isNearComplete ? 'badge-near-complete' : 'badge-locked') }} p-6 rounded-2xl text-center group">
                         <div class="relative mb-4">
-                            <div class="w-20 h-20 mx-auto {{ $badge->earned ? 'bg-white' : 'bg-gray-100' }} rounded-full flex items-center justify-center shadow-lg">
+                            <div class="badge-icon-container {{ $badge->earned ? 'bg-white' : 'bg-gray-100' }}">
                                 @if($badge->icon_path)
                                     <img src="{{ asset('storage/' . $badge->icon_path) }}" 
                                          alt="{{ $badge->name }}" 
-                                         class="w-12 h-12 object-contain {{ $badge->earned ? '' : 'grayscale' }}">
+                                         class="{{ $badge->earned ? '' : 'grayscale' }}"
+                                         onerror="this.onerror=null; this.outerHTML='<div class=\'w-full h-full rounded-full bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center\'><i class=\'fas fa-medal {{ $badge->earned ? 'text-yellow-500' : 'text-gray-400' }} text-3xl\'></i></div>';">
                                 @else
-                                    <i class="fas fa-medal {{ $badge->earned ? 'text-yellow-500' : 'text-gray-400' }} text-3xl"></i>
+                                    <div class="w-full h-full rounded-full bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center">
+                                        <i class="fas fa-medal {{ $badge->earned ? 'text-yellow-500' : 'text-gray-400' }} text-3xl"></i>
+                                    </div>
                                 @endif
                             </div>
                             

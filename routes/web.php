@@ -174,9 +174,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Instructor Management
     Route::resource('/instructors', InstructorManagementController::class);
     
-    // User Management
-    Route::resource('users', UserController::class);
-    
     // Gamification & Progress
     Route::resource('badges', BadgeController::class);
     Route::resource('/xp-transactions', XpTransactionController::class);
@@ -293,10 +290,6 @@ Route::middleware(['auth', 'role:instructor'])
         Route::put('performance-tasks/{task}', [PerformanceTaskController::class, 'update'])->name('performance-tasks.update');
         Route::delete('performance-tasks/{task}', [PerformanceTaskController::class, 'destroy'])->name('performance-tasks.destroy');
 
-        // Task Submissions
-        Route::get('/task-submissions', [TaskSubmissionController::class, 'index'])->name('task-submissions.index');
-        Route::get('/task-submissions/{taskSubmission}', [TaskSubmissionController::class, 'show'])->name('task-submissions.show');
-        Route::post('/task-submissions/{taskSubmission}/grade', [TaskSubmissionController::class, 'grade'])->name('task-submissions.grade');
         // Answer Sheets for each Performance Task
         Route::prefix('performance-task-answer-sheets')->name('performance-tasks.answer-sheets.')->group(function () {
             Route::get('/', [PerformanceTaskAnswerSheetController::class, 'index'])->name('index');
@@ -308,16 +301,19 @@ Route::middleware(['auth', 'role:instructor'])
 
         Route::post('/{task}/step/{step}', [PerformanceTaskAnswerSheetController::class, 'store'])->name('performance-tasks.answer-sheets.store');
 
-        // List submissions for a specific task
-        Route::get('/performance-tasks/{task}/submissions', [PerformanceTaskSubmissionController::class, 'index'])
-            ->name('performance-tasks.submissions.index');
+        
+    // List all performance tasks with submission overview
+    Route::get('/performance-tasks-submissions', [PerformanceTaskSubmissionController::class, 'index'])
+        ->name('performance-tasks.submissions.index');
 
-        // Show a single student's submissions
-        Route::get('/performance-tasks/{task}/submissions/{student}', [PerformanceTaskSubmissionController::class, 'show'])
-            ->name('performance-tasks.submissions.show');
-        // Optional: Manual override score
-        Route::put('performance-tasks/{task}/submissions/{submission}/override', [PerformanceTaskSubmissionController::class, 'override'])
-            ->name('performance-tasks.submissions.override');
+    // Show all student submissions for a specific task
+    Route::get('/performance-tasks/{task}/submissions', [PerformanceTaskSubmissionController::class, 'show'])
+        ->name('performance-tasks.submissions.show');
+
+    // Show detailed submission for a single student on a specific task
+    Route::get('/performance-tasks/{task}/submissions/student/{student}', [PerformanceTaskSubmissionController::class, 'showStudent'])
+        ->name('performance-tasks.submissions.show-student');
+
     });
 
 

@@ -53,28 +53,32 @@
                             </div>
                         </div>
 
-                        <!-- Tasks Section -->
+                        <!-- Performance Tasks Section -->
                         <div class="bg-[#FFF6FD] border border-[#FFC8FB] rounded-lg p-4 sm:p-6">
                             <h3 class="text-lg font-semibold text-[#FF92C2] mb-4 flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                                 </svg>
-                                Recent Tasks
+                                Recent Performance Tasks
                             </h3>
                             <div class="space-y-3">
-                                @forelse($subject->tasks->take(5) as $task)
+                                @forelse($subject->performanceTasks->take(5) as $performanceTask)
                                     <div class="p-3 bg-white rounded-lg border border-[#FFC8FB]/30 hover:bg-[#FFD9FF]/30 transition-colors duration-200">
                                         <div class="flex items-center justify-between">
                                             <div class="flex-1">
-                                                <h4 class="font-medium text-gray-900 text-sm">{{ $task->title }}</h4>
+                                                <h4 class="font-medium text-gray-900 text-sm">{{ $performanceTask->title }}</h4>
                                                 <p class="text-xs text-gray-600 mt-1">
-                                                    Due: {{ $task->due_date->format('M d, Y g:i A') }}
+                                                    @if($performanceTask->due_date)
+                                                        Due: {{ $performanceTask->due_date->format('M d, Y g:i A') }}
+                                                    @else
+                                                        <span class="text-gray-400">No due date set</span>
+                                                    @endif
                                                 </p>
                                             </div>
                                             <div class="ml-3">
                                                 @php
                                                     $student = auth()->user()->student;
-                                                    $pivot = $task->students->firstWhere('id', $student->id)?->pivot;
+                                                    $pivot = $performanceTask->students->firstWhere('id', $student->id)?->pivot;
                                                     $status = $pivot->status ?? 'assigned';
                                                 @endphp
                                                 <span @class([
@@ -97,16 +101,16 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                                             </svg>
                                         </div>
-                                        <p class="text-gray-600 text-sm">No tasks assigned yet.</p>
+                                        <p class="text-gray-600 text-sm">No performance tasks assigned yet.</p>
                                     </div>
                                 @endforelse
                             </div>
                             
-                            @if($subject->tasks->count() > 5)
+                            @if($subject->performanceTasks->count() > 5)
                                 <div class="mt-4 text-center">
-                                    <a href="{{ route('students.tasks.index', ['subject' => $subject->id]) }}" 
+                                    <a href="{{ route('students.performance-tasks.index', ['subject' => $subject->id]) }}" 
                                        class="inline-flex items-center px-3 py-2 text-xs font-medium text-[#FF92C2] bg-white border border-[#FFC8FB] rounded-md hover:bg-[#FFF0FA] hover:text-[#ff6fb5] transition-colors duration-200">
-                                        View All Tasks
+                                        View All Performance Tasks
                                         <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                         </svg>

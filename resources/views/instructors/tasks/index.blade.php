@@ -219,10 +219,6 @@
                     <p class="text-2xl font-bold text-[#FF92C2]">{{ $allTasks->count() }}</p>
                 </div>
                 <div class="bg-white p-4 rounded-lg shadow border border-[#FFC8FB]/30">
-                    <h3 class="text-sm font-medium text-gray-500">Regular Tasks</h3>
-                    <p class="text-2xl font-bold text-blue-600">{{ $allTasks->where('task_type', 'regular')->count() }}</p>
-                </div>
-                <div class="bg-white p-4 rounded-lg shadow border border-[#FFC8FB]/30">
                     <h3 class="text-sm font-medium text-gray-500">Performance Tasks</h3>
                     <p class="text-2xl font-bold text-purple-600">{{ $allTasks->where('task_type', 'performance')->count() }}</p>
                 </div>

@@ -12,18 +12,20 @@
             <p class="text-sm text-[#FF6F91] mt-1">Configure answer sheets for each step</p>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        {{-- Step Boxes --}}
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             @for ($i = 1; $i <= 10; $i++)
                 @php
                     $sheet = $answerSheets->firstWhere('step', $i);
                 @endphp
-                <a href="{{ route('instructors.performance-tasks.answer-sheets.edit', [$task->id, $i]) }}"
+                <a href="{{ route('instructors.performance-tasks.answer-sheets.edit', [$task->id, $i]) }}" 
                    class="group block">
-                    <div class="relative bg-[#FAF3F3] rounded-lg border-2 
-                        {{ $sheet ? 'border-[#D5006D]' : 'border-[#FF9AAB]' }} 
-                        p-4 hover:shadow-md hover:border-[#FF6F91] transition-all duration-300">
-                        
-                        <div class="flex items-center justify-between mb-2">
+                    <div class="relative bg-[#FAF3F3] rounded-xl border-2 
+                        {{ $sheet ? 'border-[#D5006D]' : 'border-[#FF9AAB]' }}
+                        p-4 h-36 flex flex-col justify-between hover:shadow-md hover:border-[#FF6F91] transition-all duration-300">
+
+                        {{-- Header (Step + Icon) --}}
+                        <div class="flex items-center justify-between">
                             <span class="text-sm font-semibold text-[#D5006D]">Step {{ $i }}</span>
                             <div class="w-6 h-6 rounded-full flex items-center justify-center 
                                 {{ $sheet ? 'bg-[#FF9AAB]' : 'bg-[#FAF3F3] border border-[#FF9AAB]' }}">
@@ -39,16 +41,25 @@
                             </div>
                         </div>
 
-                        <p class="text-xs {{ $sheet ? 'text-[#D5006D]' : 'text-[#FF6F91]' }}">
+                        {{-- Step Title (Optional: Show accounting step name) --}}
+                        <div class="mt-2 flex-grow flex items-center">
+                            <p class="text-xs font-medium text-[#D5006D] leading-snug text-center w-full">
+                                {{ $stepTitles[$i] ?? 'Accounting Step' }}
+                            </p>
+                        </div>
+
+                        {{-- Status --}}
+                        <p class="text-xs text-center mt-2 {{ $sheet ? 'text-[#D5006D]' : 'text-[#FF6F91]' }}">
                             {{ $sheet ? 'Configured' : 'Not configured' }}
                         </p>
 
-                        <div class="absolute inset-0 rounded-lg ring-2 ring-[#FF6F91] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                        <div class="absolute inset-0 rounded-xl ring-2 ring-[#FF6F91] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                     </div>
                 </a>
             @endfor
         </div>
 
+        {{-- Info Box --}}
         <div class="mt-8 p-4 bg-[#FAF3F3] border border-[#FF9AAB] rounded-lg">
             <div class="flex items-start">
                 <svg class="w-5 h-5 text-[#D5006D] mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

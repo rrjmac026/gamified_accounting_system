@@ -52,12 +52,28 @@ class PerformanceTaskAnswerSheetController extends Controller
                 ->get()
                 ->keyBy('step');
 
-            return view('instructors.performance-tasks.answer-sheets.show', compact('task', 'answerSheets'));
+            // ✅ Add step titles
+            $stepTitles = [
+                1 => 'Analyze Transactions',
+                2 => 'Journalize Transactions',
+                3 => 'Post to Ledger Accounts',
+                4 => 'Prepare Trial Balance',
+                5 => 'Journalize & Post Adjusting Entries',
+                6 => 'Prepare Adjusted Trial Balance',
+                7 => 'Prepare Financial Statements',
+                8 => 'Journalize & Post Closing Entries',
+                9 => 'Prepare Post-Closing Trial Balance',
+                10 => 'Reverse (Optional Step)',
+            ];
+
+            return view('instructors.performance-tasks.answer-sheets.show', compact('task', 'answerSheets', 'stepTitles'));
+
         } catch (Exception $e) {
             Log::error('Error in PerformanceTaskAnswerSheetController@show: ' . $e->getMessage());
             return back()->with('error', 'Unable to load answer sheets. Please try again.');
         }
     }
+
 
     /**
      * Edit or Create specific step answer sheet

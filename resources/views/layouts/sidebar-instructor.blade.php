@@ -86,9 +86,9 @@
                     </a>
 
                     <!-- Task Submissions -->
-                    <a href="{{ route('instructors.task-submissions.index') }}" 
-                       class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
-                       {{ request()->routeIs('instructors.task-submissions.*') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
+                    <a href="{{ route('instructors.performance-tasks.submissions.index') }}" 
+                        class="flex items-center gap-3 px-4 py-2 text-sm rounded-lg transition-all duration-300 hover:bg-[#FFEEF2]
+                        {{ request()->routeIs('instructors.performance-tasks.submissions.*') ? 'bg-[#FFC8FB]/20 text-[#595758] font-medium' : 'text-[#595758]/70 dark:text-[#FF92C2]/70' }}">
                         <span class="w-6 h-6 rounded-full bg-[#FF92C2]/20 flex items-center justify-center text-xs font-bold">
                             <i class="fas fa-file-alt text-xs"></i>
                         </span>

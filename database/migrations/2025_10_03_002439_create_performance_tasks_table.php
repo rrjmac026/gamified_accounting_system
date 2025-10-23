@@ -14,16 +14,24 @@ return new class extends Migration
         Schema::create('performance_tasks', function (Blueprint $table) {
             $table->id();
 
-            // Relationships
+            // 🔹 Relationships
             $table->foreignId('subject_id')->constrained()->onDelete('cascade');
             $table->foreignId('section_id')->constrained()->onDelete('cascade');
+
+            // 🔹 Instructor is a user with instructor role
             $table->foreignId('instructor_id')->constrained('users')->onDelete('cascade');
 
-            // Task info
+            // 🔹 Task Info
             $table->string('title');
             $table->text('description')->nullable();
-            $table->integer('max_attempts')->default(2);
+
+            // 🔹 Gamification and scoring
             $table->integer('xp_reward')->default(50);
+            $table->integer('max_attempts')->default(2);
+            $table->integer('max_score')->default(100);
+            $table->integer('deduction_per_error')->default(0);
+
+            // 🔹 Deadlines
             $table->timestamp('due_date')->nullable();
             $table->timestamp('late_until')->nullable();
 

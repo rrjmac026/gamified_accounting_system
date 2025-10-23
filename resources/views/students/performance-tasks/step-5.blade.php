@@ -145,7 +145,7 @@
                         'Account Number', 
                         'Debit (₱)', 
                         'Credit (₱)',
-                        '',
+                        'Date',
                         'Cash', 
                         'Accounts Receivable', 
                         'Supplies', 

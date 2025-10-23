@@ -7,16 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 class PerformanceTask extends Model
 {
     protected $fillable = [
-        'title',
-        'description',
-        'max_attempts',
-        'xp_reward',
-        'subject_id',
-        'section_id',
-        'instructor_id',
-        'due_date', 
-        'late_until', 
-    ];
+            'title',
+            'description',
+            'max_attempts',
+            'xp_reward',
+            'subject_id',
+            'section_id',
+            'instructor_id',
+            'due_date',
+            'late_until',
+            'max_score',
+            'deduction_per_error',
+        ];
 
     protected $casts = [
         'template_data' => 'array',

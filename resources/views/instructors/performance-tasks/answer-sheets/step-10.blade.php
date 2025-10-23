@@ -150,7 +150,7 @@
                 ['POST-CLOSING TRIAL BALANCE', '', '', ''],
                 ['December 31, 2024', '', '', ''],
                 ['', '', '', ''],
-                ['Account Title', '', 'Debit', 'Credit'],
+                ['Account Title', '', 'Credit', 'Debit'],
                 ['', '', '', ''],
                 ['', '', '', ''],
                 ['', '', '', ''],

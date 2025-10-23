@@ -25,7 +25,7 @@ class StudentSubjectController extends Controller
         $student = Auth::user()->student;
 
         $subject = $student->subjects()
-            ->with(['instructors.user', 'tasks'])
+            ->with(['instructors.user', 'performanceTasks']) // Make sure this is 'performanceTasks'
             ->findOrFail($id);
 
         return view('students.subjects.show', compact('subject'));

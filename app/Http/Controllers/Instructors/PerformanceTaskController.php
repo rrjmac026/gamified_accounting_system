@@ -11,22 +11,22 @@ use App\Models\Subject;
 use App\Models\SystemNotification;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-
 class PerformanceTaskController extends Controller
 {
     /**
      * Show list of performance tasks created by this instructor
      */
-    // public function index()
-    // {
-    //     $instructorId = Auth::user()->instructor->id;
+    public function index()
+    {
+        $instructorId = Auth::user()->instructor->id;
 
-    //     $tasks = PerformanceTask::with(['section', 'instructor', 'subject'])
-    //         ->where('instructor_id', $instructorId)
-    //         ->get();
+        $tasks = PerformanceTask::with(['section', 'instructor', 'subject'])
+            ->where('instructor_id', $instructorId)
+            ->latest()
+            ->paginate(10);
 
-    //     return view('instructors.performance-tasks.index', compact('tasks'));
-    // }
+        return view('instructors.performance-tasks.index', compact('tasks'));
+    }
 
     /**
      * Show form to create a new performance task
@@ -40,33 +40,42 @@ class PerformanceTaskController extends Controller
         return view('instructors.performance-tasks.create', compact('subjects', 'sections'));
     }
 
+    /**
+     * Store a newly created performance task
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title'        => 'required|string|max:255',
-            'description'  => 'nullable|string',
-            'xp_reward'    => 'required|integer|min:0',
-            'max_attempts' => 'required|integer|min:1',
-            'subject_id'   => 'required|exists:subjects,id',
-            'section_id'   => 'required|exists:sections,id',
-            'due_date'     => 'required|date|after:now',
-            'late_until'   => 'nullable|date|after:due_date',
+            'title'               => 'required|string|max:255',
+            'description'         => 'nullable|string',
+            'xp_reward'           => 'required|integer|min:0',
+            'max_attempts'        => 'required|integer|min:1',
+            'subject_id'          => 'required|exists:subjects,id',
+            'section_id'          => 'required|exists:sections,id',
+            'due_date'            => 'required|date|after:now',
+            'late_until'          => 'nullable|date|after:due_date',
+            'max_score'           => 'required|integer|min:1',
+            'deduction_per_error' => 'required|integer|min:0',
         ]);
 
         $instructor = Auth::user()->instructor;
 
         // 1️⃣ Create the main performance task
         $task = PerformanceTask::create([
-            'title'         => $validated['title'],
-            'description'   => $validated['description'] ?? null,
-            'xp_reward'     => $validated['xp_reward'],
-            'max_attempts'  => $validated['max_attempts'],
-            'subject_id'    => $validated['subject_id'],
-            'section_id'    => $validated['section_id'],
-            'instructor_id' => $instructor->id,
+            'title'               => $validated['title'],
+            'description'         => $validated['description'] ?? null,
+            'xp_reward'           => $validated['xp_reward'],
+            'max_attempts'        => $validated['max_attempts'],
+            'subject_id'          => $validated['subject_id'],
+            'section_id'          => $validated['section_id'],
+            'instructor_id'       => $instructor->id,
+            'due_date'            => $validated['due_date'],
+            'late_until'          => $validated['late_until'] ?? null,
+            'max_score'           => $validated['max_score'],
+            'deduction_per_error' => $validated['deduction_per_error'],
         ]);
 
-        // 3️⃣ Notify all students in the section
+        // 2️⃣ Notify all students in the section
         foreach ($task->section->students as $student) {
             SystemNotification::create([
                 'user_id' => $student->user->id,
@@ -81,53 +90,57 @@ class PerformanceTaskController extends Controller
             ->with('success', 'Performance task created successfully.');
     }
 
-
     /**
-     * Show single task
+     * Display a specific performance task
      */
     public function show(PerformanceTask $task)
     {
         $task->load([
             'subject',
             'section',
-            'instructor',  // Remove .user
-            'students'     // Remove .user
+            'instructor',
+            'students'
         ]);
 
         return view('instructors.performance-tasks.show', compact('task'));
     }
 
     /**
-     * Edit task
+     * Show form to edit a performance task
      */
     public function edit(PerformanceTask $task)
     {
         $instructor = Auth::user()->instructor;
         $subjects = $instructor->subjects;
         $sections = $instructor->sections;
-        
-        // Load the relationships needed for display
+
+        // Load relationships for dropdowns
         $task->load(['section', 'students']);
 
         return view('instructors.performance-tasks.edit', compact('task', 'subjects', 'sections'));
     }
 
     /**
-     * Update task
+     * Update a performance task
      */
     public function update(Request $request, PerformanceTask $task)
     {
         $validated = $request->validate([
-            'title'        => 'required|string|max:255',
-            'description'  => 'nullable|string',
-            'xp_reward'    => 'required|integer|min:0',
-            'max_attempts' => 'required|integer|min:1',
-            'subject_id'   => 'required|exists:subjects,id',
-            'section_id'   => 'required|exists:sections,id',
+            'title'               => 'required|string|max:255',
+            'description'         => 'nullable|string',
+            'xp_reward'           => 'required|integer|min:0',
+            'max_attempts'        => 'required|integer|min:1',
+            'subject_id'          => 'required|exists:subjects,id',
+            'section_id'          => 'required|exists:sections,id',
+            'due_date'            => 'required|date|after:now',
+            'late_until'          => 'nullable|date|after:due_date',
+            'max_score'           => 'required|integer|min:1',
+            'deduction_per_error' => 'required|integer|min:0',
         ]);
 
         $task->update($validated);
 
+        // Notify students about updates
         foreach ($task->section->students as $student) {
             SystemNotification::create([
                 'user_id' => $student->user->id,
@@ -143,7 +156,7 @@ class PerformanceTaskController extends Controller
     }
 
     /**
-     * Delete task
+     * Remove a performance task
      */
     public function destroy(PerformanceTask $task)
     {
@@ -153,6 +166,7 @@ class PerformanceTaskController extends Controller
 
         $task->delete();
 
+        // Notify affected students
         if ($students->isNotEmpty()) {
             foreach ($students as $student) {
                 SystemNotification::create([

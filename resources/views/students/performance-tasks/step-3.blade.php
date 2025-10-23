@@ -171,11 +171,7 @@
                 cells: function(row, col) {
                     const cellProperties = {};
                     const colIndex = col % 4;
-                    
-                    // Make row 8 and row 9 bold (indices 7 and 8)
-                    if (row === 7 || row === 8) {
-                        cellProperties.className = 't-account-row-bold';
-                    }
+
                     
                     // Apply T-account styling (append to existing className)
                     if (colIndex === 0) {
@@ -225,18 +221,6 @@
                     
                     return cellProperties;
                 },
-                afterGetColHeader: function(col, TH) {
-                    const colIndex = col % 4;
-                    if (colIndex === 2) {
-                        TH.style.borderRight = '2px solid #6b7280';
-                    }
-                },
-                afterGetRowHeader: function(row, TH) {
-                    // Make row headers 8 and 9 bold
-                    if (row === 7 || row === 8) {
-                        TH.style.fontWeight = '700';
-                    }
-                }
             });
 
             // Save submission data

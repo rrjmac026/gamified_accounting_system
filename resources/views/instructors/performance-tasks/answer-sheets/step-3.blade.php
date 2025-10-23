@@ -112,104 +112,89 @@
 
 <script>
     let hot;
-        document.addEventListener("DOMContentLoaded", function () {
-            const container = document.getElementById('spreadsheet');
-            const savedData = @json($sheet->correct_data ?? null);
-            
-            // Account names list
-            const accounts = [
-                'Cash', 'Accounts Receivable', 'Supplies', 'Furniture & Fixture', 
-                'Accumulated Depreciation - F&F', 'Land', 'Equipment', 
-                'Accumulated Depreciation - Equipment', 'Accounts Payable', 
-                'Notes Payable', 'Utilities Payable', 'Capital', 'Withdrawals',
-                'Service Revenue', 'Rent Expense', 'Utilities Expense', 
-                'Salaries Expense', 'Supplies Expense', 'Depreciation Expense', 
-                'Income Summary'
-            ];
-            
-            // Generate columns: Date, Blank, Debit, Credit for each account (4 cols per account)
-            const numCols = accounts.length * 4;
-            const initialData = savedData ? JSON.parse(savedData) : Array.from({ length: 15 }, () => Array(numCols).fill(''));
-            
-            // Create nested headers with blank column after Date
-            const nestedHeaders = [
-                accounts.map(name => ({ label: name, colspan: 4 })),
-                Array(accounts.length).fill(['Date', '', 'Debit (₱)', 'Credit (₱)']).flat()
-            ];
-            
-            // Create columns config with custom renderer for T-account style
-            const columns = [];
-            for (let i = 0; i < accounts.length; i++) {
-                columns.push(
-                    { type: 'text', width: 100 },      // Date
-                    { type: 'text', width: 50 },       // Blank column
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 }, // Debit
-                    { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 }  // Credit
-                );
-            }
-            
-            hot = new Handsontable(container, {
-                data: initialData,
-                rowHeaders: true,
-                nestedHeaders: nestedHeaders,
-                columns: columns,
-                height: 'auto',
-                licenseKey: 'non-commercial-and-evaluation',
-                contextMenu: true,
-                manualColumnResize: true,
-                manualRowResize: true,
-                minSpareRows: 1,
-                cells: function(row, col) {
-                    const cellProperties = {};
-                    const colIndex = col % 4;
-                    
-                    // Make row 8 and row 9 bold (indices 7 and 8)
-                    if (row === 7 || row === 8) {
-                        cellProperties.className = 't-account-row-bold';
-                    }
-                    
-                    // Apply T-account styling (append to existing className)
-                    if (colIndex === 0) {
-                        // Date column
-                        cellProperties.className = (cellProperties.className || '') + ' t-account-date';
-                    } else if (colIndex === 1) {
-                        // Blank column
-                        cellProperties.className = (cellProperties.className || '') + ' t-account-blank';
-                        cellProperties.readOnly = true; // Make blank column read-only
-                    } else if (colIndex === 2) {
-                        // Debit column (left side)
-                        cellProperties.className = (cellProperties.className || '') + ' t-account-debit';
-                    } else if (colIndex === 3) {
-                        // Credit column (right side)
-                        cellProperties.className = (cellProperties.className || '') + ' t-account-credit';
-                    }
-                    
-                    return cellProperties;
-                },
-                afterGetColHeader: function(col, TH) {
-                    const colIndex = col % 4;
-                    if (colIndex === 2) {
-                        TH.style.borderRight = '2px solid #6b7280';
-                    }
-                },
-                afterGetRowHeader: function(row, TH) {
-                    // Make row headers 8 and 9 bold
-                    if (row === 7 || row === 8) {
-                        TH.style.fontWeight = '700';
-                    }
-                }
-            });
+    document.addEventListener("DOMContentLoaded", function () {
+        const container = document.getElementById('spreadsheet');
+        const savedData = @json($sheet->correct_data ?? null);
 
-            const answerKeyForm = document.getElementById("answerKeyForm");
-            if (answerKeyForm) {
-                answerKeyForm.addEventListener("submit", function (e) {
-                    e.preventDefault();
-                    document.getElementById("correctData").value = JSON.stringify(hot.getData());
-                    this.submit();
-                });
-            }
+        // 🧾 Account names
+        const accounts = [
+            'Cash', 'Accounts Receivable', 'Supplies', 'Furniture & Fixture',
+            'Accumulated Depreciation - F&F', 'Land', 'Equipment',
+            'Accumulated Depreciation - Equipment', 'Accounts Payable',
+            'Notes Payable', 'Utilities Payable', 'Capital', 'Withdrawals',
+            'Service Revenue', 'Rent Expense', 'Utilities Expense',
+            'Salaries Expense', 'Supplies Expense', 'Depreciation Expense',
+            'Income Summary'
+        ];
+
+        // 🧩 Each account will have: Date, Blank, Debit, Credit, Blank (5 columns)
+        const numCols = accounts.length * 5;
+        const initialData = savedData
+            ? JSON.parse(savedData)
+            : Array.from({ length: 15 }, () => Array(numCols).fill(''));
+
+        // 🪟 Nested Headers setup (top = account name, bottom = individual columns)
+        const nestedHeaders = [
+            accounts.map(name => ({ label: name, colspan: 5 })),
+            Array(accounts.length).fill(['Date', '', 'Debit (₱)', 'Credit (₱)', '']).flat()
+        ];
+
+        // 🧱 Define column properties
+        const columns = [];
+        for (let i = 0; i < accounts.length; i++) {
+            columns.push(
+                { type: 'text', width: 100 }, // Date
+                { type: 'text', width: 40 },  // Blank divider
+                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 }, // Debit
+                { type: 'numeric', numericFormat: { pattern: '₱0,0.00' }, width: 120 }, // Credit
+                { type: 'text', width: 40 }   // Blank divider after Credit
+            );
+        }
+
+        // 🧮 Initialize Handsontable
+        hot = new Handsontable(container, {
+            data: initialData,
+            rowHeaders: true,
+            nestedHeaders: nestedHeaders,
+            columns: columns,
+            height: 'auto',
+            licenseKey: 'non-commercial-and-evaluation',
+            contextMenu: true,
+            manualColumnResize: true,
+            manualRowResize: true,
+            minSpareRows: 1,
+            cells: function (row, col) {
+                const cellProperties = {};
+                const colIndex = col % 5;
+
+                // 🎨 Assign T-account cell styling
+                if (colIndex === 0) {
+                    cellProperties.className = (cellProperties.className || '') + ' t-account-date';
+                } else if (colIndex === 1 || colIndex === 4) {
+                    cellProperties.className = (cellProperties.className || '') + ' t-account-blank';
+                    cellProperties.readOnly = true;
+                } else if (colIndex === 2) {
+                    cellProperties.className = (cellProperties.className || '') + ' t-account-debit';
+                } else if (colIndex === 3) {
+                    cellProperties.className = (cellProperties.className || '') + ' t-account-credit';
+                }
+
+                return cellProperties;
+            },
         });
+
+        // 💾 Save data on form submission
+        const answerKeyForm = document.getElementById("answerKeyForm");
+        if (answerKeyForm) {
+            answerKeyForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                document.getElementById("correctData").value = JSON.stringify(hot.getData());
+                this.submit();
+            });
+        }
+    });
 </script>
+
     <style>
         body { overflow-x: hidden; }
         .handsontable td { border-color: #d1d5db; }

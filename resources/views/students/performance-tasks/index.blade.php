@@ -1,9 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-[#595758] leading-tight">
-            Performance Tasks
-        </h2>
-    </x-slot>
 
             @if (session('success'))
                 <div class="mb-6 px-4 py-3 bg-green-100 border border-green-200 text-green-700 rounded-lg">

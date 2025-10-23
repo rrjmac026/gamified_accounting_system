@@ -6,14 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class XpTransaction extends Model
 {
-    
-
     protected $fillable = [
         'student_id',
         'amount',
-        'type',
-        'source', 
-        'source_id',
+        'type',           
+        'source',         
+        'source_id',   
         'description',
         'processed_at'
     ];
@@ -29,8 +27,18 @@ class XpTransaction extends Model
         return $this->belongsTo(Student::class);
     }
 
-    public function performanceTask()
+
+    public function getSourceModel()
     {
-        return $this->belongsTo(PerformanceTask::class, 'performance_task_id');
+        $models = [
+            'performance_task' => PerformanceTask::class,
+
+        ];
+
+        if (isset($models[$this->source]) && $this->source_id) {
+            return $models[$this->source]::find($this->source_id);
+        }
+
+        return null;
     }
 }

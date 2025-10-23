@@ -13,8 +13,8 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
             $table->integer('amount');
             $table->enum('type', ['earned', 'bonus', 'penalty', 'adjustment']);
-            $table->enum('source', ['task_completion', 'quiz_score', 'bonus_activity', 'manual']);
-            $table->string('source_id')->nullable();
+            $table->enum('source', ['performance_task', 'task_completion', 'quiz_score', 'bonus_activity', 'manual']); // ✅ Added 'performance_task'
+            $table->unsignedBigInteger('source_id')->nullable();
             $table->text('description');
             $table->timestamp('processed_at');
             $table->timestamps();

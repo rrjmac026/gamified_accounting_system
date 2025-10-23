@@ -20,7 +20,7 @@
                                     {{ $task->title }}
                                 </h3>
                                 <p class="text-sm text-gray-500">
-                                    {{ Str::limit($task->description, 80) }}
+                                    {{ Str::limit(strip_tags($task->description), 80) }}
                                 </p>
                             </div>
                         </div>

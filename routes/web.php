@@ -314,7 +314,7 @@ Route::middleware(['auth', 'role:instructor'])
     Route::get('/performance-tasks/{task}/submissions/student/{student}', [PerformanceTaskSubmissionController::class, 'showStudent'])
         ->name('performance-tasks.submissions.show-student');
 
-    });
+});
 
 
 // Student Progress Routes (Instructor Side)

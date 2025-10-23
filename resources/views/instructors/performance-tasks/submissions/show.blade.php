@@ -13,7 +13,7 @@
             <div class="flex items-start justify-between">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">{{ $task->title }}</h1>
-                    <p class="text-sm text-gray-600 mt-1">{{ $task->description }}</p>
+                    <p class="text-sm text-gray-600 mt-1">{{ strip_tags($task->description) }}</p>
                 </div>
                 
                 <!-- Overall Task Statistics Card -->

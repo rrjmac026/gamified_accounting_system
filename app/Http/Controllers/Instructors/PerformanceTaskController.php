@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\PerformanceTask;
 use App\Models\Section;
 use App\Models\Subject;
+use App\Models\Student;
 use App\Models\SystemNotification;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -20,10 +21,10 @@ class PerformanceTaskController extends Controller
     {
         $instructorId = Auth::user()->instructor->id;
 
-        $tasks = PerformanceTask::with(['section', 'instructor', 'subject'])
-            ->where('instructor_id', $instructorId)
-            ->latest()
-            ->paginate(10);
+        $tasks = PerformanceTask::with(['section', 'instructor', 'subject', 'students'])
+        ->where('instructor_id', $instructorId)
+        ->latest('created_at')
+        ->get();
 
         return view('instructors.performance-tasks.index', compact('tasks'));
     }

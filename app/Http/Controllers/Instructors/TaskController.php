@@ -51,10 +51,10 @@ class TaskController extends Controller
     {
         $instructorId = Auth::user()->instructor->id;
         
-        // Fetch regular tasks with all necessary relationships
+        
         $tasks = Task::with(['subject', 'instructor', 'section', 'submissions', 'students'])
             ->where('instructor_id', $instructorId)
-            ->where('parent_task_id', null) // Only parent tasks
+            ->where('parent_task_id', null)
             ->get()
             ->map(function ($task) {
                 $task->task_type = 'regular';
@@ -67,7 +67,7 @@ class TaskController extends Controller
             ->get()
             ->map(function ($task) {
                 $task->task_type = 'performance';
-                // Add empty submissions collection for consistency
+                
                 $task->submissions = collect();
                 return $task;
             });

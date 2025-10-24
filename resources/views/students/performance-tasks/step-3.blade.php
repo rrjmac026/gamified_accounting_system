@@ -27,6 +27,8 @@
             </div>
         @endif
 
+        <x-view-answers-button :submission="$submission" :performanceTask="$performanceTask" :step="$step" />
+
         <!-- Step Header -->
         <div class="mb-6 sm:mb-8">
             <div class="relative">

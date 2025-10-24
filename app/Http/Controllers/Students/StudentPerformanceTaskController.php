@@ -147,6 +147,7 @@ class StudentPerformanceTaskController extends Controller
             'answerSheet' => $answerSheet,
             'completedSteps' => $completedSteps,
             'deadlineStatus' => $deadlineStatus,
+            'step' => $step,
         ]);
     }
 
@@ -676,5 +677,55 @@ class StudentPerformanceTaskController extends Controller
 
         // Redirect to progress page with the task ID
         return redirect()->route('students.performance-tasks.progress', ['taskId' => $id]);
+    }
+
+    /**
+     * Show correct answers for a step (after max attempts reached)
+     */
+    public function showAnswers($id, $step)
+    {
+        $user = auth()->user();
+        abort_if($step < 1 || $step > 10, 404);
+
+        $performanceTask = PerformanceTask::where('id', $id)
+            ->whereHas('section.students', function ($query) use ($user) {
+                $query->where('student_id', $user->student->id);
+            })
+            ->first();
+
+        if (!$performanceTask) {
+            return redirect()->route('students.performance-tasks.index')
+                ->with('error', 'Performance task not found.');
+        }
+
+        $submission = PerformanceTaskSubmission::where([
+            'task_id' => $performanceTask->id,
+            'student_id' => $user->student->id,
+            'step' => $step,
+        ])->first();
+
+        if (!$submission || $submission->attempts < $performanceTask->max_attempts) {
+            return redirect()->route('students.performance-tasks.step', [
+                'id' => $performanceTask->id,
+                'step' => $step,
+            ])->with('error', 'You must complete all attempts before viewing answers.');
+        }
+
+        $answerSheet = PerformanceTaskAnswerSheet::where([
+            'performance_task_id' => $performanceTask->id,
+            'step' => $step,
+        ])->first();
+
+        if (!$answerSheet) {
+            return back()->with('error', 'Answer sheet not available for this step.');
+        }
+
+        // ✅ Use ONE view for all steps
+        return view("students.performance-tasks.answers.view", [
+            'performanceTask' => $performanceTask,
+            'answerSheet' => $answerSheet,
+            'submission' => $submission,
+            'step' => $step,
+        ]);
     }
 }

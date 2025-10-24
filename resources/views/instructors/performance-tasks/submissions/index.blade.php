@@ -51,7 +51,7 @@
                         <div class="space-y-3 mb-4">
                             <div class="flex items-center justify-between text-sm">
                                 <span class="text-gray-600">Total Submissions:</span>
-                                <span class="font-semibold text-gray-900">{{ $stats['total_submissions'] }}</span>
+                                <span class="font-semibold text-gray-900">{{ $stats['total_submissions'] }}/10</span>
                             </div>
 
                             <div class="flex items-center justify-between text-sm">

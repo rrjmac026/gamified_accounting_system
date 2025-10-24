@@ -48,6 +48,8 @@
             </div>
         @endif
 
+        <x-view-answers-button :submission="$submission" :performanceTask="$performanceTask" :step="$step" />
+
         <!-- Enhanced Header Section with better design -->
         <div class="mb-6 sm:mb-8">
             <div class="relative">

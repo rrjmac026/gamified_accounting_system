@@ -31,6 +31,8 @@
             </div>
         @endif
 
+        <x-view-answers-button :submission="$submission" :performanceTask="$performanceTask" :step="$step" />
+
         {{-- ✅ Header --}}
         <div class="mb-6 sm:mb-8">
             <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs sm:text-sm font-semibold mb-3">

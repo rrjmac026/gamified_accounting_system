@@ -358,6 +358,8 @@ Route::middleware(['auth', 'role:student'])->prefix('students')->name('students.
 
     Route::post('/performance-tasks/submit', [StudentPerformanceTaskController::class, 'submit'])
         ->name('performance-tasks.submit');
+    Route::get('performance-tasks/{id}/step/{step}/answers', [StudentPerformanceTaskController::class, 'showAnswers'])
+    ->name('performance-tasks.show-answers');
         
     // Feedback Management
     Route::resource('feedback', FeedbackController::class)->only(['create', 'store', 'index', 'show']);

@@ -27,6 +27,8 @@
             </div>
         @endif
 
+        <x-view-answers-button :submission="$submission" :performanceTask="$performanceTask" :step="$step" />
+
         <div class="mb-6">
             <span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
                 Step 10 of 10

@@ -30,8 +30,8 @@ class PerformanceTaskSubmissionController extends Controller
                 ->latest()
                 ->get();
 
-            // Get all submissions for the instructor's tasks
-            $allSubmissions = PerformanceTaskSubmission::with(['student', 'task'])
+            // Get all submissions for the instructor's tasks with proper eager loading
+            $allSubmissions = PerformanceTaskSubmission::with(['student.user', 'task'])
                 ->whereHas('task', function($query) use ($instructor) {
                     $query->where('instructor_id', $instructor->id);
                 })
@@ -70,6 +70,7 @@ class PerformanceTaskSubmissionController extends Controller
                 
                 $studentStats[$studentId] = [
                     'student' => $student,
+                    'user' => $student->user, // Add user data
                     'tasks_count' => $studentSubmissions->unique('task_id')->count(),
                     'completed_steps' => $studentSubmissions->where('status', 'correct')->count(),
                     'total_score' => $studentSubmissions->sum('score'),
@@ -91,11 +92,8 @@ class PerformanceTaskSubmissionController extends Controller
 
 
     /**
-     * View details of a single student's submission for a specific task
+     * Show all student submissions for a specific performance task
      */
-    /**
- * Show all student submissions for a specific performance task
- */
     public function show(PerformanceTask $task)
     {
         try {
@@ -106,8 +104,8 @@ class PerformanceTaskSubmissionController extends Controller
                 throw new Exception('Unauthorized access to task');
             }
 
-            // Get all submissions for this task
-            $submissions = PerformanceTaskSubmission::with('student')
+            // Get all submissions for this task with proper eager loading
+            $submissions = PerformanceTaskSubmission::with('student.user')
                 ->where('task_id', $task->id)
                 ->orderBy('student_id')
                 ->orderBy('step')
@@ -120,9 +118,11 @@ class PerformanceTaskSubmissionController extends Controller
             $studentStats = [];
             foreach ($studentSubmissions as $studentId => $studentSubs) {
                 $student = $studentSubs->first()->student;
+                $user = $student->user; // Get the related user
                 
                 $studentStats[$studentId] = [
                     'student' => $student,
+                    'user' => $user, // Pass user separately
                     'total_submissions' => $studentSubs->count(),
                     'completed_steps' => $studentSubs->where('status', 'correct')->count(),
                     'wrong_steps' => $studentSubs->where('status', 'wrong')->count(),
@@ -168,9 +168,16 @@ class PerformanceTaskSubmissionController extends Controller
                 throw new Exception('Unauthorized access to task');
             }
 
+            // Get the student record
+            $studentRecord = $student->student;
+            
+            if (!$studentRecord) {
+                throw new Exception('Student record not found');
+            }
+
             // Get all submissions for this student and task
             $submissions = PerformanceTaskSubmission::where('task_id', $task->id)
-                ->where('student_id', $student->id)
+                ->where('student_id', $studentRecord->id)
                 ->orderBy('step')
                 ->get();
 
@@ -197,7 +204,7 @@ class PerformanceTaskSubmissionController extends Controller
                     'score' => $submission->score,
                     'attempts' => $submission->attempts,
                     'submitted_data' => $submission->submitted_data,
-                    'feedback' => $submission->feedback,
+                    'feedback' => $submission->remarks, // Changed from feedback to remarks
                     'submitted_at' => $submission->created_at,
                     'updated_at' => $submission->updated_at,
                 ];

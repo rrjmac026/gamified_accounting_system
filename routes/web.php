@@ -39,6 +39,7 @@ use App\Http\Controllers\Admin\DataBackupController;
 use App\Http\Controllers\Instructors\PerformanceTaskController;
 use App\Http\Controllers\Instructors\PerformanceTaskAnswerSheetController;
 use App\Http\Controllers\Instructors\PerformanceTaskSubmissionController;
+use App\Http\Controllers\Instructors\PerformanceTaskSubmissionExportController;
 
 
 // ============================================================================
@@ -292,6 +293,13 @@ Route::middleware(['auth', 'role:instructor'])
     // Show detailed submission for a single student on a specific task
     Route::get('/performance-tasks/{task}/submissions/student/{student}', [PerformanceTaskSubmissionController::class, 'showStudent'])
         ->name('performance-tasks.submissions.show-student');
+
+        // Export Routes
+        Route::get('/performance-tasks-submissions/export/excel', [PerformanceTaskSubmissionExportController::class, 'exportExcel'])
+            ->name('performance-tasks.submissions.export.excel');
+        
+        Route::get('/performance-tasks-submissions/export/pdf', [PerformanceTaskSubmissionExportController::class, 'exportPdf'])
+            ->name('performance-tasks.submissions.export.pdf');
 
 });
 

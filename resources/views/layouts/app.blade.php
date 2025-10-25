@@ -18,10 +18,45 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         <script>
+            // Prevent flash of unstyled content
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+
             document.addEventListener('alpine:init', () => {
+                // Sidebar store
                 Alpine.store('sidebar', {
                     isOpen: window.innerWidth >= 1024,
                     toggle() { this.isOpen = !this.isOpen }
+                })
+                
+                // Dark mode store
+                Alpine.store('darkMode', {
+                    init() {
+                        const theme = localStorage.getItem('theme');
+                        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        
+                        this.on = theme === 'dark' || (!theme && prefersDark);
+                        
+                        if (this.on) {
+                            document.documentElement.classList.add('dark');
+                        } else {
+                            document.documentElement.classList.remove('dark');
+                        }
+                    },
+                    
+                    on: false,
+                    
+                    toggle() {
+                        this.on = !this.on;
+                        localStorage.setItem('theme', this.on ? 'dark' : 'light');
+                        
+                        if (this.on) {
+                            document.documentElement.classList.add('dark');
+                        } else {
+                            document.documentElement.classList.remove('dark');
+                        }
+                    }
                 })
             })
         </script>
@@ -55,7 +90,7 @@
         </style>
     </head>
     <body class="font-sans antialiased" 
-          :class="{ 'dark bg-[#595758]': $store.darkMode.on, 'bg-gray-50': !$store.darkMode.on }">
+          :class="{ 'dark bg-[#111827]': $store.darkMode.on, 'bg-gray-50': !$store.darkMode.on }">
         <div class="min-h-screen flex flex-col w-full">
             <!-- Navigation -->
             @include('layouts.navigation')

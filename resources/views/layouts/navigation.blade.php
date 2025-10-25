@@ -310,7 +310,6 @@ function navigationComponent() {
         notificationOpen: false,
         profileOpen: false,
         loading: false,
-        darkMode: false,
         allRead: false,
         
         // Data
@@ -388,16 +387,6 @@ function navigationComponent() {
         
         updateAllReadStatus() {
             this.allRead = this.notifications.length > 0 && this.unreadCount === 0;
-        },
-        
-        toggleDarkMode() {
-            this.darkMode = !this.darkMode;
-            // You can add actual dark mode implementation here
-            if (this.darkMode) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
         },
         
         logout() {

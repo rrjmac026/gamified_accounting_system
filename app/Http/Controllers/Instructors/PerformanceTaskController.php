@@ -87,7 +87,7 @@ class PerformanceTaskController extends Controller
             ]);
         }
 
-        return redirect()->route('instructors.tasks.index')
+        return redirect()->route('instructors.performance-tasks.index')
             ->with('success', 'Performance task created successfully.');
     }
 

@@ -8,21 +8,21 @@
 
     <!-- Sidebar -->
     <aside 
-        x-show="$store.sidebar.isOpen"
-        x-cloak
-        x-transition:enter="transform transition-transform duration-300 ease-in-out"
-        x-transition:enter-start="-translate-x-full"
-        x-transition:enter-end="translate-x-0"
-        x-transition:leave="transform transition-transform duration-300 ease-in-out"
-        x-transition:leave-start="translate-x-0"
-        x-transition:leave-end="-translate-x-full"
-        @click.outside="$store.sidebar.isOpen = false"
-        @click.capture="if ($event.target.closest('a') && window.innerWidth < 1024) $store.sidebar.isOpen = false"
-        :class="{
-            'fixed': window.innerWidth < 1024,
-            'absolute lg:fixed': window.innerWidth >= 1024
-        }"
-        class="top-16 left-0 h-[calc(100vh-4rem)] w-72 max-w-[85vw] sm:max-w-72 border-r shadow-xl z-40 flex flex-col">
+    x-show="$store.sidebar.isOpen"
+    x-cloak
+    x-transition:enter="transform transition-transform duration-300 ease-in-out"
+    x-transition:enter-start="-translate-x-full"
+    x-transition:enter-end="translate-x-0"
+    x-transition:leave="transform transition-transform duration-300 ease-in-out"
+    x-transition:leave-start="translate-x-0"
+    x-transition:leave-end="-translate-x-full"
+    @click.outside="$store.sidebar.isOpen = false"
+    @click.capture="if ($event.target.closest('a') && window.innerWidth < 1024) $store.sidebar.isOpen = false"
+    :class="{
+        'fixed': window.innerWidth < 1024,
+        'absolute lg:fixed': window.innerWidth >= 1024
+    }"
+    class="top-16 left-0 h-[calc(100vh-4rem)] w-72 max-w-[85vw] sm:max-w-72 border-r shadow-xl z-40 flex flex-col bg-white">
         
         <!-- Main content wrapper with scrolling -->
         <div class="flex-1 overflow-y-auto overflow-x-hidden"

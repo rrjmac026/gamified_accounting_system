@@ -121,8 +121,8 @@
                                 </div>
                             </div>
 
-                            <a href="#" 
-                               class="block px-4 py-3 text-sm text-center text-pink-600 hover:text-pink-800 hover:bg-pink-50/50 border-t border-pink-100/30 transition-colors duration-200">
+                            <a href="{{ route('notifications.index') }}" 
+                            class="block px-4 py-3 text-sm text-center text-pink-600 hover:text-pink-800 hover:bg-pink-50/50 border-t border-pink-100/30 transition-colors duration-200">
                                 View All Notifications
                             </a>
                         </div>

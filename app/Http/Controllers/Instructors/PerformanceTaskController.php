@@ -21,10 +21,10 @@ class PerformanceTaskController extends Controller
     {
         $instructorId = Auth::user()->instructor->id;
 
-        $tasks = PerformanceTask::with(['section', 'instructor', 'subject', 'students'])
-        ->where('instructor_id', $instructorId)
-        ->latest('created_at')
-        ->get();
+        $tasks = PerformanceTask::with(['section', 'instructor', 'subject'])
+            ->where('instructor_id', $instructorId)
+            ->latest('created_at')
+            ->get();
 
         return view('instructors.performance-tasks.index', compact('tasks'));
     }
@@ -61,7 +61,7 @@ class PerformanceTaskController extends Controller
 
         $instructor = Auth::user()->instructor;
 
-        // 1️⃣ Create the main performance task
+        // Create the performance task
         $task = PerformanceTask::create([
             'title'               => $validated['title'],
             'description'         => $validated['description'] ?? null,
@@ -76,7 +76,10 @@ class PerformanceTaskController extends Controller
             'deduction_per_error' => $validated['deduction_per_error'],
         ]);
 
-        // 2️⃣ Notify all students in the section
+        // Load the section with students
+        $task->load('section.students.user');
+
+        // Notify all students in the section
         foreach ($task->section->students as $student) {
             SystemNotification::create([
                 'user_id' => $student->user->id,
@@ -96,11 +99,15 @@ class PerformanceTaskController extends Controller
      */
     public function show(PerformanceTask $task)
     {
+        // Authorize: ensure the instructor owns this task
+        if ($task->instructor_id !== Auth::user()->instructor->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $task->load([
             'subject',
-            'section',
-            'instructor',
-            'students'
+            'section.students',
+            'instructor'
         ]);
 
         return view('instructors.performance-tasks.show', compact('task'));
@@ -111,12 +118,17 @@ class PerformanceTaskController extends Controller
      */
     public function edit(PerformanceTask $task)
     {
+        // Authorize: ensure the instructor owns this task
+        if ($task->instructor_id !== Auth::user()->instructor->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $instructor = Auth::user()->instructor;
         $subjects = $instructor->subjects;
         $sections = $instructor->sections;
 
         // Load relationships for dropdowns
-        $task->load(['section', 'students']);
+        $task->load('section');
 
         return view('instructors.performance-tasks.edit', compact('task', 'subjects', 'sections'));
     }
@@ -126,6 +138,11 @@ class PerformanceTaskController extends Controller
      */
     public function update(Request $request, PerformanceTask $task)
     {
+        // Authorize: ensure the instructor owns this task
+        if ($task->instructor_id !== Auth::user()->instructor->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $validated = $request->validate([
             'title'               => 'required|string|max:255',
             'description'         => 'nullable|string',
@@ -141,6 +158,9 @@ class PerformanceTaskController extends Controller
 
         $task->update($validated);
 
+        // Load the section with students
+        $task->load('section.students.user');
+
         // Notify students about updates
         foreach ($task->section->students as $student) {
             SystemNotification::create([
@@ -152,7 +172,7 @@ class PerformanceTaskController extends Controller
             ]);
         }
 
-        return redirect()->route('instructors.tasks.index')
+        return redirect()->route('instructors.performance-tasks.index')
             ->with('success', 'Performance task updated successfully.');
     }
 
@@ -161,7 +181,13 @@ class PerformanceTaskController extends Controller
      */
     public function destroy(PerformanceTask $task)
     {
-        $task->load('section.students');
+        // Authorize: ensure the instructor owns this task
+        if ($task->instructor_id !== Auth::user()->instructor->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Load section with students before deletion
+        $task->load('section.students.user');
         $taskTitle = $task->title;
         $students = $task->section->students ?? collect();
 
@@ -180,7 +206,7 @@ class PerformanceTaskController extends Controller
             }
         }
 
-        return redirect()->route('instructors.tasks.index')
+        return redirect()->route('instructors.performance-tasks.index')
             ->with('success', 'Performance task deleted successfully.');
     }
 }

@@ -33,7 +33,7 @@
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-[#D5006D]">Performance Tasks Management</h2>
-                        <div class="text-sm text-[#FF6F91]">
+                        <div class="text-sm text-[#FF9AAB]">
                             Manage all performance tasks
                         </div>
                     </div>
@@ -145,7 +145,7 @@
                     <h3 class="text-sm font-medium text-[#FF6F91]">Total Students Assigned</h3>
                     <p class="text-2xl font-bold text-[#D5006D]">
                         {{ $tasks->sum(function($task) { 
-                            return $task->students->count(); 
+                            return $task->section->students->count(); 
                         }) }}
                     </p>
                 </div>
